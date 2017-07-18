@@ -2,8 +2,25 @@ import {LeafNode, InnerNode} from '../tree';
 import AColumn from './AColumn';
 
 export default class NumberColumn extends AColumn {
-  constructor(index: number, name: string, frozen: boolean = false, width = 100) {
+  private maxValue: number = 1;
+
+  constructor(index: number, name: string, frozen: boolean = false, width = 100, private readonly rebuilder: ()=>void) {
     super(index, name, frozen, width);
+  }
+
+  createHeader(document: Document) {
+    const d = this.common(document);
+    d.innerHTML = `<span>${this.name}</span><input type="range" min="0" max="1" value="1" step="0.1">`;
+    (<HTMLInputElement>d.lastElementChild).onchange = (evt) => {
+      const v = (<HTMLInputElement>evt.target).value;
+      this.maxValue = parseFloat(v);
+      this.rebuilder();
+    };
+    return d;
+  }
+
+  filter(row: LeafNode<number>) {
+    return row.item <= this.maxValue;
   }
 
   createSingle(row: LeafNode<number>, index: number, document: Document) {

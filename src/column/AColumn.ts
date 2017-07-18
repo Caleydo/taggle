@@ -11,6 +11,10 @@ export abstract class AColumn implements ITaggleColumn {
     return `col${this.index}`;
   }
 
+  filter(row: LeafNode<number>) {
+    return true;
+  }
+
   common(document: Document) {
     const d = document.createElement('div');
     if (this.frozen) {

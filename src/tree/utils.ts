@@ -12,7 +12,9 @@ export function flatLeaves<T>(root: INode, result: LeafNode<T>[] = []): LeafNode
 
 export function flat(root: INode, result: INode[] = []): INode[] {
   if (root.type === 'leaf' || (root.type === 'inner' && root.aggregation === EAggregationType.AGGREGATED)) {
-    result.push(root);
+    if (!root.filtered) {
+      result.push(root);
+    }
     return result;
   }
   return root.children.reduce((r, child) => flat(child, r), result);

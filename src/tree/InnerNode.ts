@@ -15,6 +15,10 @@ export default class InnerNode extends ANode {
     super();
   }
 
+  get filtered(): boolean {
+    return this.children.every((c) => c.filtered);
+  }
+
   toString() {
     return this.name;
   }

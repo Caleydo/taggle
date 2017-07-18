@@ -36,7 +36,7 @@ export default class TestRenderer extends APrefetchRenderer {
       this.columns = [
         new HierarchyColumn(i++, () => this.rebuild()),
         new StringColumn(i++, 'String', true, 200),
-        new NumberColumn(i++, 'Number', false, 200),
+        new NumberColumn(i++, 'Number', false, 200, () => this.rebuild()),
         new CategoricalColumn(i++, 'Categorical', 200)
       ];
     }
@@ -110,6 +110,7 @@ export default class TestRenderer extends APrefetchRenderer {
   }
 
   private rebuildData() {
+    this.tree.flatLeaves<number>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
     this.flat = this.tree.flatChildren();
     const exceptions = nonUniformContext(this.flat.map((n) => n.height), this.defaultRowHeight);
     const scroller = <HTMLElement>this.root.querySelector('main');
