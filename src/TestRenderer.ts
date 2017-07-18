@@ -5,7 +5,8 @@ import {APrefetchRenderer, IRenderContext} from 'lineupengine/src/APrefetchRende
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {StyleManager, TEMPLATE} from 'lineupengine/src/style';
 import {fromArray, INode, LeafNode, InnerNode, EAggregationType} from './tree';
-import {StringColumn, computeHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
+import {StringColumn, computeCategoricalHist, computeNumericalHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
+import {data, columns, IRow} from './data';
 
 function setTemplate(root: HTMLElement) {
   root.innerHTML = TEMPLATE;
@@ -23,31 +24,32 @@ export default class TestRenderer extends APrefetchRenderer {
 
   private readonly defaultRowHeight: number;
 
-  constructor(private readonly root: HTMLElement, numberOfRows = 1000) {
+  constructor(private readonly root: HTMLElement) {
     super(<HTMLElement>setTemplate(root).querySelector('main > article'));
     root.id = 'taggle';
     root.classList.add('lineup-engine');
 
     this.defaultRowHeight = 20;
-    this.tree = this.createTree(numberOfRows, this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
+    this.tree = this.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
 
-    {
-      let i = 0;
-      this.columns = [
-        new HierarchyColumn(i++, () => this.rebuild()),
-        new StringColumn(i++, 'String', true, 200),
-        new NumberColumn(i++, 'Number', false, 200, () => this.rebuild()),
-        new CategoricalColumn(i++, 'Categorical', 200)
-      ];
-    }
+    this.columns = [new HierarchyColumn(0, null, () => this.rebuild())];
+    this.columns.push(...columns.map((col, i) => {
+      switch(col.value.type) {
+        case 'string': return new StringColumn(i + 1, col, true, 200);
+        case 'categorical': return new CategoricalColumn(i + 1, col, 150);
+        case 'int':
+        case 'real': return new NumberColumn(i + 1, col, false, 150, () => this.rebuild());
+      }
+    }));
     this.style = new StyleManager(root, `#taggle`, this.defaultRowHeight);
 
     this.rebuildData();
   }
 
-  private createTree(numberOfRows: number, leafHeight: number, groupHeights: [{renderer: string, height: number}]): InnerNode {
-    const arr = Array.from(new Array(numberOfRows).keys()).map(() => Math.random());
-    const root = fromArray(arr, leafHeight, (row: number) => String(Math.floor(Math.random()*5)));
+  private createTree(leafHeight: number, groupHeights: [{renderer: string, height: number}]): InnerNode {
+    const root = fromArray(data, leafHeight, (row: IRow) => {
+      return <string>row.Continent || 'Others';
+    });
 
     root.children.sort((a: any, b: any) => a.name.localeCompare(b.name));
     root.children.forEach((n) => {
@@ -59,7 +61,14 @@ export default class TestRenderer extends APrefetchRenderer {
       const group = groupHeights[Math.floor(Math.random() * groupHeights.length)];
       inner.renderer = group.renderer;
       inner.aggregatedHeight = group.height;
-      inner.aggregate = computeHist(inner.flatLeaves<number>());
+      inner.aggregate = {};
+      columns.forEach((col) => {
+        if (col.value.type === 'int' || col.value.type === 'real') {
+          inner.aggregate[col.name] = computeNumericalHist(inner.flatLeaves<IRow>(), col);
+        } else if (col.value.type === 'categorical') {
+          inner.aggregate[col.name] = computeCategoricalHist(inner.flatLeaves<IRow>(), col);
+        }
+      });
     });
 
     return root;
@@ -99,7 +108,7 @@ export default class TestRenderer extends APrefetchRenderer {
     }
 
     this.columns.forEach((col, i) => {
-      const child = row.type === 'leaf' ? col.createSingle(<LeafNode<number>>row, index, document) : col.createGroup(<InnerNode>row, index, document);
+      const child = row.type === 'leaf' ? col.createSingle(<LeafNode<IRow>>row, index, document) : col.createGroup(<InnerNode>row, index, document);
       node.appendChild(child);
     });
   }
@@ -110,7 +119,7 @@ export default class TestRenderer extends APrefetchRenderer {
   }
 
   private rebuildData() {
-    this.tree.flatLeaves<number>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
+    this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
     this.flat = this.tree.flatChildren();
     const exceptions = nonUniformContext(this.flat.map((n) => n.height), this.defaultRowHeight);
     const scroller = <HTMLElement>this.root.querySelector('main');
@@ -136,11 +145,11 @@ export default class TestRenderer extends APrefetchRenderer {
     this.columns.forEach((col, i) => {
       const child = <HTMLElement>node.children[i];
       if (changed) {
-        const replacement = row.type === 'leaf' ? col.createSingle(<LeafNode<number>>row, index, document) : col.createGroup(<InnerNode>row, index, document);
+        const replacement = row.type === 'leaf' ? col.createSingle(<LeafNode<IRow>>row, index, document) : col.createGroup(<InnerNode>row, index, document);
         node.replaceChild(replacement, child);
       } else {
         if (row.type === 'leaf') {
-          col.updateSingle(child, <LeafNode<number>>row, index);
+          col.updateSingle(child, <LeafNode<IRow>>row, index);
         } else {
           col.updateGroup(child, <InnerNode>row, index);
         }
