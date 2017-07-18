@@ -47,7 +47,6 @@ export default class TestRenderer extends APrefetchRenderer {
   }
 
   private createTree(leafHeight: number, groupHeights: [{renderer: string, height: number}]): InnerNode {
-    console.log(data.map((r) => r.Continent));
     const root = fromArray(data, leafHeight, (row: IRow) => {
       return <string>row.Continent || 'Others';
     });
