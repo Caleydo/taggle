@@ -1,13 +1,11 @@
 /**
  * Created by Samuel Gratzl on 13.07.2017.
  */
-import 'file-loader?name=taggle.html!extract-loader!html-loader?interpolate!./index.html';
 import {APrefetchRenderer, IRenderContext} from 'lineupengine/src/APrefetchRenderer';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {StyleManager, TEMPLATE} from 'lineupengine/src/style';
 import {fromArray, INode, LeafNode, InnerNode, EAggregationType} from './tree';
 import {StringColumn, computeHist, ITaggleColumn, NumberColumn, HierarchyColumn} from './column';
-import './style.scss';
 
 function setTemplate(root: HTMLElement) {
   root.innerHTML = TEMPLATE;
