@@ -1,4 +1,4 @@
-import {IColumn} from '.lineupengine/src/style';
+import {IColumn} from 'lineupengine/src/style';
 import {LeafNode, InnerNode} from '../tree';
 
 export interface ITaggleColumn extends IColumn {
