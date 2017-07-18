@@ -52,7 +52,7 @@ function cleanupDependency(d) {
 
 function resolveWorkspace() {
   console.log('resolve parent');
-  const workspaceDeps = dependencyGraph('..').dependencies;
+  const workspaceDeps = dependencyGraph('..').dependencies || {};
   const modules = new Set(resolveModules());
 
   const resolveModule = (m) => {

@@ -1,4 +1,5 @@
 
 import TestRenderer from './TestRenderer';
 
-new TestRenderer(document.body.querySelector('div'));
+const app = new TestRenderer(document.body.querySelector('div'));
+app.run();
