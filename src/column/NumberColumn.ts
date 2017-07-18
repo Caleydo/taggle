@@ -24,7 +24,10 @@ export default class NumberColumn extends AColumn {
 
   filter(row: LeafNode<IRow>) {
     const v = <number>row.item[this.name];
-    return isNaN(v) || v <= this.maxValue;
+    if (isNaN(v)) {
+      return this.maxValue >= this.column.value.range[1];
+    }
+    return v <= this.maxValue;
   }
 
   private rescale(v: number) {
@@ -73,8 +76,8 @@ export default class NumberColumn extends AColumn {
         binNode.textContent = `#${bin}`;
       });
     } else {
-      const children = row.flatLeaves<IRow>();
-      const mean = children.reduce((a, c) => a + <number>c.item[this.name],  0) / children.length;
+      const children = row.flatLeaves<IRow>().map((c) => <number>c.item[this.name]).filter((v) => !isNaN(v));
+      const mean = children.reduce((a, c) => a + c,  0) / children.length;
       const bar = <HTMLElement>node.children[0];
       bar.style.width = `${Math.round(this.rescale(mean) * 100)}%`;
       bar.textContent = mean.toFixed(2);

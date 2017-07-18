@@ -47,6 +47,7 @@ export default class TestRenderer extends APrefetchRenderer {
   }
 
   private createTree(leafHeight: number, groupHeights: [{renderer: string, height: number}]): InnerNode {
+    console.log(data.map((r) => r.Continent));
     const root = fromArray(data, leafHeight, (row: IRow) => {
       return <string>row.Continent || 'Others';
     });
@@ -83,11 +84,11 @@ export default class TestRenderer extends APrefetchRenderer {
     const header = <HTMLElement>this.root.querySelector('header');
     const headerNode = <HTMLElement>header.querySelector('article');
 
-    this.style.update(this.columns, 100);
+    this.style.update(this.columns, 150);
     this.columns.forEach((c) => headerNode.appendChild(c.createHeader(headerNode.ownerDocument)));
 
     //wait till layouted
-    setTimeout(super.init.bind(this), 100, headerNode);
+    setTimeout(super.init.bind(this), 100, header);
   }
 
   protected onScrolledHorizontally(scrollLeft: number) {
