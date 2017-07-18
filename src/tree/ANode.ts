@@ -18,7 +18,7 @@ export abstract class ANode {
     return this.parent ? this.parent.children.indexOf(<any>this) : -1;
   }
 
-  get level() {
+  get level(): number {
     if (this.parent === null) {
       return 0;
     }

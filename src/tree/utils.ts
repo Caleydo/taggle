@@ -2,7 +2,7 @@
 
 import {EAggregationType, INode, LeafNode, InnerNode} from './';
 
-export function flatLeaves<T>(root: INode, result: LeafNode<T>[] = []) {
+export function flatLeaves<T>(root: INode, result: LeafNode<T>[] = []): LeafNode<T>[] {
   if (root.type === 'leaf') {
     result.push(root);
     return result;
@@ -10,7 +10,7 @@ export function flatLeaves<T>(root: INode, result: LeafNode<T>[] = []) {
   return root.children.reduce((r, child) => flatLeaves(child, r), result);
 }
 
-export function flat(root: INode, result: INode[] = []) {
+export function flat(root: INode, result: INode[] = []): INode[] {
   if (root.type === 'leaf' || (root.type === 'inner' && root.aggregation === EAggregationType.AGGREGATED)) {
     result.push(root);
     return result;

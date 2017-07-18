@@ -28,11 +28,11 @@ export default class InnerNode extends ANode {
     return 1 + this.children.length;
   }
 
-  get flatLength() {
+  get flatLength(): number {
     return 1 + this.children.reduce((r, n) => n.flatLength, 0);
   }
 
-  get flatLeavesLength() {
+  get flatLeavesLength(): number {
     return this.children.reduce((r, n) => n.flatLeavesLength, 0);
   }
 
