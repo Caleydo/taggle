@@ -1,5 +1,6 @@
 
 $engine_assets: "~lineupengine/src/assets";
+
 @import "~lineupengine/src/style";
 
 .lineup-engine {
@@ -16,7 +17,6 @@ $engine_assets: "~lineupengine/src/assets";
 }
 
 [data-type="leaf"] {
-
   .bar {
     margin: 2px 0;
     position: relative;
