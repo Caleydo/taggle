@@ -14,19 +14,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sgratzl/taggle2.git"
+    "url": "git@github.com:sgratzl/taggle2.git"
   },
-  "main": "build/taggle2.js",
-  "files": [
-    "src",
-    "index.js",
-    "build"
-  ],
-  "engines": {
-    "npm": ">= 3",
-    "node": ">= 6"
-  },
+  "private": true,
   "scripts": {
+    "predist": "npm run build && npm run docs",
+    "predocker": "npm run build",
+    "docker": "docker build -t taggle2 -f deploy/Dockerfile .",
     "compile": "tsc",
     "lint": "tslint --project tsconfig.json --type-check -c tslint.json && stylelint src/**/*.scss",
     "docs": "typedoc --options typedoc.json src",
@@ -43,8 +37,18 @@
     "release:major": "npm version major && npm publish && git push --follow-tags",
     "release:minor": "npm version minor && npm publish && git push --follow-tags",
     "release:patch": "npm version patch && npm publish && git push --follow-tags",
-    "predist": "npm run build && npm run docs",
     "dist": "mkdirp dist && cd build && tar cvzf ../dist/taggle2.tar.gz *"
+  },
+  "files": [
+    "src",
+    "index.js",
+    "phovea.js",
+    "phovea_registry.js",
+    "build"
+  ],
+  "engines": {
+    "npm": ">= 3",
+    "node": ">= 6"
   },
   "devDependencies": {
     "@types/handlebars": "4.0.33",

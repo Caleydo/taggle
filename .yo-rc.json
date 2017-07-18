@@ -1,0 +1,20 @@
+{
+  "generator-phovea": {
+    "type": "app",
+    "app": "Taggle2",
+    "clientOnly": true,
+    "entries": {
+      "app": "./src/index.ts"
+    },
+    "libraries": [],
+    "modules": [],
+    "libraryAliases": {},
+    "libraryExternals": [],
+    "ignores": [],
+    "extensions": [],
+    "name": "taggle2",
+    "author": "Samuel Gratzl",
+    "today": "Tue, 18 Jul 2017 09:57:39 GMT",
+    "githubAccount": "sgratzl"
+  }
+}

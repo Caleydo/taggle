@@ -26,6 +26,12 @@ Building
 npm run build
 ```
 
+Launching
+---------
+
+```
+npm start
+```
 
 
 ***
