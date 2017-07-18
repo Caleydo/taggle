@@ -5,7 +5,7 @@ import {APrefetchRenderer, IRenderContext} from 'lineupengine/src/APrefetchRende
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {StyleManager, TEMPLATE} from 'lineupengine/src/style';
 import {fromArray, INode, LeafNode, InnerNode, EAggregationType} from './tree';
-import {StringColumn, computeHist, ITaggleColumn, NumberColumn, HierarchyColumn} from './column';
+import {StringColumn, computeHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
 
 function setTemplate(root: HTMLElement) {
   root.innerHTML = TEMPLATE;
@@ -36,7 +36,8 @@ export default class TestRenderer extends APrefetchRenderer {
       this.columns = [
         new HierarchyColumn(i++, () => this.rebuild()),
         new StringColumn(i++, 'String', true, 200),
-        new NumberColumn(i++, 'Number', false, 200)
+        new NumberColumn(i++, 'Number', false, 200),
+        new CategoricalColumn(i++, 'Categorical', 200)
       ];
     }
     this.style = new StyleManager(root, `#taggle`, this.defaultRowHeight);
