@@ -1,13 +1,14 @@
 import {LeafNode, InnerNode, INode, EAggregationType} from '../tree';
 import AColumn from './AColumn';
+import {IRow, IColumn} from '../data';
 
 const CARET_NO = '<i>&nbsp;</i>';
 const CARET_DOWN = '<i>&#9660;</i>';
 const CARET_RIGHT = '<i>&#9658;</i>';
 
 export default class HierarchyColumn extends AColumn {
-  constructor(index: number, private readonly rebuilder: ()=>void) {
-    super(index, '', true, 60);
+  constructor(index: number, column: IColumn, private readonly rebuilder: ()=>void) {
+    super(index, column, true, 60);
   }
 
   common(document: Document) {
@@ -16,7 +17,7 @@ export default class HierarchyColumn extends AColumn {
     return d;
   }
 
-  createSingle(row: LeafNode<number>, index: number, document: Document) {
+  createSingle(row: LeafNode<IRow>, index: number, document: Document) {
     const n = this.common(document);
     return this.updateSingle(n, row, index);
   }
@@ -39,7 +40,7 @@ export default class HierarchyColumn extends AColumn {
   }
 
 
-  updateSingle(node: HTMLElement, row: LeafNode<number>, index: number) {
+  updateSingle(node: HTMLElement, row: LeafNode<IRow>, index: number) {
     node.innerHTML = row.isFirstChild ? this.hierarchy(row.parent) + CARET_DOWN : '';
     Array.from(node.children).forEach(this.toggle.bind(this, row.parent));
     return node;

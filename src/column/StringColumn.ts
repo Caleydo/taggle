@@ -1,9 +1,10 @@
 import {LeafNode, InnerNode} from '../tree';
 import AColumn from './AColumn';
+import {IRow, IColumn} from '../data';
 
 export default class StringColumn extends AColumn {
-  constructor(index: number, name: string, frozen: boolean = false, width = 100) {
-    super(index, name, frozen, width);
+  constructor(index: number, column: IColumn, frozen: boolean = false, width = 100) {
+    super(index, column, frozen, width);
   }
 
   common(document: Document) {
@@ -12,13 +13,13 @@ export default class StringColumn extends AColumn {
     return d;
   }
 
-  createSingle(row: LeafNode<number>, index: number, document: Document) {
+  createSingle(row: LeafNode<IRow>, index: number, document: Document) {
     const n = this.common(document);
     return this.updateSingle(n, row, index);
   }
 
-  updateSingle(node: HTMLElement, row: LeafNode<number>, index: number) {
-    node.textContent = `${row.parent.name}#${row.parent.children.indexOf(row)}`;
+  updateSingle(node: HTMLElement, row: LeafNode<IRow>, index: number) {
+    node.textContent = <string>row.item[this.column.name];
     return node;
   }
 
@@ -28,7 +29,7 @@ export default class StringColumn extends AColumn {
   }
 
   updateGroup(node: HTMLElement, row: InnerNode, index: number) {
-    node.textContent = `Group ${row.name} #${row.length}`;
+    node.textContent = `${row.name} #${row.length}`;
     return node;
   }
 }
