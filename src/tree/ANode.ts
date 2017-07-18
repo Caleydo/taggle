@@ -4,6 +4,8 @@ import {INode, InnerNode} from './';
 export abstract class ANode {
   parent: InnerNode | null = null;
 
+  renderer = 'default';
+
   get isFirstChild() {
     return (this.parent && this.parent.children[0] === <any>this) || !this.parent;
   }

@@ -27,10 +27,9 @@ export default class TestRenderer extends APrefetchRenderer {
     super(<HTMLElement>setTemplate(root).querySelector('main > article'));
     root.id = 'taggle';
     root.classList.add('lineup-engine');
-    const scroller = <HTMLElement>root.querySelector('main');
 
     this.defaultRowHeight = 20;
-    this.tree = this.createTree(numberOfRows, this.defaultRowHeight, 100);
+    this.tree = this.createTree(numberOfRows, this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
 
     {
       let i = 0;
@@ -45,7 +44,7 @@ export default class TestRenderer extends APrefetchRenderer {
     this.rebuildData();
   }
 
-  private createTree(numberOfRows: number, leafHeight: number, groupHeight: number): InnerNode {
+  private createTree(numberOfRows: number, leafHeight: number, groupHeights: [{renderer: string, height: number}]): InnerNode {
     const arr = Array.from(new Array(numberOfRows).keys()).map(() => Math.random());
     const root = fromArray(arr, leafHeight, (row: number) => String(Math.floor(Math.random()*5)));
 
@@ -56,7 +55,9 @@ export default class TestRenderer extends APrefetchRenderer {
         inner.aggregation = EAggregationType.AGGREGATED;
       }
 
-      inner.aggregatedHeight = groupHeight;
+      const group = groupHeights[Math.floor(Math.random() * groupHeights.length)];
+      inner.renderer = group.renderer;
+      inner.aggregatedHeight = group.height;
       inner.aggregate = computeHist(inner.flatLeaves<number>());
     });
 
@@ -91,12 +92,15 @@ export default class TestRenderer extends APrefetchRenderer {
     const row = this.getRow(index);
     const document = node.ownerDocument;
 
+    node.dataset.type = row.type;
+    if (row.renderer !== 'default') {
+      node.dataset.renderer = row.renderer;
+    }
+
     this.columns.forEach((col, i) => {
       const child = row.type === 'leaf' ? col.createSingle(<LeafNode<number>>row, index, document) : col.createGroup(<InnerNode>row, index, document);
       node.appendChild(child);
     });
-
-    node.dataset.type = row.type;
   }
 
   private rebuild() {
@@ -119,10 +123,17 @@ export default class TestRenderer extends APrefetchRenderer {
     const document = node.ownerDocument;
 
     const was = node.dataset.type;
+    const renderer = node.dataset.renderer || 'default';
+    const changed = was !== row.type || renderer !== row.renderer;
+
     node.dataset.type = row.type;
+    if (row.renderer !== 'default') {
+      node.dataset.renderer = row.renderer;
+    }
+
     this.columns.forEach((col, i) => {
       const child = <HTMLElement>node.children[i];
-      if (was !== row.type) {
+      if (changed) {
         const replacement = row.type === 'leaf' ? col.createSingle(<LeafNode<number>>row, index, document) : col.createGroup(<InnerNode>row, index, document);
         node.replaceChild(replacement, child);
       } else {
