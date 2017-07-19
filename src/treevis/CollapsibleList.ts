@@ -21,7 +21,7 @@ export default class CollapsibleList {
           $this.select('ul').classed('hidden', !hiddenVal);
           (<MouseEvent>d3.event).stopPropagation();
         });
-      $li.text((d) => d.type === 'inner' ? d.name : (<any>d.item).AIDS_Countries);
+      $li.text((d) => d.type === 'inner' ? this.buildName(d) : (<any>d.item).AIDS_Countries);
       $li.each(function(this: HTMLElement, d: InnerNode) {
         renderLevel(d3.select(this), d);
       });
@@ -30,6 +30,13 @@ export default class CollapsibleList {
 
     renderLevel(this.$node, root);
     this.$node.select('ul').classed('hidden', false);
+  }
+
+  buildName(node: InnerNode) {
+    return node.name +
+        ' (Child Count: ' + node.length +
+        ' | Current Height: ' + node.height +
+        ' | Aggr. Height: ' + node.aggregatedHeight + ')';
   }
 }
 
