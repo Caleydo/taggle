@@ -16,7 +16,7 @@ export abstract class AColumn implements ITaggleColumn {
     return `col${this.index}`;
   }
 
-  filter(row: LeafNode<IRow>) {
+  filter(_row: LeafNode<IRow>) {
     return true;
   }
 
@@ -37,10 +37,10 @@ export abstract class AColumn implements ITaggleColumn {
     return d;
   }
 
-  abstract createSingle(row: LeafNode<IRow>, index: number, document: Document): HTMLElement;
+  abstract createSingle(document: Document, row: LeafNode<IRow>, index: number): HTMLElement;
   abstract updateSingle(node: HTMLElement, row: LeafNode<IRow>, index: number): HTMLElement;
 
-  abstract createGroup(row: InnerNode, index: number, document: Document): HTMLElement;
+  abstract createGroup(document: Document, row: InnerNode, index: number): HTMLElement;
   abstract updateGroup(node: HTMLElement, row: InnerNode, index: number): HTMLElement;
 }
 

@@ -7,10 +7,10 @@ export interface ITaggleColumn extends IColumn {
 
   filter(node: LeafNode<IRow>): boolean;
 
-  createSingle(row: LeafNode<IRow>, index: number, document: Document): HTMLElement;
+  createSingle(document: Document, row: LeafNode<IRow>, index: number): HTMLElement;
   updateSingle(node: HTMLElement, row: LeafNode<IRow>, index: number): HTMLElement;
 
-  createGroup(row: InnerNode, index: number, document: Document): HTMLElement;
+  createGroup(document: Document, row: InnerNode, index: number): HTMLElement;
   updateGroup(node: HTMLElement, row: InnerNode, index: number): HTMLElement;
 }
 

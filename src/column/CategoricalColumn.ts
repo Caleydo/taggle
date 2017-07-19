@@ -13,25 +13,25 @@ export default class CategoricalColumn extends AColumn {
     this.categories = column.value.categories!;
   }
 
-  createSingle(row: LeafNode<IRow>, index: number, document: Document) {
+  createSingle(document: Document, row: LeafNode<IRow>) {
     const n = this.common(document);
-    return this.updateSingle(n, row, index);
+    return this.updateSingle(n, row);
   }
 
-  updateSingle(node: HTMLElement, row: LeafNode<IRow>, index: number) {
+  updateSingle(node: HTMLElement, row: LeafNode<IRow>) {
     const v = String(row.item[this.name]);
     node.textContent = v;
     node.style.backgroundColor = (this.categories.find((c) => c.name === v) || { color: 'magenta'}).color;
     return node;
   }
 
-  createGroup(row: InnerNode, index: number, document: Document) {
+  createGroup(document: Document, row: InnerNode) {
     const n = this.common(document);
     n.innerHTML = this.categories.map((c) => `<div class="bin" style="background-color: ${c.color}"></div>`).join('');
-    return this.updateGroup(n, row, index);
+    return this.updateGroup(n, row);
   }
 
-  updateGroup(node: HTMLElement, row: InnerNode, index: number) {
+  updateGroup(node: HTMLElement, row: InnerNode) {
     const hist = <number[]>row.aggregate[this.name];
     const max = Math.max(...hist);
     hist.forEach((bin, i) => {

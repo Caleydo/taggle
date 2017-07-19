@@ -17,9 +17,9 @@ export default class HierarchyColumn extends AColumn {
     return d;
   }
 
-  createSingle(row: LeafNode<IRow>, index: number, document: Document) {
+  createSingle(document: Document, row: LeafNode<IRow>) {
     const n = this.common(document);
-    return this.updateSingle(n, row, index);
+    return this.updateSingle(n, row);
   }
 
   private hierarchy(row: INode) {
@@ -40,18 +40,18 @@ export default class HierarchyColumn extends AColumn {
   }
 
 
-  updateSingle(node: HTMLElement, row: LeafNode<IRow>, index: number) {
+  updateSingle(node: HTMLElement, row: LeafNode<IRow>) {
     node.innerHTML = row.isFirstChild ? this.hierarchy(row.parent!) + CARET_DOWN : '';
     Array.from(node.children).forEach(this.toggle.bind(this, row.parent));
     return node;
   }
 
-  createGroup(row: InnerNode, index: number, document: Document) {
+  createGroup(document: Document, row: InnerNode) {
     const n = this.common(document);
-    return this.updateGroup(n, row, index);
+    return this.updateGroup(n, row);
   }
 
-  updateGroup(node: HTMLElement, row: InnerNode, index: number) {
+  updateGroup(node: HTMLElement, row: InnerNode) {
     node.innerHTML = this.hierarchy(row) + CARET_RIGHT;
     Array.from(node.children).forEach(this.toggle.bind(this, row));
     return node;

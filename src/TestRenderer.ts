@@ -107,8 +107,8 @@ export default class TestRenderer extends APrefetchRenderer {
       node.dataset.renderer = row.renderer;
     }
 
-    this.columns.forEach((col, i) => {
-      const child = row.type === 'leaf' ? col.createSingle(<LeafNode<IRow>>row, index, document) : col.createGroup(<InnerNode>row, index, document);
+    this.columns.forEach((col) => {
+      const child = row.type === 'leaf' ? col.createSingle(document, <LeafNode<IRow>>row, index) : col.createGroup(document, <InnerNode>row, index);
       node.appendChild(child);
     });
   }
@@ -145,7 +145,7 @@ export default class TestRenderer extends APrefetchRenderer {
     this.columns.forEach((col, i) => {
       const child = <HTMLElement>node.children[i];
       if (changed) {
-        const replacement = row.type === 'leaf' ? col.createSingle(<LeafNode<IRow>>row, index, document) : col.createGroup(<InnerNode>row, index, document);
+        const replacement = row.type === 'leaf' ? col.createSingle(document, <LeafNode<IRow>>row, index) : col.createGroup(document, <InnerNode>row, index);
         node.replaceChild(replacement, child);
       } else {
         if (row.type === 'leaf') {

@@ -36,13 +36,13 @@ export default class NumberColumn extends AColumn {
     return (v - this.range[0]) / (this.range[1] - this.range[0]);
   }
 
-  createSingle(row: LeafNode<IRow>, index: number, document: Document) {
+  createSingle(document: Document, row: LeafNode<IRow>) {
     const n = this.common(document);
     n.innerHTML = `<div class="bar"></div>`;
-    return this.updateSingle(n, row, index);
+    return this.updateSingle(n, row);
   }
 
-  updateSingle(node: HTMLElement, row: LeafNode<IRow>, index: number) {
+  updateSingle(node: HTMLElement, row: LeafNode<IRow>) {
     node.dataset.group = row.parent!.name;
     const bar = <HTMLElement>node.children[0];
     const v = <number>row.item[this.name];
@@ -56,17 +56,17 @@ export default class NumberColumn extends AColumn {
     return node;
   }
 
-  createGroup(row: InnerNode, index: number, document: Document) {
+  createGroup(document: Document, row: InnerNode) {
     const n = this.common(document);
     if (row.renderer === 'default') {
       n.innerHTML = `<div class="bin"></div><div class="bin"></div><div class="bin"></div><div class="bin"></div><div class="bin"></div>`;
     } else {
       n.innerHTML = `<div class="bar"></div>`;
     }
-    return this.updateGroup(n, row, index);
+    return this.updateGroup(n, row);
   }
 
-  updateGroup(node: HTMLElement, row: InnerNode, index: number) {
+  updateGroup(node: HTMLElement, row: InnerNode) {
     node.dataset.group = row.name;
     if (row.renderer === 'default') {
       const hist = <number[]>row.aggregate[this.name];
@@ -88,10 +88,11 @@ export default class NumberColumn extends AColumn {
 }
 
 export function computeHist(leaves: LeafNode<IRow>[], column: IColumn) {
+  const range = column.value.range!;
   const bins = [0, 0, 0, 0, 0];
 
   leaves.forEach((leaf) => {
-    const bin = Math.round(((<number>leaf.item[column.name] - this.range[0])/(this.range[1] - this.range[0])) * 5) % 5;
+    const bin = Math.round(((<number>leaf.item[column.name] - range[0])/(range[1] - range[0])) * 5) % 5;
     if (!isNaN(bin)) {
       bins[bin] ++;
     }

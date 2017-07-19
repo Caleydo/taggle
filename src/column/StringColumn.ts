@@ -13,22 +13,22 @@ export default class StringColumn extends AColumn {
     return d;
   }
 
-  createSingle(row: LeafNode<IRow>, index: number, document: Document) {
+  createSingle(document: Document, row: LeafNode<IRow>) {
     const n = this.common(document);
-    return this.updateSingle(n, row, index);
+    return this.updateSingle(n, row);
   }
 
-  updateSingle(node: HTMLElement, row: LeafNode<IRow>, index: number) {
+  updateSingle(node: HTMLElement, row: LeafNode<IRow>) {
     node.textContent = <string>row.item[this.column.name];
     return node;
   }
 
-  createGroup(row: InnerNode, index: number, document: Document) {
+  createGroup(document: Document, row: InnerNode) {
     const n = this.common(document);
-    return this.updateGroup(n, row, index);
+    return this.updateGroup(n, row);
   }
 
-  updateGroup(node: HTMLElement, row: InnerNode, index: number) {
+  updateGroup(node: HTMLElement, row: InnerNode) {
     node.textContent = `${row.name} #${row.length}`;
     return node;
   }

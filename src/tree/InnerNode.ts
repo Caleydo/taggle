@@ -39,11 +39,11 @@ export default class InnerNode extends ANode {
   }
 
   get flatLength(): number {
-    return 1 + this.children.reduce((r, n) => n.flatLength, 0);
+    return 1 + this.children.reduce((r, n) => r + n.flatLength, 0);
   }
 
   get flatLeavesLength(): number {
-    return this.children.reduce((r, n) => n.flatLeavesLength, 0);
+    return this.children.reduce((r, n) => r + n.flatLeavesLength, 0);
   }
 
   flatLeaves<T>(): LeafNode<T>[] {
