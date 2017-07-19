@@ -7,7 +7,7 @@ import {StyleManager, TEMPLATE} from 'lineupengine/src/style';
 import {fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
 import {StringColumn, computeCategoricalHist, computeNumericalHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
 import {data, columns, IRow} from './data';
-
+import CollapsibleList from './treevis/CollapsibleList';
 function setTemplate(root: HTMLElement) {
   root.innerHTML = TEMPLATE;
   return root;
@@ -83,6 +83,13 @@ export default class TestRenderer extends APrefetchRenderer {
 
     //wait till layouted
     setTimeout(super.init.bind(this), 100, header);
+
+    this.createTreeVis();
+  }
+
+  private createTreeVis() {
+    const cl = new CollapsibleList(this.root.parentElement!);
+    cl.render(this.tree);
   }
 
   protected onScrolledHorizontally(scrollLeft: number) {
