@@ -51,8 +51,7 @@ export default class TestRenderer extends APrefetchRenderer {
     const root = fromArray(data, leafHeight);
     // initial grouping and sorting
     TestRenderer.restratifyTree(root, 'Continent');
-    TestRenderer.dump(root);
-    //TestRenderer.reorderTree(root, 'Population (2017)');
+    TestRenderer.reorderTree(root, 'Population (2017)');
 
     // random aggregation
     visit<IRow>(root, (inner: InnerNode) => {
@@ -65,7 +64,7 @@ export default class TestRenderer extends APrefetchRenderer {
       return true;
     }, ()=> undefined);
 
-    //TestRenderer.dump(root);
+    TestRenderer.dump(root);
 
     return root;
   }
