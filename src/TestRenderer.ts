@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 13.07.2017.
  */
-import {AColumnBaseRenderer, IColumnRenderContext} from 'lineupengine/src/AColumnBaseRenderer';
+import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
 import {StringColumn, computeCategoricalHist, computeNumericalHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
@@ -9,8 +9,8 @@ import {data, columns, IRow} from './data';
 
 
 
-export default class TestRenderer extends AColumnBaseRenderer<ITaggleColumn> {
-  protected _context: IColumnRenderContext<ITaggleColumn>;
+export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
+  protected _context: ICellRenderContext<ITaggleColumn>;
 
   private readonly columns: ITaggleColumn[];
   private readonly tree: InnerNode;
@@ -21,7 +21,6 @@ export default class TestRenderer extends AColumnBaseRenderer<ITaggleColumn> {
   constructor(root: HTMLElement) {
     super(root);
     root.id = 'taggle';
-    root.classList.add('lineup-engine');
 
     this.defaultRowHeight = 20;
     this.tree = TestRenderer.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
@@ -67,9 +66,8 @@ export default class TestRenderer extends AColumnBaseRenderer<ITaggleColumn> {
   }
 
   run() {
-    const header = <HTMLElement>this.root.querySelector('header');
     //wait till layouted
-    setTimeout(this.init.bind(this), 100, header);
+    setTimeout(this.init.bind(this), 100);
   }
 
   protected get context() {
@@ -161,12 +159,12 @@ export default class TestRenderer extends AColumnBaseRenderer<ITaggleColumn> {
     column.updateHeader(node);
   }
 
-  protected createColumn(document: Document, index: number, column: ITaggleColumn) {
+  protected createCell(document: Document, index: number, column: ITaggleColumn) {
     const row = this.getRow(index);
     return row.type === 'leaf' ? column.createSingle(document, <LeafNode<IRow>>row, index) : column.createGroup(document, <InnerNode>row, index);
   }
 
-  protected updateColumn(node: HTMLElement, index: number, column: ITaggleColumn, changed: boolean) {
+  protected updateCell(node: HTMLElement, index: number, column: ITaggleColumn, changed: boolean) {
     const row = this.getRow(index);
     const document = node.ownerDocument;
 
