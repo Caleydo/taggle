@@ -41,7 +41,7 @@ export function fromArray<T>(rows: T[], rowHeight: number, grouper?: (row: T) =>
         gg.parent = root;
         g.set(group, gg);
       } else {
-        gg = g.get(group);
+        gg = g.get(group)!;
       }
       n.parent = gg;
       gg.children.push(n);

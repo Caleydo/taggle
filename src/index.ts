@@ -2,5 +2,5 @@ import 'file-loader?name=index.html!extract-loader!html-loader?interpolate!./ind
 import './style.scss';
 import TestRenderer from './TestRenderer';
 
-const app = new TestRenderer(document.body.querySelector('div'));
+const app = new TestRenderer(document.body.querySelector('div')!);
 app.run();

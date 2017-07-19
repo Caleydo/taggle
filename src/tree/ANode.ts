@@ -37,7 +37,7 @@ export abstract class ANode {
 
   get path() {
     const r: INode[] = [];
-    let a: INode = <any>this;
+    let a: INode|null = <any>this;
     while (a != null) {
       r.push(a);
       a = a.parent;

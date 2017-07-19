@@ -41,7 +41,7 @@ export default class HierarchyColumn extends AColumn {
 
 
   updateSingle(node: HTMLElement, row: LeafNode<IRow>, index: number) {
-    node.innerHTML = row.isFirstChild ? this.hierarchy(row.parent) + CARET_DOWN : '';
+    node.innerHTML = row.isFirstChild ? this.hierarchy(row.parent!) + CARET_DOWN : '';
     Array.from(node.children).forEach(this.toggle.bind(this, row.parent));
     return node;
   }

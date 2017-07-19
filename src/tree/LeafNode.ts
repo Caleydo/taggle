@@ -1,4 +1,3 @@
-import InnerNode from './InnerNode';
 import ANode from './ANode';
 
 export default class LeafNode<T> extends ANode {

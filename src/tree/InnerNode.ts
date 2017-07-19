@@ -1,7 +1,13 @@
-import {EAggregationType, INode} from './';
+import {INode} from './';
 import {flat, flatLeaves} from './utils';
 import LeafNode from './LeafNode';
 import ANode from './ANode';
+
+export enum EAggregationType {
+  AGGREGATED,
+  NON_UNIFORM,
+  UNIFORM
+}
 
 export default class InnerNode extends ANode {
   readonly type: 'inner' = 'inner';
