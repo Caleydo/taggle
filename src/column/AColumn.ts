@@ -1,4 +1,3 @@
-import {setColumn} from 'lineupengine/src/style';
 import {LeafNode, InnerNode} from '../tree';
 import ITaggleColumn from './ITaggleColumn';
 import {IRow, IColumn} from '../data';
@@ -21,23 +20,26 @@ export abstract class AColumn implements ITaggleColumn {
   }
 
   common(document: Document) {
-    const d = document.createElement('div');
+    const node = document.createElement('div');
     if (this.frozen) {
-      d.classList.add('frozen');
+      node.classList.add('frozen');
     }
-    d.dataset.id = this.id;
-    setColumn(d, this);
-    return d;
+    node.dataset.id = this.id;
+    return node;
   }
 
   createHeader(document: Document) {
-    const d = this.common(document);
-    d.textContent = this.name;
-    d.title = this.name;
+    const node = this.common(document);
+    node.textContent = this.name;
+    node.title = this.name;
     if (this.name !== '') {
-      d.onclick = () => this.rebuild(this.name);
+      node.onclick = () => this.rebuild(this.name);
     }
-    return d;
+    return node;
+  }
+
+  updateHeader(node: HTMLElement) {
+    node.title = this.name;
   }
 
   abstract createSingle(document: Document, row: LeafNode<IRow>, index: number): HTMLElement;
