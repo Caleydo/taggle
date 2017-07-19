@@ -7,8 +7,8 @@ const CARET_DOWN = '<i>&#9660;</i>';
 const CARET_RIGHT = '<i>&#9658;</i>';
 
 export default class HierarchyColumn extends AColumn {
-  constructor(index: number, column: IColumn, private readonly rebuilder: ()=>void) {
-    super(index, column, true, 60);
+  constructor(index: number, column: IColumn, rebuild: (name?: string)=>void) {
+    super(index, column, rebuild, true, 50);
   }
 
   common(document: Document) {
@@ -35,7 +35,7 @@ export default class HierarchyColumn extends AColumn {
       p.reverse();
       const toggle = p[index + 1];
       toggle.aggregation = toggle.aggregation === EAggregationType.UNIFORM ? EAggregationType.AGGREGATED : EAggregationType.UNIFORM;
-      this.rebuilder();
+      this.rebuild();
     };
   }
 

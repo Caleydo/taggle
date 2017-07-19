@@ -6,8 +6,8 @@ export default class NumberColumn extends AColumn {
   private maxValue: number = 1;
   private readonly range: [number, number];
 
-  constructor(index: number, column: IColumn, frozen: boolean = false, width = 100, private readonly rebuilder: ()=>void) {
-    super(index, column, frozen, width);
+  constructor(index: number, column: IColumn, rebuild: (name?: string)=>void, width = 100) {
+    super(index, column, rebuild, false, width);
     this.range = this.column.value.range!;
     this.maxValue = this.range[1];
   }
@@ -19,7 +19,7 @@ export default class NumberColumn extends AColumn {
     (<HTMLInputElement>d.lastElementChild).onchange = (evt) => {
       const v = (<HTMLInputElement>evt.target).value;
       this.maxValue = parseFloat(v);
-      this.rebuilder();
+      this.rebuild();
     };
     return d;
   }

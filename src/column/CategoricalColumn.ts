@@ -7,8 +7,8 @@ export default class CategoricalColumn extends AColumn {
 
   private readonly categories: {name: string, color: string}[];
 
-  constructor(index: number, column: IColumn, width = 100) {
-    super(index, column, false, width);
+  constructor(index: number, column: IColumn, rebuild: (name?: string)=>void, width = 100) {
+    super(index, column, rebuild, false, width);
 
     this.categories = column.value.categories!;
   }

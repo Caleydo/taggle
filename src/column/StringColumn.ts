@@ -3,8 +3,8 @@ import AColumn from './AColumn';
 import {IRow, IColumn} from '../data';
 
 export default class StringColumn extends AColumn {
-  constructor(index: number, column: IColumn, frozen: boolean = false, width = 100) {
-    super(index, column, frozen, width);
+  constructor(index: number, column: IColumn, rebuild: (name?: string)=>void, width = 100) {
+    super(index, column, rebuild, true, width);
   }
 
   common(document: Document) {

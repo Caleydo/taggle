@@ -4,7 +4,7 @@ import ITaggleColumn from './ITaggleColumn';
 import {IRow, IColumn} from '../data';
 
 export abstract class AColumn implements ITaggleColumn {
-  constructor(public readonly index: number, public readonly column: IColumn, public readonly frozen: boolean = false, public readonly width = 100) {
+  constructor(public readonly index: number, public readonly column: IColumn, protected readonly rebuild: (name?: string)=>void, public readonly frozen: boolean = false, public readonly width = 100) {
 
   }
 

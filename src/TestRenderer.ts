@@ -4,7 +4,7 @@
 import {APrefetchRenderer, IRenderContext} from 'lineupengine/src/APrefetchRenderer';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {StyleManager, TEMPLATE} from 'lineupengine/src/style';
-import {fromArray, INode, LeafNode, InnerNode, EAggregationType} from './tree';
+import {fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
 import {StringColumn, computeCategoricalHist, computeNumericalHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
 import {data, columns, IRow} from './data';
 
@@ -30,15 +30,16 @@ export default class TestRenderer extends APrefetchRenderer {
     root.classList.add('lineup-engine');
 
     this.defaultRowHeight = 20;
-    this.tree = this.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
+    this.tree = TestRenderer.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
 
-    this.columns = [new HierarchyColumn(0, { name: '', value: { type: 'string'}}, () => this.rebuild())];
+    const rebuilder = (name?: string) => this.rebuild(name);
+    this.columns = [new HierarchyColumn(0, { name: '', value: { type: 'string'}}, rebuilder)];
     this.columns.push(...columns.map((col, i) => {
       switch(col.value.type) {
-        case 'categorical': return new CategoricalColumn(i + 1, col, 150);
+        case 'categorical': return new CategoricalColumn(i + 1, col, rebuilder, 150);
         case 'int':
-        case 'real': return new NumberColumn(i + 1, col, false, 150, () => this.rebuild());
-        default: return new StringColumn(i + 1, col, true, 200);
+        case 'real': return new NumberColumn(i + 1, col,rebuilder, 150);
+        default: return new StringColumn(i + 1, col, rebuilder, 200);
       }
     }));
     this.style = new StyleManager(root, `#taggle`, this.defaultRowHeight);
@@ -46,30 +47,22 @@ export default class TestRenderer extends APrefetchRenderer {
     this.rebuildData();
   }
 
-  private createTree(leafHeight: number, groupHeights: [{renderer: string, height: number}]): InnerNode {
-    const root = fromArray(data, leafHeight, (row: IRow) => {
-      return <string>row.Continent || 'Others';
-    });
+  private static createTree(leafHeight: number, groupHeights: [{renderer: string, height: number}]): InnerNode {
+    const root = fromArray(data, leafHeight);
+    // initial grouping and sorting
+    TestRenderer.restratifyTree(root, 'Continent');
+    TestRenderer.reorderTree(root, 'Population (2017)');
 
-    root.children.sort((a: any, b: any) => a.name.localeCompare(b.name));
-    root.children.forEach((n) => {
-      const inner = <InnerNode>n;
+    // random aggregation
+    visit(root, (inner: InnerNode) => {
       if (Math.random() < 0.3) {
         inner.aggregation = EAggregationType.AGGREGATED;
       }
-
       const group = groupHeights[Math.floor(Math.random() * groupHeights.length)];
       inner.renderer = group.renderer;
       inner.aggregatedHeight = group.height;
-      inner.aggregate = {};
-      columns.forEach((col) => {
-        if (col.value.type === 'int' || col.value.type === 'real') {
-          inner.aggregate[col.name] = computeNumericalHist(inner.flatLeaves<IRow>(), col);
-        } else if (col.value.type === 'categorical') {
-          inner.aggregate[col.name] = computeCategoricalHist(inner.flatLeaves<IRow>(), col);
-        }
-      });
-    });
+      return true;
+    }, ()=>undefined);
 
     return root;
   }
@@ -113,10 +106,40 @@ export default class TestRenderer extends APrefetchRenderer {
     });
   }
 
-  private rebuild() {
+  private rebuild(groupOrSortBy?: string) {
+    if (groupOrSortBy) {
+      const column = columns.find((c) => c.name === groupOrSortBy)!;
+      if (column.value.type === 'categorical') {
+        TestRenderer.restratifyTree(this.tree, groupOrSortBy);
+      } else {
+        TestRenderer.reorderTree(this.tree, groupOrSortBy);
+      }
+    }
     this.rebuildData();
     this.recreate();
   }
+
+  private static reorderTree(root: InnerNode, by: string) {
+    //desc
+    sort<IRow>(root, (a, b) => <number>b[by] - <number>a[by]);
+  }
+
+  private static restratifyTree(root: InnerNode, by: string) {
+    groupBy<IRow>(root, root.flatLeaves(), (a) => <string>a[by]);
+
+    visit(root, (inner: InnerNode) => {
+      inner.aggregate = {};
+      columns.forEach((col) => {
+        if (col.value.type === 'int' || col.value.type === 'real') {
+          inner.aggregate[col.name] = computeNumericalHist(inner.flatLeaves<IRow>(), col);
+        } else if (col.value.type === 'categorical') {
+          inner.aggregate[col.name] = computeCategoricalHist(inner.flatLeaves<IRow>(), col);
+        }
+      });
+      return true;
+    }, ()=>undefined);
+  }
+
 
   private rebuildData() {
     this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
