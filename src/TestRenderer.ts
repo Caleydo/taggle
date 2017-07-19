@@ -1,22 +1,16 @@
 /**
  * Created by Samuel Gratzl on 13.07.2017.
  */
-import {APrefetchRenderer, IRenderContext} from 'lineupengine/src/APrefetchRenderer';
+import {AColumnBaseRenderer, IColumnRenderContext} from 'lineupengine/src/AColumnBaseRenderer';
 import {nonUniformContext} from 'lineupengine/src/logic';
-import {StyleManager, TEMPLATE} from 'lineupengine/src/style';
 import {fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
 import {StringColumn, computeCategoricalHist, computeNumericalHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
 import {data, columns, IRow} from './data';
 
-function setTemplate(root: HTMLElement) {
-  root.innerHTML = TEMPLATE;
-  return root;
-}
 
 
-export default class TestRenderer extends APrefetchRenderer {
-  private readonly style: StyleManager;
-  protected _context: IRenderContext;
+export default class TestRenderer extends AColumnBaseRenderer<ITaggleColumn> {
+  protected _context: IColumnRenderContext<ITaggleColumn>;
 
   private readonly columns: ITaggleColumn[];
   private readonly tree: InnerNode;
@@ -24,8 +18,8 @@ export default class TestRenderer extends APrefetchRenderer {
 
   private readonly defaultRowHeight: number;
 
-  constructor(private readonly root: HTMLElement) {
-    super(<HTMLElement>setTemplate(root).querySelector('main > article'));
+  constructor(root: HTMLElement) {
+    super(root);
     root.id = 'taggle';
     root.classList.add('lineup-engine');
 
@@ -42,7 +36,6 @@ export default class TestRenderer extends APrefetchRenderer {
         default: return new StringColumn(i + 1, col, rebuilder, 200);
       }
     }));
-    this.style = new StyleManager(root, `#taggle`, this.defaultRowHeight);
 
     this.rebuildData();
   }
@@ -73,39 +66,14 @@ export default class TestRenderer extends APrefetchRenderer {
     return this.flat[index];
   }
 
-
   run() {
     const header = <HTMLElement>this.root.querySelector('header');
-    const headerNode = <HTMLElement>header.querySelector('article');
-
-    this.style.update(this.columns, 150);
-    this.columns.forEach((c) => headerNode.appendChild(c.createHeader(headerNode.ownerDocument)));
-
     //wait till layouted
-    setTimeout(super.init.bind(this), 100, header);
+    setTimeout(this.init.bind(this), 100, header);
   }
 
-  protected onScrolledHorizontally(scrollLeft: number) {
-    this.style.updateFrozenColumnsShift(this.columns, scrollLeft);
-  }
-
-  protected get context(): IRenderContext {
+  protected get context() {
     return this._context;
-  }
-
-  protected createRow(node: HTMLElement, index: number) {
-    const row = this.getRow(index);
-    const document = node.ownerDocument;
-
-    node.dataset.type = row.type;
-    if (row.renderer !== 'default') {
-      node.dataset.renderer = row.renderer;
-    }
-
-    this.columns.forEach((col) => {
-      const child = row.type === 'leaf' ? col.createSingle(document, <LeafNode<IRow>>row, index) : col.createGroup(document, <InnerNode>row, index);
-      node.appendChild(child);
-    });
   }
 
   private rebuild(groupOrSortBy?: string) {
@@ -174,16 +142,58 @@ export default class TestRenderer extends APrefetchRenderer {
     this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
     this.flat = this.tree.flatChildren();
     const exceptions = nonUniformContext(this.flat.map((n) => n.height), this.defaultRowHeight);
+    const columnExceptions = nonUniformContext(this.columns.map((c) => c.width), 150);
     const scroller = <HTMLElement>this.root.querySelector('main');
 
     this._context = Object.assign({
-      scroller
+      scroller,
+      columns: this.columns,
+      column: columnExceptions,
+      htmlId: '#taggle'
     }, exceptions);
+  }
+
+  protected createHeader(document: Document, column: ITaggleColumn) {
+    return column.createHeader(document);
+  }
+
+  protected updateHeader(node: HTMLElement, column: ITaggleColumn) {
+    column.updateHeader(node);
+  }
+
+  protected createColumn(document: Document, index: number, column: ITaggleColumn) {
+    const row = this.getRow(index);
+    return row.type === 'leaf' ? column.createSingle(document, <LeafNode<IRow>>row, index) : column.createGroup(document, <InnerNode>row, index);
+  }
+
+  protected updateColumn(node: HTMLElement, index: number, column: ITaggleColumn, changed: boolean) {
+    const row = this.getRow(index);
+    const document = node.ownerDocument;
+
+    if (changed) {
+      return row.type === 'leaf' ? column.createSingle(document, <LeafNode<IRow>>row, index) : column.createGroup(document, <InnerNode>row, index);
+    } else {
+      if (row.type === 'leaf') {
+        column.updateSingle(node, <LeafNode<IRow>>row, index);
+      } else {
+        column.updateGroup(node, <InnerNode>row, index);
+      }
+      return node;
+    }
+  }
+
+  protected createRow(node: HTMLElement, index: number) {
+    const row = this.getRow(index);
+    node.dataset.type = row.type;
+    if (row.renderer !== 'default') {
+      node.dataset.renderer = row.renderer;
+    }
+
+    super.createRow(node, index);
   }
 
   protected updateRow(node: HTMLElement, index: number) {
     const row = this.getRow(index);
-    const document = node.ownerDocument;
 
     const was = node.dataset.type;
     const renderer = node.dataset.renderer || 'default';
@@ -194,18 +204,6 @@ export default class TestRenderer extends APrefetchRenderer {
       node.dataset.renderer = row.renderer;
     }
 
-    this.columns.forEach((col, i) => {
-      const child = <HTMLElement>node.children[i];
-      if (changed) {
-        const replacement = row.type === 'leaf' ? col.createSingle(document, <LeafNode<IRow>>row, index) : col.createGroup(document, <InnerNode>row, index);
-        node.replaceChild(replacement, child);
-      } else {
-        if (row.type === 'leaf') {
-          col.updateSingle(child, <LeafNode<IRow>>row, index);
-        } else {
-          col.updateGroup(child, <InnerNode>row, index);
-        }
-      }
-    });
+    super.updateRow(node, index, changed);
   }
 }

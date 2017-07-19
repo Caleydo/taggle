@@ -4,6 +4,7 @@ import {IRow} from '../data';
 
 export interface ITaggleColumn extends IColumn {
   createHeader(document: Document): HTMLElement;
+  updateHeader(node: HTMLElement): void;
 
   filter(node: LeafNode<IRow>): boolean;
 
