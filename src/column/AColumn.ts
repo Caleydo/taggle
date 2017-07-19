@@ -34,6 +34,9 @@ export abstract class AColumn implements ITaggleColumn {
     const d = this.common(document);
     d.textContent = this.name;
     d.title = this.name;
+    if (this.name !== '') {
+      d.onclick = () => this.rebuild(this.name);
+    }
     return d;
   }
 

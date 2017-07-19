@@ -7,6 +7,10 @@ $engine_assets: "~lineupengine/src/assets";
   height: 90vh;
   max-width: 100vw;
 
+  header > article > div {
+    cursor: pointer;
+  }
+
   header > article > div,
   main > article > div > * {
     white-space: nowrap;

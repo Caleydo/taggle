@@ -51,10 +51,11 @@ export default class TestRenderer extends APrefetchRenderer {
     const root = fromArray(data, leafHeight);
     // initial grouping and sorting
     TestRenderer.restratifyTree(root, 'Continent');
-    TestRenderer.reorderTree(root, 'Population (2017)');
+    TestRenderer.dump(root);
+    //TestRenderer.reorderTree(root, 'Population (2017)');
 
     // random aggregation
-    visit(root, (inner: InnerNode) => {
+    visit<IRow>(root, (inner: InnerNode) => {
       if (Math.random() < 0.3) {
         inner.aggregation = EAggregationType.AGGREGATED;
       }
@@ -62,7 +63,9 @@ export default class TestRenderer extends APrefetchRenderer {
       inner.renderer = group.renderer;
       inner.aggregatedHeight = group.height;
       return true;
-    }, ()=>undefined);
+    }, ()=> undefined);
+
+    //TestRenderer.dump(root);
 
     return root;
   }
@@ -120,8 +123,26 @@ export default class TestRenderer extends APrefetchRenderer {
   }
 
   private static reorderTree(root: InnerNode, by: string) {
-    //desc
-    sort<IRow>(root, (a, b) => <number>b[by] - <number>a[by]);
+    const column = columns.find((c) => c.name === by);
+    if (column && (column.value.type === 'int' || column.value.type === 'real')) {
+      //desc
+      sort<IRow>(root, (a, b) => {
+        const va = <number>a[by];
+        const vb = <number>b[by];
+        if (isNaN(va) && isNaN(vb)) {
+          return 0;
+        }
+        if (isNaN(va)) {
+          return -1;
+        }
+        if (isNaN(vb)) {
+          return +1;
+        }
+        return vb - va;
+      });
+    } else if (column) {
+      sort<IRow>(root, (a, b) => (<string>a[by]).localeCompare(<string>b[by]));
+    }
   }
 
   private static restratifyTree(root: InnerNode, by: string) {
@@ -138,6 +159,15 @@ export default class TestRenderer extends APrefetchRenderer {
       });
       return true;
     }, ()=>undefined);
+  }
+
+  private static dump(root: InnerNode) {
+    // random aggregation
+    visit<IRow>(root, (inner: InnerNode) => {
+      console.log(' '.repeat(inner.level) + '-' + inner.name);
+
+      return true;
+    }, (n)=> console.log(' '.repeat(n.level) + '-' + n.item.AIDS_Countries));
   }
 
 

@@ -42,6 +42,7 @@ export function sort<T>(root: InnerNode, comparator: (a: T, b: T) => number) {
 
 export function groupBy<T>(root: InnerNode, leaves: LeafNode<T>[], grouper: (row: T) => string[]|string|null): InnerNode {
   const g = new Map<string, InnerNode>();
+  root.children = [];
   leaves.forEach((n) => {
     const groups = grouper(n.item);
     if (groups === null || groups === '' || groups.length === 0) {
@@ -55,13 +56,14 @@ export function groupBy<T>(root: InnerNode, leaves: LeafNode<T>[], grouper: (row
     if (!g.has(group)) {
       gg = new InnerNode(group);
       gg.parent = root;
+      root.children.push(gg);
       g.set(group, gg);
     } else {
       gg = g.get(group)!;
     }
 
     let parent = gg;
-    groupArray.slice(1, groupArray.length - 1).forEach((group) => {
+    groupArray.slice(1).forEach((group) => {
       const existing = <InnerNode>parent.children.find((n) => n.type === 'inner' && n.name === group);
       if (existing) {
         parent = existing;
@@ -75,8 +77,6 @@ export function groupBy<T>(root: InnerNode, leaves: LeafNode<T>[], grouper: (row
     n.parent = parent;
     parent.children.push(n);
   });
-
-  g.forEach((gg) => root.children.push(gg));
   return root;
 }
 

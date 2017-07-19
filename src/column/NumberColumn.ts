@@ -21,6 +21,7 @@ export default class NumberColumn extends AColumn {
       this.maxValue = parseFloat(v);
       this.rebuild();
     };
+    (<HTMLElement>d.firstElementChild).onclick = () => this.rebuild(this.name);
     return d;
   }
 
