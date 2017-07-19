@@ -6,7 +6,7 @@ import {nonUniformContext} from 'lineupengine/src/logic';
 import {fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
 import {StringColumn, computeCategoricalHist, computeNumericalHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
 import {data, columns, IRow} from './data';
-
+import CollapsibleList from './treevis/CollapsibleList';
 
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
@@ -65,7 +65,13 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     return this.flat[index];
   }
 
+  private createTreeVis() {
+     const cl = new CollapsibleList(this.root.parentElement!);
+     cl.render(this.tree);
+  }
+
   run() {
+    this.createTreeVis();
     //wait till layouted
     setTimeout(this.init.bind(this), 100);
   }
