@@ -32,13 +32,13 @@ export default class TestRenderer extends APrefetchRenderer {
     this.defaultRowHeight = 20;
     this.tree = this.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
 
-    this.columns = [new HierarchyColumn(0, null, () => this.rebuild())];
+    this.columns = [new HierarchyColumn(0, { name: '', value: { type: 'string'}}, () => this.rebuild())];
     this.columns.push(...columns.map((col, i) => {
       switch(col.value.type) {
-        case 'string': return new StringColumn(i + 1, col, true, 200);
         case 'categorical': return new CategoricalColumn(i + 1, col, 150);
         case 'int':
         case 'real': return new NumberColumn(i + 1, col, false, 150, () => this.rebuild());
+        default: return new StringColumn(i + 1, col, true, 200);
       }
     }));
     this.style = new StyleManager(root, `#taggle`, this.defaultRowHeight);

@@ -4,16 +4,18 @@ import {IRow, IColumn} from '../data';
 
 export default class NumberColumn extends AColumn {
   private maxValue: number = 1;
+  private readonly range: [number, number];
 
   constructor(index: number, column: IColumn, frozen: boolean = false, width = 100, private readonly rebuilder: ()=>void) {
     super(index, column, frozen, width);
-    this.maxValue = this.column.value.range[1];
+    this.range = this.column.value.range!;
+    this.maxValue = this.range[1];
   }
 
   createHeader(document: Document) {
     const d = this.common(document);
     d.title = this.name;
-    d.innerHTML = `<span>${this.name}</span><br><input type="range" min="${this.column.value.range[0]}" max="${this.column.value.range[1]}" value="${this.column.value.range[1]}" step="0.1">`;
+    d.innerHTML = `<span>${this.name}</span><br><input type="range" min="${this.range[0]}" max="${this.range![1]}" value="${this.range[1]}" step="0.1">`;
     (<HTMLInputElement>d.lastElementChild).onchange = (evt) => {
       const v = (<HTMLInputElement>evt.target).value;
       this.maxValue = parseFloat(v);
@@ -25,14 +27,13 @@ export default class NumberColumn extends AColumn {
   filter(row: LeafNode<IRow>) {
     const v = <number>row.item[this.name];
     if (isNaN(v)) {
-      return this.maxValue >= this.column.value.range[1];
+      return this.maxValue >= this.range[1];
     }
     return v <= this.maxValue;
   }
 
   private rescale(v: number) {
-    const range = this.column.value.range;
-    return (v - range[0]) / (range[1] - range[0]);
+    return (v - this.range[0]) / (this.range[1] - this.range[0]);
   }
 
   createSingle(row: LeafNode<IRow>, index: number, document: Document) {
@@ -42,7 +43,7 @@ export default class NumberColumn extends AColumn {
   }
 
   updateSingle(node: HTMLElement, row: LeafNode<IRow>, index: number) {
-    node.dataset.group = row.parent.name;
+    node.dataset.group = row.parent!.name;
     const bar = <HTMLElement>node.children[0];
     const v = <number>row.item[this.name];
     if (isNaN(v)) {
@@ -89,10 +90,8 @@ export default class NumberColumn extends AColumn {
 export function computeHist(leaves: LeafNode<IRow>[], column: IColumn) {
   const bins = [0, 0, 0, 0, 0];
 
-  const minmax = column.value.range;
-
   leaves.forEach((leaf) => {
-    const bin = Math.round(((<number>leaf.item[column.name] - minmax[0])/(minmax[1] - minmax[0])) * 5) % 5;
+    const bin = Math.round(((<number>leaf.item[column.name] - this.range[0])/(this.range[1] - this.range[0])) * 5) % 5;
     if (!isNaN(bin)) {
       bins[bin] ++;
     }
