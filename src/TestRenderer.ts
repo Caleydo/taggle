@@ -132,10 +132,10 @@ export default class TestRenderer extends APrefetchRenderer {
           return 0;
         }
         if (isNaN(va)) {
-          return -1;
+          return 1;
         }
         if (isNaN(vb)) {
-          return +1;
+          return -1;
         }
         return vb - va;
       });
