@@ -12,9 +12,11 @@ export default class CollapsibleList {
   }
 
   render(root: InnerNode) {
-    const checkCount = (node: INode) => {
-      // if the next level is a leaf level
+    const chooseItemData = (node: INode) => {
       if(node.type === 'inner') {
+
+        // separate leafs and inner nodes
+        // if leaf count is > max leaf count then we just want to show a single node
         const leaves = node.children.filter((x) => x.type === 'leaf');
         const inners = node.children.filter((x) => x.type === 'inner');
 
@@ -32,7 +34,7 @@ export default class CollapsibleList {
     const renderLevel = ($node: d3.Selection<INode>, node: INode) => {
       node.type === 'inner' ? $node.classed('inner', true) : $node.classed('leaf', true);
 
-      const $li = $node.append('ul').classed('hidden', true).selectAll('li').data(checkCount(node));
+      const $li = $node.append('ul').classed('hidden', true).selectAll('li').data(chooseItemData(node));
       $li.enter().append('li')
         .on('click', function(this: HTMLElement) {
           const $this = d3.select(this);
