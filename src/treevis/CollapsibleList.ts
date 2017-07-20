@@ -13,6 +13,7 @@ export default class CollapsibleList {
 
   render(root: InnerNode) {
     const renderLevel = ($node: d3.Selection<INode>, node: INode) => {
+      node.type === 'inner' ? $node.classed('inner', true) : $node.classed('leaf', true);
       const $li = $node.append('ul').classed('hidden', true).selectAll('li').data(node.type === 'inner' ? node.children : []);
       $li.enter().append('li')
         .on('click', function(this: HTMLElement) {
