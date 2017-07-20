@@ -24,11 +24,10 @@ export default class CollapsibleList {
         }
 
         return node.children;
-      }
-      else {
+      } else {
         return [];
       }
-    }
+    };
 
     const renderLevel = ($node: d3.Selection<INode>, node: INode) => {
       node.type === 'inner' ? $node.classed('inner', true) : $node.classed('leaf', true);
