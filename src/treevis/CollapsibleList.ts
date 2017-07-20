@@ -29,7 +29,14 @@ export default class CollapsibleList {
       $li.exit().remove();
     };
 
+    // create new dummy root
+    root.parent = new InnerNode('dummy node');
+    root.parent.children.push(root);
+    root = root.parent;
     renderLevel(this.$node, root);
+    // remove dummy root again after rendering
+    root = <InnerNode> root.children[0];
+    root.parent = null;
     this.$node.select('ul').classed('hidden', false);
   }
 
@@ -37,7 +44,10 @@ export default class CollapsibleList {
     return node.name +
         ' (Child Count: ' + node.length +
         ' | Current Height: ' + node.height +
-        ' | Aggr. Height: ' + node.aggregatedHeight + ')';
+        ' | Aggr. Height: ' + node.aggregatedHeight +
+        ' | Aggregation State: ' + node.aggregation +
+        ' | Renderer: ' + node.renderer +
+         ')';
   }
 }
 
