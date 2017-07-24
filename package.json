@@ -90,6 +90,9 @@
   "dependencies": {
     "lineupengine": "github:sgratzl/lineupengine",
     "@types/d3-dsv": "^1.0.30",
-    "d3-dsv": "^1.0.5"
+    "d3-dsv": "^1.0.5",
+    "@types/d3": "3.5.36",
+    "d3": "3.5.17"
   }
 }
+

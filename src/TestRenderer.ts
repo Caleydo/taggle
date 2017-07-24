@@ -3,11 +3,11 @@
  */
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
-import {fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
+import {Tree, fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
 import {StringColumn, computeCategoricalHist, computeNumericalHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
 import {data, columns, IRow} from './data';
-
-
+import CollapsibleList from './treevis/CollapsibleList';
+import TreeModel from './model/TreeModel';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
@@ -65,7 +65,20 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     return this.flat[index];
   }
 
+  private createTreeVis() {
+     const cl = new CollapsibleList(this.root.parentElement!);
+     cl.render(this.tree);
+     return cl;
+  }
+
+  private createTree() {
+    return new Tree();
+  }
+
   run() {
+    const treeModel = new TreeModel();
+    treeModel.addListener(this.createTreeVis());
+    treeModel.addListener(this.createTree());
     //wait till layouted
     setTimeout(this.init.bind(this), 100);
   }
