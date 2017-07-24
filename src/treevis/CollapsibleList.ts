@@ -3,7 +3,7 @@
  */
 import * as d3 from 'd3';
 import {InnerNode, INode, LeafNode} from '../tree';
-import {ITreeObserver} from '../model/TreeModel';
+import {ITreeObserver, TreeEvent} from '../model/TreeModel';
 
 export default class CollapsibleList implements ITreeObserver {
   private readonly $node: d3.Selection<any>;
@@ -77,8 +77,9 @@ export default class CollapsibleList implements ITreeObserver {
         ')';
   }
 
-  update(e: Event): void {
+  update(e: TreeEvent): void {
     console.log(e);
+   // this.render(/*specified node*/)
   }
 }
 

@@ -3,7 +3,7 @@
  */
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
-import {Tree, fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
+import {fromArray, Tree, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
 import {StringColumn, computeCategoricalHist, computeNumericalHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
 import {data, columns, IRow} from './data';
 import CollapsibleList from './treevis/CollapsibleList';
@@ -13,7 +13,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
 
   private readonly columns: ITaggleColumn[];
-  private readonly tree: InnerNode;
+  private readonly tree: Tree;
   private flat: INode[] = [];
 
   private readonly defaultRowHeight: number;
@@ -23,7 +23,13 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     root.id = 'taggle';
 
     this.defaultRowHeight = 20;
-    this.tree = TestRenderer.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
+
+    const treeModel = new TreeModel();
+    treeModel.addListener(this.createTreeVis());
+    this.tree = new Tree();
+    treeModel.addListener(this.tree);
+    const r = TestRenderer.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
+    this.tree.initFromExistingTree(r, treeModel);
 
     const rebuilder = (name?: string) => this.rebuild(name);
     this.columns = [new HierarchyColumn(0, { name: '', value: { type: 'string'}}, rebuilder)];
@@ -67,18 +73,10 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
 
   private createTreeVis() {
      const cl = new CollapsibleList(this.root.parentElement!);
-     cl.render(this.tree);
      return cl;
   }
 
-  private createTree() {
-    return new Tree();
-  }
-
   run() {
-    const treeModel = new TreeModel();
-    treeModel.addListener(this.createTreeVis());
-    treeModel.addListener(this.createTree());
     //wait till layouted
     setTimeout(this.init.bind(this), 100);
   }
@@ -91,9 +89,9 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     if (groupOrSortBy) {
       const column = columns.find((c) => c.name === groupOrSortBy)!;
       if (column.value.type === 'categorical') {
-        TestRenderer.restratifyTree(this.tree, groupOrSortBy);
+        TestRenderer.restratifyTree(this.tree.Root, groupOrSortBy);
       } else {
-        TestRenderer.reorderTree(this.tree, groupOrSortBy);
+        TestRenderer.reorderTree(this.tree.Root, groupOrSortBy);
       }
     }
     this.rebuildData();
@@ -150,8 +148,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
 
 
   private rebuildData() {
-    this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
-    this.flat = this.tree.flatChildren();
+    this.tree.Root.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
+    this.flat = this.tree.Root.flatChildren();
     const exceptions = nonUniformContext(this.flat.map((n) => n.height), this.defaultRowHeight);
     const columnExceptions = nonUniformContext(this.columns.map((c) => c.width), 150);
     const scroller = <HTMLElement>this.root.querySelector('main');
