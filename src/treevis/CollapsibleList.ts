@@ -3,8 +3,9 @@
  */
 import * as d3 from 'd3';
 import {InnerNode, INode, LeafNode} from '../tree';
+import {ITreeObserver} from '../model/TreeModel';
 
-export default class CollapsibleList {
+export default class CollapsibleList implements ITreeObserver {
   private readonly $node: d3.Selection<any>;
 
   constructor(root: HTMLElement, private maxLeafVisCount = 20) {
@@ -14,7 +15,6 @@ export default class CollapsibleList {
   render(root: InnerNode) {
     const chooseItemData = (node: INode) => {
       if(node.type === 'inner') {
-
         // separate leafs and inner nodes
         // if leaf count is > max leaf count then we just want to show a single node
         const leaves = node.children.filter((x) => x.type === 'leaf');
@@ -75,6 +75,10 @@ export default class CollapsibleList {
         ' | Aggregation State: ' + node.aggregation +
         ' | Renderer: ' + node.renderer +
         ')';
+  }
+
+  update(e: Event): void {
+    console.log(e);
   }
 }
 
