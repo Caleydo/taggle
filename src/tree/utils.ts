@@ -21,11 +21,11 @@ export function flat(root: INode, result: INode[] = []): INode[] {
 export function visit<T>(root: INode, visitInner: (node: InnerNode)=>boolean, visitLeaf: (node: LeafNode<T>)=>void) {
   if (root.type === 'leaf') {
     visitLeaf(<LeafNode<T>>root);
-  } else {
-    const continueVisiting = visitInner(<InnerNode>root);
-    if (continueVisiting) {
-      root.children.forEach((child) => visit(child, visitInner, visitLeaf));
-    }
+    return;
+  }
+  const continueVisiting = visitInner(<InnerNode>root);
+  if (continueVisiting) {
+    root.children.forEach((child) => visit(child, visitInner, visitLeaf));
   }
 }
 
@@ -67,12 +67,12 @@ export function groupBy<T>(root: InnerNode, leaves: LeafNode<T>[], grouper: (row
       const existing = <InnerNode>parent.children.find((n) => n.type === 'inner' && n.name === group);
       if (existing) {
         parent = existing;
-      } else {
-        const newInner = new InnerNode(group);
-        newInner.parent = parent;
-        parent.children.push(newInner);
-        parent = newInner;
+        return;
       }
+      const newInner = new InnerNode(group);
+      newInner.parent = parent;
+      parent.children.push(newInner);
+      parent = newInner;
     });
     n.parent = parent;
     parent.children.push(n);
@@ -92,9 +92,7 @@ export function fromArray<T>(rows: T[], rowHeight: number, grouper?: (row: T) =>
 
   if (grouper) {
     return groupBy(root, leaves, grouper);
-  } else {
-    root.children = leaves;
   }
-
+  root.children = leaves;
   return root;
 }
