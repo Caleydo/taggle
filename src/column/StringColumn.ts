@@ -7,12 +7,6 @@ export default class StringColumn extends AColumn {
     super(index, column, rebuild, true, width);
   }
 
-  common(document: Document) {
-    const d = super.common(document);
-    d.classList.add('string');
-    return d;
-  }
-
   createSingle(document: Document, row: LeafNode<IRow>) {
     const n = this.common(document);
     return this.updateSingle(n, row);

@@ -27,18 +27,28 @@ export default class CategoricalColumn extends AColumn {
 
   createGroup(document: Document, row: InnerNode) {
     const n = this.common(document);
-    n.innerHTML = this.categories.map((c) => `<div class="bin" style="background-color: ${c.color}"></div>`).join('');
+    if (row.renderer === 'default') {
+      n.innerHTML = this.categories.map((c) => `<div class="bin" style="background-color: ${c.color}"></div>`).join('');
+    } else {
+      n.innerHTML = ``;
+    }
     return this.updateGroup(n, row);
   }
 
   updateGroup(node: HTMLElement, row: InnerNode) {
     const hist = <number[]>row.aggregate[this.name];
     const max = Math.max(...hist);
-    hist.forEach((bin, i) => {
-      const binNode = <HTMLElement>node.children[i];
-      binNode.style.transform = `translateY(${Math.round((max - bin) * 100 / max)}%)`;
-      binNode.textContent = `#${bin}`;
-    });
+    if (row.renderer === 'default') {
+      hist.forEach((bin, i) => {
+        const binNode = <HTMLElement>node.children[i];
+        binNode.style.height = `${Math.round(bin * 100 / max)}%`;
+        binNode.title = `#${bin}`;
+      });
+    } else {
+      const maxBin = hist.findIndex((d) => d === max);
+      node.textContent = `#${maxBin}: ${max}`;
+      node.style.backgroundColor = this.categories[maxBin].color;
+    }
     return node;
   }
 }

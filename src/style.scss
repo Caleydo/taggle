@@ -1,4 +1,3 @@
-
 $engine_assets: "~lineupengine/src/assets";
 
 @import "~lineupengine/src/style";
@@ -41,32 +40,39 @@ $engine_assets: "~lineupengine/src/assets";
       color: black;
     }
   }
-
-  .bin {
-    background-color: #5886e6;
-  }
 }
 
-[data-type="inner"][data-renderer="default"] > div {
+[data-type="inner"]:not([data-renderer]) {
   &.string {
-    line-height: 100px;
-    vertical-align: middle;
-  }
-}
-
-[data-type="inner"] > div {
-  &:not(.string) {
     display: flex;
-    align-items: stretch;
-    align-content: stretch;
+    align-items: center;
+  }
+
+  &.categorical,
+  &.int,
+  &.real {
+    display: flex;
+    align-items: flex-end;
     margin: 2px 0;
 
-    > * {
+    > .bin {
       flex: 1 1 auto;
       margin: 0 2px;
+      position: relative;
       border-radius: 5px 5px 0 0;
-      display: inline-block;
+      background-color: #5886e6;
       transition: all 0.5s;
+
+      &::after {
+        content: attr(title);
+        text-align: center;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+      }
     }
   }
 }
