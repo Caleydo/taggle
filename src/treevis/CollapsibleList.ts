@@ -7,7 +7,7 @@ import {InnerNode, INode, LeafNode} from '../tree';
 export default class CollapsibleList {
   private readonly $node: d3.Selection<any>;
 
-  constructor(root: HTMLElement, private maxLeafVisCount = 20) {
+  constructor(root: HTMLElement, private readonly maxLeafVisCount = 20) {
     this.$node = d3.select(root).append('div').classed('treevis', true);
   }
 
@@ -17,11 +17,11 @@ export default class CollapsibleList {
 
         // separate leafs and inner nodes
         // if leaf count is > max leaf count then we just want to show a single node
-        const leaves = node.children.filter((x) => x.type === 'leaf');
+        const numLeaves = node.children.reduce((a, n) => a + (n.type === 'leaf' ? 1 : 0), 0)
         const inners = node.children.filter((x) => x.type === 'inner');
 
-        if(leaves.length > this.maxLeafVisCount) {
-          inners.unshift(new LeafNode(leaves.length + ' items'));
+        if(numLeaves > this.maxLeafVisCount) {
+          inners.unshift(new LeafNode(numLeaves + ' items'));
           return inners;
         }
 
@@ -50,31 +50,20 @@ export default class CollapsibleList {
 
     // create new dummy root
     console.assert(root.parent === null);
-    root.parent = new InnerNode('dummy node');
-    root.parent.children.push(root);
-    root = root.parent;
-    renderLevel(this.$node, root);
+
+    const newRoot = new InnerNode('dummy node');
+    newRoot.children.push(root);
+    renderLevel(this.$node, newRoot);
     // remove dummy root again after rendering
-    root = <InnerNode> root.children[0];
-    root.parent = null;
     this.$node.select('ul').classed('hidden', false);
   }
 
-  buildLeafNodeLabel(node: LeafNode<any>) {
-    return node.item +
-        ' (Current Height: ' + node.height +
-        ' | Renderer: ' + node.renderer +
-        ')';
+  private buildLeafNodeLabel(node: LeafNode<any>) {
+    return `${node.item} (Current Height: ${node.height} | Renderer: ${node.renderer} )`;
   }
 
-  buildInnerNodeLabel(node: InnerNode) {
-    return node.name +
-        ' (Child Count: ' + node.length +
-        ' | Current Height: ' + node.height +
-        ' | Aggr. Height: ' + node.aggregatedHeight +
-        ' | Aggregation State: ' + node.aggregation +
-        ' | Renderer: ' + node.renderer +
-        ')';
+  private buildInnerNodeLabel(node: InnerNode) {
+    return `${node.name} (Child Count: ${node.length} | Current Height: ${node.height} | Aggr. Height: ${node.aggregatedHeight} | Renderer: ${node.renderer} )`;
   }
 }
 
