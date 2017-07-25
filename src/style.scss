@@ -76,3 +76,18 @@ $engine_assets: "~lineupengine/src/assets";
     }
   }
 }
+
+.treevis {
+  .hidden {
+    display: none;
+  }
+
+  .leaf {
+    color: red;
+  }
+
+  .inner {
+    color: black;
+  }
+}
+

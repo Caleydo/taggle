@@ -14,7 +14,7 @@ import {
   CategoricalColumn
 } from './column';
 import {data, columns, IRow} from './data';
-
+import CollapsibleList from './treevis/CollapsibleList';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
@@ -78,7 +78,13 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     return this.flat[index];
   }
 
+  private createTreeVis() {
+     const cl = new CollapsibleList(this.root.parentElement!);
+     cl.render(this.tree);
+  }
+
   run() {
+    this.createTreeVis();
     //wait till layouted
     setTimeout(this.init.bind(this), 100);
   }
