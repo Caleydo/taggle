@@ -21,14 +21,13 @@ export default class CollapsibleList {
         const inners = node.children.filter((x) => x.type === 'inner');
 
         if(numLeaves > this.maxLeafVisCount) {
-          inners.unshift(new LeafNode(numLeaves + ' items'));
+          inners.unshift(new LeafNode('${numLeaves} items'));
           return inners;
         }
 
         return node.children;
-      } else {
-        return [];
       }
+      return [];
     };
 
     const renderLevel = ($node: d3.Selection<INode>, node: INode) => {
