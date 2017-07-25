@@ -64,8 +64,7 @@ export default class CollapsibleList implements ITreeObserver {
       const size = $ulParent.node().childNodes.length;
       if(size > this.maxLeafVisCount) {
         return;
-      }
-      else if (size == this.maxLeafVisCount) {
+      } else if (size === this.maxLeafVisCount) {
         node = new LeafNode(`${node.parent.children.length - size} items more...`);
       }
       const $li = $ulParent.append('li').datum(node);
@@ -74,7 +73,7 @@ export default class CollapsibleList implements ITreeObserver {
   }
 
   private setHiddenState($ul: d3.Selection<any>, node: INode) {
-    if(node.type == 'inner') {
+    if(node.type === 'inner') {
       const inner = node as InnerNode;
       //todo calculate that in model and pass it as parameter here
       inner.aggregation === EAggregationType.AGGREGATED ? $ul.classed('hidden', true) :$ul.classed('hidden', false);

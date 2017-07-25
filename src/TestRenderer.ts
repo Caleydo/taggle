@@ -37,7 +37,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       if(node) {
         this.treeModel.nodesChanged([node], this);
       }
-    }
+    };
     this.columns = [new HierarchyColumn(0, { name: '', value: { type: 'string'}}, rebuilder)];
     this.columns.push(...columns.map((col, i) => {
       switch(col.value.type) {
