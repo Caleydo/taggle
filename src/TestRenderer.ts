@@ -14,6 +14,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
 
   private readonly columns: ITaggleColumn[];
   private readonly tree: Tree;
+  private readonly treeModel: TreeModel;
   private flat: INode[] = [];
 
   private readonly defaultRowHeight: number;
@@ -24,14 +25,19 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
 
     this.defaultRowHeight = 20;
 
-    const treeModel = new TreeModel();
-    treeModel.addListener(this.createTreeVis());
+    this.treeModel = new TreeModel();
+    this.treeModel.addListener(this.createTreeVis());
     this.tree = new Tree();
-    treeModel.addListener(this.tree);
+    this.treeModel.addListener(this.tree);
     const r = TestRenderer.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
-    this.tree.initFromExistingTree(r, treeModel);
+    this.tree.initFromExistingTree(r, this.treeModel);
 
-    const rebuilder = (name?: string) => this.rebuild(name);
+    const rebuilder = (name?: string, node?: InnerNode) => {
+      this.rebuild(name);
+      if(node) {
+        this.treeModel.nodesChanged([node], this);
+      }
+    }
     this.columns = [new HierarchyColumn(0, { name: '', value: { type: 'string'}}, rebuilder)];
     this.columns.push(...columns.map((col, i) => {
       switch(col.value.type) {
@@ -148,7 +154,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
 
 
   private rebuildData() {
-    this.tree.Root.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
+    const fl = this.tree.Root.flatLeaves<IRow>();
+    fl.forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
     this.flat = this.tree.Root.flatChildren();
     const exceptions = nonUniformContext(this.flat.map((n) => n.height), this.defaultRowHeight);
     const columnExceptions = nonUniformContext(this.columns.map((c) => c.width), 150);

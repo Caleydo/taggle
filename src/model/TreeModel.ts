@@ -1,7 +1,12 @@
-import {INode} from '../tree';
+import {INode, InnerNode, EAggregationType} from '../tree';
 // todo use already existing Event class (phovea_core event?)
+
+export enum EventType {
+  NodeAdded, NodeRemoved, NodeAggregated, NodeUnaggregated
+}
+
 export class TreeEvent {
-  constructor(public parent: INode | null, public leaves: INode[], public sender: any) {
+  constructor(public parent: INode | null, public node: INode, public sender: any, public eventType: EventType) {
 
   }
 }
@@ -22,9 +27,19 @@ export default class TreeModel {
     this.listeners.forEach((l) => l.update(event));
   }
 
-  nodesAdded(parent: INode | null, leaves: INode[], sender: any) {
-    const event = new TreeEvent(parent, leaves, sender);
-    this.notify(event);
+  nodesAdded(parent: INode | null, nodes: INode[], sender: any) {
+    nodes.forEach((n) => {
+      const event = new TreeEvent(parent, n, sender, EventType.NodeAdded);
+      this.notify(event);
+    });
+  }
+
+  nodesChanged(nodes: InnerNode[], sender: any) {
+    nodes.forEach((n) => {
+      const e = n.aggregation === EAggregationType.AGGREGATED ? EventType.NodeAggregated : EventType.NodeUnaggregated;
+      const event = new TreeEvent(null, n, sender, e);
+      this.notify(event);
+    });
   }
 }
 

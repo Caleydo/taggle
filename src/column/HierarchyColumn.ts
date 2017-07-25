@@ -35,7 +35,7 @@ export default class HierarchyColumn extends AColumn {
       p.reverse();
       const toggle = p[index + 1];
       toggle.aggregation = toggle.aggregation === EAggregationType.UNIFORM ? EAggregationType.AGGREGATED : EAggregationType.UNIFORM;
-      this.rebuild();
+      this.rebuild(undefined, toggle);
     };
   }
 

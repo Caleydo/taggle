@@ -3,7 +3,7 @@
  */
 import * as d3 from 'd3';
 import {InnerNode, INode, LeafNode} from '../tree';
-import {ITreeObserver, TreeEvent} from '../model/TreeModel';
+import {ITreeObserver, TreeEvent, EventType} from '../model/TreeModel';
 
 export default class CollapsibleList implements ITreeObserver {
   private readonly $node: d3.Selection<any>;
@@ -31,28 +31,48 @@ export default class CollapsibleList implements ITreeObserver {
   }
 
   update(e: TreeEvent): void {
-    e.leaves.forEach((leaf) => {
-      if(!leaf.parent) { // if its the root node
-        this.$node.classed(leaf.type, true);
-        const $li = this.$node.append('ul').classed('hidden', false).append('li').datum(leaf);
-        this.installNode($li, leaf);
-      } else {
-        const $ulParent = this.nodeMap.get(leaf.parent);
-        console.assert($ulParent);
-        if(!$ulParent) { // should never happen
-          return;
-        }
-        const size = $ulParent.node().childNodes.length;
-        if(size > this.maxLeafVisCount) {
-          return;
-        }
-        else if (size == this.maxLeafVisCount) {
-          leaf = new LeafNode(`${leaf.parent.children.length - size} items more...`);
-        }
-        const $li = $ulParent.classed('hidden', true).append('li').datum(leaf);
-        this.installNode($li, leaf);
+    switch(e.eventType) {
+      case EventType.NodeAdded: this.addNodes(e); break;
+      case EventType.NodeAggregated: this.collapseNodes(e); break;
+    }
+  }
+
+  private collapseNodes(e: TreeEvent) {
+    const $ul = this.nodeMap.get(e.node);
+    console.assert($ul);
+    if(!$ul) { // should never happen
+      return;
+    }
+    if(e.eventType === EventType.NodeAggregated) {
+      $ul.classed('hidden', true);
+    } else {
+      $ul.classed('hidden', false);
+    }
+  }
+
+  private addNodes(e: TreeEvent) {
+    let node = e.node;
+    if(!node.parent) { // if its the root node
+      this.$node.classed(node.type, true);
+      const $li = this.$node.append('ul').classed('hidden', false).append('li').datum(node);
+      this.installNode($li, node);
+    } else {
+      const $ulParent = this.nodeMap.get(node.parent);
+      console.assert($ulParent);
+      if(!$ulParent) { // should never happen
+        return;
       }
-    });
+      //todo use old algorithm
+      const size = $ulParent.node().childNodes.length;
+      if(size > this.maxLeafVisCount) {
+        return;
+      }
+      else if (size == this.maxLeafVisCount) {
+        node = new LeafNode(`${node.parent.children.length - size} items more...`);
+      }
+      const $li = $ulParent.classed('hidden', true).append('li').datum(node);
+      this.installNode($li, node);
+    }
   }
 
   private installNode($li: d3.Selection<any>, leaf: INode) {
