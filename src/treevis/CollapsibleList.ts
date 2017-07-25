@@ -13,10 +13,6 @@ export default class CollapsibleList implements ITreeObserver {
     this.$node = d3.select(root).append('div').classed('treevis', true);
   }
 
-  chooseItemData(node: INode) {
-    return [node];
-  }
-
   render(root: InnerNode) {
     const chooseItemData = (node: INode) => {
       if(node.type === 'inner') {
@@ -83,11 +79,12 @@ export default class CollapsibleList implements ITreeObserver {
   }
 
   update(e: TreeEvent): void {
-    e.leaves.forEach((leave) => {
+    e.leaves.forEach((leaf) => {
       // if its the root node
-      if(!leave.parent) {
-        this.$node.classed(leave.type, true);
-        const $li = this.$node.append('ul').classed('hidden', false).append('li').datum(leave);
+      if(!leaf.parent) {
+        this.$node.classed(leaf.type, true);
+        const $li = this.$node.append('ul').classed('hidden', false).append('li').datum(leaf);
+
         $li.on('click', function(this: HTMLElement) {
           const $this = d3.select(this);
           const hiddenVal = $this.select('ul').classed('hidden');
@@ -95,15 +92,25 @@ export default class CollapsibleList implements ITreeObserver {
           (<MouseEvent>d3.event).stopPropagation();
         });
         $li.text((d) => d.type === 'inner' ? this.buildInnerNodeLabel(d) : this.buildLeafNodeLabel(d));
-        this.nodeMap.set(leave, $li.append('ul'));
+        const $ulNew = $li.append('ul');
+        $li.classed(leaf.type, true);
+        this.nodeMap.set(leaf, $ulNew);
       } else {
-        const $ulParent = this.nodeMap.get(leave.parent);
+        const $ulParent = this.nodeMap.get(leaf.parent);
         console.assert($ulParent);
         if(!$ulParent) {
           return;
         }
-        $ulParent.classed(leave.type, true);
-        const $li = $ulParent.classed('hidden', true).append('li').datum(leave);
+        let size = $ulParent.selectAll('ul > li').size();
+        size = $ulParent.node().childNodes.length;
+        if(size > this.maxLeafVisCount) {
+          return;
+        }
+        else if (size == this.maxLeafVisCount) {
+          leaf = new LeafNode(`${leaf.parent.children.length - size} items more...`);
+        }
+        const $li = $ulParent.classed('hidden', true).append('li').datum(leaf);
+
         $li.on('click', function(this: HTMLElement) {
           const $this = d3.select(this);
           const hiddenVal = $this.select('ul').classed('hidden');
@@ -111,7 +118,9 @@ export default class CollapsibleList implements ITreeObserver {
           (<MouseEvent>d3.event).stopPropagation();
         });
         $li.text((d) => d.type === 'inner' ? this.buildInnerNodeLabel(d) : this.buildLeafNodeLabel(d));
-        this.nodeMap.set(leave, $li.append('ul'));
+        const $ulNew = $li.append('ul');
+        $li.classed(leaf.type, true);
+        this.nodeMap.set(leaf, $ulNew);
       }
     });
   }
