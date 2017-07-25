@@ -74,8 +74,8 @@ export default class NumberColumn extends AColumn {
       const max = Math.max(...hist);
       hist.forEach((bin, i) => {
         const binNode = <HTMLElement>node.children[i];
-        binNode.style.transform = `translateY(${Math.round((max - bin) * 100 / max)}%)`;
-        binNode.textContent = `#${bin}`;
+        binNode.style.height = `${Math.round(bin * 100 / max)}%`;
+        binNode.title = `#${bin}`;
       });
     } else {
       const children = row.flatLeaves<IRow>().map((c) => <number>c.item[this.name]).filter((v) => !isNaN(v));

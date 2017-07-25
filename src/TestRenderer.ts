@@ -174,15 +174,24 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
 
   protected createCell(document: Document, index: number, column: ITaggleColumn) {
     const row = this.getRow(index);
-    return row.type === 'leaf' ? column.createSingle(document, <LeafNode<IRow>>row, index) : column.createGroup(document, <InnerNode>row, index);
+    const cell = row.type === 'leaf' ? column.createSingle(document, <LeafNode<IRow>>row, index) : column.createGroup(document, <InnerNode>row, index);
+    cell.dataset.type = row.type;
+    if (row.renderer !== 'default') {
+      cell.dataset.renderer = row.renderer;
+    }
+    return cell;
   }
 
-  protected updateCell(node: HTMLElement, index: number, column: ITaggleColumn, changed: boolean) {
+  protected updateCell(node: HTMLElement, index: number, column: ITaggleColumn) {
     const row = this.getRow(index);
     const document = node.ownerDocument;
 
+    const was = node.dataset.type;
+    const renderer = node.dataset.renderer || 'default';
+    const changed = was !== row.type || renderer !== row.renderer;
+
     if (changed) {
-      return row.type === 'leaf' ? column.createSingle(document, <LeafNode<IRow>>row, index) : column.createGroup(document, <InnerNode>row, index);
+      return this.createCell(document, index, column);
     }
     if (row.type === 'leaf') {
       column.updateSingle(node, <LeafNode<IRow>>row, index);
@@ -190,30 +199,5 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       column.updateGroup(node, <InnerNode>row, index);
     }
     return node;
-  }
-
-  protected createRow(node: HTMLElement, index: number) {
-    const row = this.getRow(index);
-    node.dataset.type = row.type;
-    if (row.renderer !== 'default') {
-      node.dataset.renderer = row.renderer;
-    }
-
-    super.createRow(node, index);
-  }
-
-  protected updateRow(node: HTMLElement, index: number) {
-    const row = this.getRow(index);
-
-    const was = node.dataset.type;
-    const renderer = node.dataset.renderer || 'default';
-    const changed = was !== row.type || renderer !== row.renderer;
-
-    node.dataset.type = row.type;
-    if (row.renderer !== 'default') {
-      node.dataset.renderer = row.renderer;
-    }
-
-    super.updateRow(node, index, changed);
   }
 }
