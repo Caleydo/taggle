@@ -18,6 +18,7 @@ export default class Tree implements ITreeObserver {
   public initFromExistingTree(root: InnerNode, treeModel: TreeModel) {
     this.root = root;
     visit<IRow>(root, (inner: InnerNode) => {
+      console.log(inner.toString() + ' ' + inner.aggregation);
       treeModel.nodesAdded(inner.parent, [inner], this);
       return true;
     }, (leaf: LeafNode<IRow>)=> treeModel.nodesAdded(leaf.parent, [leaf], this));
