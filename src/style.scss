@@ -42,14 +42,12 @@ $engine_assets: "~lineupengine/src/assets";
   }
 }
 
-[data-type="inner"] {
-  &.string {
-    line-height: 100px;
-    vertical-align: middle;
-  }
-}
-
 [data-type="inner"]:not([data-renderer]) {
+  &.string {
+    display: flex;
+    align-items: center;
+  }
+
   &.categorical,
   &.int,
   &.real {
