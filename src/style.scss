@@ -1,7 +1,7 @@
 
+@import "~lineupengine/src/styles/vars";
 $engine_assets: "~lineupengine/src/assets";
-
-@import "~lineupengine/src/style";
+@import "~lineupengine/src/styles/style";
 
 .lineup-engine {
   height: 90vh;
