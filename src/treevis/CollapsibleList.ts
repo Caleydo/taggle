@@ -7,9 +7,28 @@ import {ITreeObserver, TreeEvent} from '../model/TreeModel';
 
 export default class CollapsibleList implements ITreeObserver {
   private readonly $node: d3.Selection<any>;
+  private nodeMap = new Map();
 
   constructor(root: HTMLElement, private maxLeafVisCount = 20) {
     this.$node = d3.select(root).append('div').classed('treevis', true);
+  }
+
+  chooseItemData(node: INode) {
+    if(node.type === 'inner') {
+      // separate leafs and inner nodes
+      // if leaf count is > max leaf count then we just want to show a single node
+      const leaves = node.children.filter((x) => x.type === 'leaf');
+      const inners = node.children.filter((x) => x.type === 'inner');
+
+      if(leaves.length > this.maxLeafVisCount) {
+        inners.unshift(new LeafNode(leaves.length + ' items'));
+        return inners;
+      }
+
+      return node.children;
+    } else {
+      return [];
+    }
   }
 
   render(root: InnerNode) {
@@ -78,8 +97,19 @@ export default class CollapsibleList implements ITreeObserver {
   }
 
   update(e: TreeEvent): void {
-    console.log(e);
-   // this.render(/*specified node*/)
+    e.leaves.forEach((leave) => {
+      // if its the root node
+      if(!leave.parent) {
+        this.$node.classed(leave.type, true);
+        this.$node.append('ul').classed('hidden', false);
+        this.nodeMap.set(leave, this.$node);
+      } else {
+        /*const $parent = this.nodeMap.get(leave.parent.index);
+        $parent.select('ul').selectAll('li').data(this.chooseItemData(leave));
+        this.nodeMap.set(leave, leave.index);*/
+        console.log('leave');
+      }
+    });
   }
 }
 

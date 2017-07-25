@@ -1,7 +1,7 @@
-import {ANode} from '../tree/ANode';
+import {INode} from '../tree';
 // todo use already existing Event class (phovea_core event?)
 export class TreeEvent {
-  constructor(public parent: ANode | null, public leaves: ANode[], public sender: any) {
+  constructor(public parent: INode | null, public leaves: INode[], public sender: any) {
 
   }
 }
@@ -22,7 +22,7 @@ export default class TreeModel {
     this.listeners.forEach((l) => l.update(event));
   }
 
-  nodesAdded(parent: ANode | null, leaves: ANode[], sender: any) {
+  nodesAdded(parent: INode | null, leaves: INode[], sender: any) {
     const event = new TreeEvent(parent, leaves, sender);
     this.notify(event);
   }
