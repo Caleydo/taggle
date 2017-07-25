@@ -54,7 +54,6 @@ export default class CollapsibleList {
     const newRoot = new InnerNode('dummy node');
     newRoot.children.push(root);
     renderLevel(this.$node, newRoot);
-    // remove dummy root again after rendering
     this.$node.select('ul').classed('hidden', false);
   }
 
@@ -63,7 +62,7 @@ export default class CollapsibleList {
   }
 
   private buildInnerNodeLabel(node: InnerNode) {
-    return `${node.name} (Child Count: ${node.length} | Current Height: ${node.height} | Aggr. Height: ${node.aggregatedHeight} | Renderer: ${node.renderer} )`;
+    return `${node.name} (Child Count: ${node.children.length} | Current Height: ${node.height} | Aggr. Height: ${node.aggregatedHeight} | Renderer: ${node.renderer} )`;
   }
 }
 
