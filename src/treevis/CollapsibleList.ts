@@ -17,7 +17,7 @@ export default class CollapsibleList {
 
         // separate leafs and inner nodes
         // if leaf count is > max leaf count then we just want to show a single node
-        const numLeaves = node.children.reduce((a, n) => a + (n.type === 'leaf' ? 1 : 0), 0)
+        const numLeaves = node.children.reduce((a, n) => a + (n.type === 'leaf' ? 1 : 0), 0);
         const inners = node.children.filter((x) => x.type === 'inner');
 
         if(numLeaves > this.maxLeafVisCount) {
