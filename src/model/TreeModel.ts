@@ -17,7 +17,7 @@ export interface ITreeObserver {
 
 /** Stores all tree listeners and delegates events */
 export default class TreeModel {
-  private listeners = new Array<ITreeObserver>();
+  private readonly listeners = new Array<ITreeObserver>();
 
   addListener(obs: ITreeObserver) {
     this.listeners.push(obs);

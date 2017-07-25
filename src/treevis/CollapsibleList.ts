@@ -7,27 +7,18 @@ import {ITreeObserver, TreeEvent, EventType} from '../model/TreeModel';
 
 export default class CollapsibleList implements ITreeObserver {
   private readonly $node: d3.Selection<any>;
-  private nodeMap = new Map<INode, d3.Selection<any>>();
+  private readonly nodeMap = new Map<INode, d3.Selection<any>>();
 
-  constructor(root: HTMLElement, private maxLeafVisCount = 20) {
+  constructor(root: HTMLElement, private readonly maxLeafVisCount = 20) {
     this.$node = d3.select(root).append('div').classed('treevis', true);
   }
 
-  buildLeafNodeLabel(node: LeafNode<any>) {
-    return node.item +
-        ' (Current Height: ' + node.height +
-        ' | Renderer: ' + node.renderer +
-        ')';
+  private buildLeafNodeLabel(node: LeafNode<any>) {
+    return `${node.item} (Current Height: ${node.height} | Renderer: ${node.renderer} )`;
   }
 
-  buildInnerNodeLabel(node: InnerNode) {
-    return node.name +
-        ' (Child Count: ' + node.children.length +
-        ' | Current Height: ' + node.height +
-        ' | Aggr. Height: ' + node.aggregatedHeight +
-        ' | Aggregation State: ' + node.aggregation +
-        ' | Renderer: ' + node.renderer +
-        ')';
+  private buildInnerNodeLabel(node: InnerNode) {
+    return `${node.name} (Child Count: ${node.length} | Current Height: ${node.height} | Aggr. Height: ${node.aggregatedHeight} | Renderer: ${node.renderer} )`;
   }
 
   update(e: TreeEvent): void {
