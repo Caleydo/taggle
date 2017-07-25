@@ -34,7 +34,7 @@ const webpackloaders = [
     test: /\.(png|jpg)$/,
     loader: 'url-loader',
     query: {
-      limit: 10000, //inline <= 10kb
+      limit: 10000 //inline <= 10kb
     }
   },
   {
@@ -260,14 +260,13 @@ function generateWebpack(options) {
         debug: false
       }),
       new UglifyJsPlugin({
-        mangle: {
-          screw_ie8: true
+        uglifyOptions: {
+          ecma: 6,
+          mange: true,
+          compress: true,
+          warnings: true
         },
-        compress: {
-          screw_ie8: true
-        },
-        comments: false,
-        sourceMap: false
+        extractComments: false
       }));
   } else {
     //generate source maps

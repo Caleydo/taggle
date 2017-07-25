@@ -24,6 +24,7 @@ export abstract class AColumn implements ITaggleColumn {
     if (this.frozen) {
       node.classList.add('frozen');
     }
+    node.classList.add(this.column.value.type);
     node.dataset.id = this.id;
     return node;
   }

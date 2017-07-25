@@ -4,10 +4,17 @@
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
-import {StringColumn, computeCategoricalHist, computeNumericalHist, ITaggleColumn, NumberColumn, HierarchyColumn, CategoricalColumn} from './column';
+import {
+  StringColumn,
+  computeCategoricalHist,
+  computeNumericalHist,
+  ITaggleColumn,
+  NumberColumn,
+  HierarchyColumn,
+  CategoricalColumn
+} from './column';
 import {data, columns, IRow} from './data';
 import CollapsibleList from './treevis/CollapsibleList';
-
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
@@ -23,23 +30,29 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     root.id = 'taggle';
 
     this.defaultRowHeight = 20;
-    this.tree = TestRenderer.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {renderer: 'mean', height: this.defaultRowHeight}]);
+    this.tree = TestRenderer.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {
+      renderer: 'mean',
+      height: this.defaultRowHeight
+    }]);
 
     const rebuilder = (name?: string) => this.rebuild(name);
-    this.columns = [new HierarchyColumn(0, { name: '', value: { type: 'string'}}, rebuilder)];
+    this.columns = [new HierarchyColumn(0, {name: '', value: {type: 'string'}}, rebuilder)];
     this.columns.push(...columns.map((col, i) => {
-      switch(col.value.type) {
-        case 'categorical': return new CategoricalColumn(i + 1, col, rebuilder, 150);
+      switch (col.value.type) {
+        case 'categorical':
+          return new CategoricalColumn(i + 1, col, rebuilder, 150);
         case 'int':
-        case 'real': return new NumberColumn(i + 1, col,rebuilder, 150);
-        default: return new StringColumn(i + 1, col, rebuilder, 200);
+        case 'real':
+          return new NumberColumn(i + 1, col, rebuilder, 150);
+        default:
+          return new StringColumn(i + 1, col, rebuilder, 200);
       }
     }));
 
     this.rebuildData();
   }
 
-  private static createTree(leafHeight: number, groupHeights: [{renderer: string, height: number}]): InnerNode {
+  private static createTree(leafHeight: number, groupHeights: [{ renderer: string, height: number }]): InnerNode {
     const root = fromArray(data, leafHeight);
     // initial grouping and sorting
     TestRenderer.restratifyTree(root, 'Continent');
@@ -54,7 +67,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       inner.renderer = group.renderer;
       inner.aggregatedHeight = group.height;
       return true;
-    }, ()=> undefined);
+    }, () => undefined);
 
     TestRenderer.dump(root);
 
@@ -129,16 +142,16 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
         }
       });
       return true;
-    }, ()=>undefined);
+    }, () => undefined);
   }
 
   private static dump(root: InnerNode) {
     // random aggregation
     visit<IRow>(root, (inner: InnerNode) => {
-      console.log(' '.repeat(inner.level) + '-' + inner.name);
+      console.log(`${' '.repeat(inner.level)}-${inner.name}`);
 
       return true;
-    }, (n)=> console.log(' '.repeat(n.level) + '-' + n.item.AIDS_Countries));
+    }, (n) => console.log(`${' '.repeat(n.level)}-${n.item.AIDS_Countries}`));
   }
 
 
@@ -167,47 +180,30 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
 
   protected createCell(document: Document, index: number, column: ITaggleColumn) {
     const row = this.getRow(index);
-    return row.type === 'leaf' ? column.createSingle(document, <LeafNode<IRow>>row, index) : column.createGroup(document, <InnerNode>row, index);
+    const cell = row.type === 'leaf' ? column.createSingle(document, <LeafNode<IRow>>row, index) : column.createGroup(document, <InnerNode>row, index);
+    cell.dataset.type = row.type;
+    if (row.renderer !== 'default') {
+      cell.dataset.renderer = row.renderer;
+    }
+    return cell;
   }
 
-  protected updateCell(node: HTMLElement, index: number, column: ITaggleColumn, changed: boolean) {
+  protected updateCell(node: HTMLElement, index: number, column: ITaggleColumn) {
     const row = this.getRow(index);
     const document = node.ownerDocument;
-
-    if (changed) {
-      return row.type === 'leaf' ? column.createSingle(document, <LeafNode<IRow>>row, index) : column.createGroup(document, <InnerNode>row, index);
-    } else {
-      if (row.type === 'leaf') {
-        column.updateSingle(node, <LeafNode<IRow>>row, index);
-      } else {
-        column.updateGroup(node, <InnerNode>row, index);
-      }
-      return node;
-    }
-  }
-
-  protected createRow(node: HTMLElement, index: number) {
-    const row = this.getRow(index);
-    node.dataset.type = row.type;
-    if (row.renderer !== 'default') {
-      node.dataset.renderer = row.renderer;
-    }
-
-    super.createRow(node, index);
-  }
-
-  protected updateRow(node: HTMLElement, index: number) {
-    const row = this.getRow(index);
 
     const was = node.dataset.type;
     const renderer = node.dataset.renderer || 'default';
     const changed = was !== row.type || renderer !== row.renderer;
 
-    node.dataset.type = row.type;
-    if (row.renderer !== 'default') {
-      node.dataset.renderer = row.renderer;
+    if (changed) {
+      return this.createCell(document, index, column);
     }
-
-    super.updateRow(node, index, changed);
+    if (row.type === 'leaf') {
+      column.updateSingle(node, <LeafNode<IRow>>row, index);
+    } else {
+      column.updateGroup(node, <InnerNode>row, index);
+    }
+    return node;
   }
 }
