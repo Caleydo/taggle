@@ -7,28 +7,14 @@ import {ITreeObserver, TreeEvent} from '../model/TreeModel';
 
 export default class CollapsibleList implements ITreeObserver {
   private readonly $node: d3.Selection<any>;
-  private nodeMap = new Map();
+  private nodeMap = new Map<INode, d3.Selection<any>>();
 
   constructor(root: HTMLElement, private maxLeafVisCount = 20) {
     this.$node = d3.select(root).append('div').classed('treevis', true);
   }
 
   chooseItemData(node: INode) {
-    if(node.type === 'inner') {
-      // separate leafs and inner nodes
-      // if leaf count is > max leaf count then we just want to show a single node
-      const leaves = node.children.filter((x) => x.type === 'leaf');
-      const inners = node.children.filter((x) => x.type === 'inner');
-
-      if(leaves.length > this.maxLeafVisCount) {
-        inners.unshift(new LeafNode(leaves.length + ' items'));
-        return inners;
-      }
-
-      return node.children;
-    } else {
-      return [];
-    }
+    return [node];
   }
 
   render(root: InnerNode) {
@@ -88,7 +74,7 @@ export default class CollapsibleList implements ITreeObserver {
 
   buildInnerNodeLabel(node: InnerNode) {
     return node.name +
-        ' (Child Count: ' + node.length +
+        ' (Child Count: ' + node.children.length +
         ' | Current Height: ' + node.height +
         ' | Aggr. Height: ' + node.aggregatedHeight +
         ' | Aggregation State: ' + node.aggregation +
@@ -101,13 +87,31 @@ export default class CollapsibleList implements ITreeObserver {
       // if its the root node
       if(!leave.parent) {
         this.$node.classed(leave.type, true);
-        this.$node.append('ul').classed('hidden', false);
-        this.nodeMap.set(leave, this.$node);
+        const $li = this.$node.append('ul').classed('hidden', false).append('li').datum(leave);
+        $li.on('click', function(this: HTMLElement) {
+          const $this = d3.select(this);
+          const hiddenVal = $this.select('ul').classed('hidden');
+          $this.select('ul').classed('hidden', !hiddenVal);
+          (<MouseEvent>d3.event).stopPropagation();
+        });
+        $li.text((d) => d.type === 'inner' ? this.buildInnerNodeLabel(d) : this.buildLeafNodeLabel(d));
+        this.nodeMap.set(leave, $li.append('ul'));
       } else {
-        /*const $parent = this.nodeMap.get(leave.parent.index);
-        $parent.select('ul').selectAll('li').data(this.chooseItemData(leave));
-        this.nodeMap.set(leave, leave.index);*/
-        console.log('leave');
+        const $ulParent = this.nodeMap.get(leave.parent);
+        console.assert($ulParent);
+        if(!$ulParent) {
+          return;
+        }
+        $ulParent.classed(leave.type, true);
+        const $li = $ulParent.classed('hidden', true).append('li').datum(leave);
+        $li.on('click', function(this: HTMLElement) {
+          const $this = d3.select(this);
+          const hiddenVal = $this.select('ul').classed('hidden');
+          $this.select('ul').classed('hidden', !hiddenVal);
+          (<MouseEvent>d3.event).stopPropagation();
+        });
+        $li.text((d) => d.type === 'inner' ? this.buildInnerNodeLabel(d) : this.buildLeafNodeLabel(d));
+        this.nodeMap.set(leave, $li.append('ul'));
       }
     });
   }
