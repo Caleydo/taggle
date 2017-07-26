@@ -9,7 +9,7 @@ import {IRow} from '../data';
 
 export default class Tree implements ITreeObserver {
   private root: InnerNode;
-  update(e: TreeEvent): void {
+  updateListener(e: TreeEvent): void {
     if(e.sender === this) {
       return;
     }

@@ -1,5 +1,5 @@
 import {INode, InnerNode, EAggregationType} from '../tree';
-// todo use already existing Event class (phovea_core event?)
+import {ITreeModel} from './ITreeModel';
 
 export enum EventType {
   NodeAdded, NodeRemoved, NodeAggregated, NodeUnaggregated
@@ -12,11 +12,11 @@ export class TreeEvent {
 }
 
 export interface ITreeObserver {
-    update(e: TreeEvent): void;
+    updateListener(e: TreeEvent): void;
   }
 
 /** Stores all tree listeners and delegates events */
-export default class TreeModel {
+export default class TreeModel implements ITreeModel {
   private readonly listeners = new Array<ITreeObserver>();
 
   addListener(obs: ITreeObserver) {
@@ -24,7 +24,7 @@ export default class TreeModel {
   }
 
   private notify(event: TreeEvent) {
-    this.listeners.forEach((l) => l.update(event));
+    this.listeners.forEach((l) => l.updateListener(event));
   }
 
   nodesAdded(parent: INode | null, nodes: INode[], sender: any) {

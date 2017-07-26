@@ -21,7 +21,7 @@ export default class CollapsibleList implements ITreeObserver {
     return `${node.name} (Child Count: ${node.length} | Current Height: ${node.height} | Aggr. Height: ${node.aggregatedHeight} | Renderer: ${node.renderer} )`;
   }
 
-  update(e: TreeEvent): void {
+  updateListener(e: TreeEvent): void {
     switch(e.eventType) {
       case EventType.NodeAdded: this.addNodes(e); break;
       case EventType.NodeAggregated: this.collapseNodes(e, true); break;

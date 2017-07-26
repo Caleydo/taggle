@@ -4,6 +4,7 @@
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
+import {ITreeObserver, TreeEvent} from './model/TreeModel';
 import {
   StringColumn,
   computeCategoricalHist,
@@ -16,7 +17,7 @@ import {
 import {data, columns, IRow} from './data';
 
 
-export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
+export default class TestRenderer extends ACellRenderer<ITaggleColumn> implements ITreeObserver {
   protected _context: ICellRenderContext<ITaggleColumn>;
 
   private readonly columns: ITaggleColumn[];
@@ -200,4 +201,9 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     }
     return node;
   }
+
+  updateListener(e: TreeEvent) {
+    console.log(e);
+  }
+
 }
