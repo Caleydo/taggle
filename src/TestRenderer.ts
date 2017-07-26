@@ -16,6 +16,7 @@ import {
 import {data, columns, IRow} from './data';
 
 
+
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
 
