@@ -14,6 +14,7 @@ export default class InnerNode extends ANode {
   children: INode[] = [];
   aggregation: EAggregationType = EAggregationType.UNIFORM;
   aggregatedHeight = 100;
+  aggregatedDoi = 0.5;
 
   aggregate: any;
 
@@ -56,6 +57,13 @@ export default class InnerNode extends ANode {
       return this.aggregatedHeight;
     }
     return this.children.reduce((a, n) => a + n.height, 0);
+  }
+
+  get doi(): number {
+    if (this.aggregation === EAggregationType.AGGREGATED) {
+      return this.aggregatedDoi;
+    }
+    return this.children.reduce((a, n) => Math.max(a, n.doi), 0);
   }
 
   set height(value: number) {

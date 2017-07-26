@@ -14,7 +14,7 @@ import {
   CategoricalColumn
 } from './column';
 import {data, columns, IRow} from './data';
-import CollapsibleList from './treevis/CollapsibleList';
+
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
@@ -80,13 +80,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     return this.flat[index];
   }
 
-  private createTreeVis() {
-     const cl = new CollapsibleList(this.root.parentElement!);
-     cl.render(this.tree);
-  }
-
   run() {
-    this.createTreeVis();
     //wait till layouted
     setTimeout(this.init.bind(this), 100);
   }
@@ -160,7 +154,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
 
   private rebuildData() {
     this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
-    this.flat = this.tree.flatChildren();
+    this.flat = this.tree.aggregation === EAggregationType.AGGREGATED ? [this.tree] : this.tree.flatChildren();
     const exceptions = nonUniformContext(this.flat.map((n) => n.height), this.defaultRowHeight);
     const columnExceptions = nonUniformContext(this.columns.map((c) => c.width), 150);
     const scroller = <HTMLElement>this.root.querySelector('main');

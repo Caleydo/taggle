@@ -33,7 +33,7 @@ export default class HierarchyColumn extends AColumn {
     n.onclick = () => {
       const p = <InnerNode[]>row.path;
       p.reverse();
-      const toggle = p[index + 1];
+      const toggle = p[p.length === 1 ? 0 : index + 1];
       toggle.aggregation = toggle.aggregation === EAggregationType.UNIFORM ? EAggregationType.AGGREGATED : EAggregationType.UNIFORM;
       this.rebuild(null, false);
     };
