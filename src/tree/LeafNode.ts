@@ -4,10 +4,18 @@ export default class LeafNode<T> extends ANode {
   readonly type: 'leaf' = 'leaf';
   height = 20;
 
-  filtered: boolean = false;
+  doi: number = 0.5;
 
   constructor(public readonly item: T) {
     super();
+  }
+
+  set filtered(value: boolean) {
+    this.doi = value ? 0 : 0.5;
+  }
+
+  get filtered() {
+    return this.doi === 0;
   }
 
   get length() {

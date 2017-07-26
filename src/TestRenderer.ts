@@ -4,7 +4,6 @@
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
-import {ITreeObserver, TreeEvent} from './model/TreeModel';
 import {
   StringColumn,
   computeCategoricalHist,
@@ -17,7 +16,7 @@ import {
 import {data, columns, IRow} from './data';
 
 
-export default class TestRenderer extends ACellRenderer<ITaggleColumn> implements ITreeObserver {
+export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
 
   private readonly columns: ITaggleColumn[];
@@ -25,6 +24,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
   private flat: INode[] = [];
 
   private readonly defaultRowHeight: number;
+
+  private groupBy: string[] = [];
 
   constructor(root: HTMLElement) {
     super(root);
@@ -36,7 +37,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
       height: this.defaultRowHeight
     }]);
 
-    const rebuilder = (name?: string) => this.rebuild(name);
+    const rebuilder = (name: string|null, additional: boolean) => this.rebuild(name, additional);
     this.columns = [new HierarchyColumn(0, {name: '', value: {type: 'string'}}, rebuilder)];
     this.columns.push(...columns.map((col, i) => {
       switch (col.value.type) {
@@ -56,7 +57,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
   private static createTree(leafHeight: number, groupHeights: [{ renderer: string, height: number }]): InnerNode {
     const root = fromArray(data, leafHeight);
     // initial grouping and sorting
-    TestRenderer.restratifyTree(root, 'Continent');
+    TestRenderer.restratifyTree(root, ['Continent']);
     TestRenderer.reorderTree(root, 'Population (2017)');
 
     // random aggregation
@@ -88,11 +89,12 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
     return this._context;
   }
 
-  private rebuild(groupOrSortBy?: string) {
+  private rebuild(groupOrSortBy: string|null, additional: boolean) {
     if (groupOrSortBy) {
       const column = columns.find((c) => c.name === groupOrSortBy)!;
       if (column.value.type === 'categorical') {
-        TestRenderer.restratifyTree(this.tree, groupOrSortBy);
+        this.groupBy =  additional ? this.groupBy.concat([groupOrSortBy]) : [groupOrSortBy];
+        TestRenderer.restratifyTree(this.tree, this.groupBy);
       } else {
         TestRenderer.reorderTree(this.tree, groupOrSortBy);
       }
@@ -124,8 +126,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
     }
   }
 
-  private static restratifyTree(root: InnerNode, by: string) {
-    groupBy<IRow>(root, root.flatLeaves(), (a) => <string>a[by]);
+  private static restratifyTree(root: InnerNode, by: string[]) {
+    groupBy<IRow>(root, root.flatLeaves(), (a) => by.map((bi) => <string>a[bi]));
 
     visit(root, (inner: InnerNode) => {
       inner.aggregate = {};
@@ -152,7 +154,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
 
   private rebuildData() {
     this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
-    this.flat = this.tree.flatChildren();
+    this.flat = this.tree.aggregation === EAggregationType.AGGREGATED ? [this.tree] : this.tree.flatChildren();
     const exceptions = nonUniformContext(this.flat.map((n) => n.height), this.defaultRowHeight);
     const columnExceptions = nonUniformContext(this.columns.map((c) => c.width), 150);
     const scroller = <HTMLElement>this.root.querySelector('main');
@@ -201,9 +203,4 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
     }
     return node;
   }
-
-  updateListener(e: TreeEvent) {
-    console.log(e);
-  }
-
 }

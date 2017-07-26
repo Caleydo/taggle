@@ -6,7 +6,7 @@ export default class NumberColumn extends AColumn {
   private maxValue: number = 1;
   private readonly range: [number, number];
 
-  constructor(index: number, column: IColumn, rebuild: (name?: string)=>void, width = 100) {
+  constructor(index: number, column: IColumn, rebuild: (name: string|null, additional: boolean)=>void, width = 100) {
     super(index, column, rebuild, false, width);
     this.range = this.column.value.range!;
     this.maxValue = this.range[1];
@@ -19,9 +19,9 @@ export default class NumberColumn extends AColumn {
     (<HTMLInputElement>d.lastElementChild).onchange = (evt) => {
       const v = (<HTMLInputElement>evt.target).value;
       this.maxValue = parseFloat(v);
-      this.rebuild();
+      this.rebuild(null, false);
     };
-    (<HTMLElement>d.firstElementChild).onclick = () => this.rebuild(this.name);
+    (<HTMLElement>d.firstElementChild).onclick = () => this.rebuild(this.name, false);
     return d;
   }
 
