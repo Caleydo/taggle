@@ -3,7 +3,7 @@ import AColumn from './AColumn';
 import {IRow, IColumn} from '../data';
 
 export default class StringColumn extends AColumn {
-  constructor(index: number, column: IColumn, rebuild: (name?: string)=>void, width = 100) {
+  constructor(index: number, column: IColumn, rebuild: (name: string|null, additional: boolean)=>void, width = 100) {
     super(index, column, rebuild, true, width);
   }
 

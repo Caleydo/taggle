@@ -25,6 +25,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
 
   private readonly defaultRowHeight: number;
 
+  private groupBy: string[] = [];
+
   constructor(root: HTMLElement) {
     super(root);
     root.id = 'taggle';
@@ -35,7 +37,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       height: this.defaultRowHeight
     }]);
 
-    const rebuilder = (name?: string) => this.rebuild(name);
+    const rebuilder = (name: string|null, additional: boolean) => this.rebuild(name, additional);
     this.columns = [new HierarchyColumn(0, {name: '', value: {type: 'string'}}, rebuilder)];
     this.columns.push(...columns.map((col, i) => {
       switch (col.value.type) {
@@ -55,7 +57,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   private static createTree(leafHeight: number, groupHeights: [{ renderer: string, height: number }]): InnerNode {
     const root = fromArray(data, leafHeight);
     // initial grouping and sorting
-    TestRenderer.restratifyTree(root, 'Continent');
+    TestRenderer.restratifyTree(root, ['Continent']);
     TestRenderer.reorderTree(root, 'Population (2017)');
 
     // random aggregation
@@ -87,11 +89,12 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     return this._context;
   }
 
-  private rebuild(groupOrSortBy?: string) {
+  private rebuild(groupOrSortBy: string|null, additional: boolean) {
     if (groupOrSortBy) {
       const column = columns.find((c) => c.name === groupOrSortBy)!;
       if (column.value.type === 'categorical') {
-        TestRenderer.restratifyTree(this.tree, groupOrSortBy);
+        this.groupBy =  additional ? this.groupBy.concat([groupOrSortBy]) : [groupOrSortBy];
+        TestRenderer.restratifyTree(this.tree, this.groupBy);
       } else {
         TestRenderer.reorderTree(this.tree, groupOrSortBy);
       }
@@ -123,8 +126,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     }
   }
 
-  private static restratifyTree(root: InnerNode, by: string) {
-    groupBy<IRow>(root, root.flatLeaves(), (a) => <string>a[by]);
+  private static restratifyTree(root: InnerNode, by: string[]) {
+    groupBy<IRow>(root, root.flatLeaves(), (a) => by.map((bi) => <string>a[bi]));
 
     visit(root, (inner: InnerNode) => {
       inner.aggregate = {};

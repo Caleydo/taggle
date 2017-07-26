@@ -3,7 +3,7 @@ import ITaggleColumn from './ITaggleColumn';
 import {IRow, IColumn} from '../data';
 
 export abstract class AColumn implements ITaggleColumn {
-  constructor(public readonly index: number, public readonly column: IColumn, protected readonly rebuild: (name?: string)=>void, public readonly frozen: boolean = false, public readonly width = 100) {
+  constructor(public readonly index: number, public readonly column: IColumn, protected readonly rebuild: (name: string|null, additional: boolean)=>void, public readonly frozen: boolean = false, public readonly width = 100) {
 
   }
 
@@ -34,7 +34,7 @@ export abstract class AColumn implements ITaggleColumn {
     node.textContent = this.name;
     node.title = this.name;
     if (this.name !== '') {
-      node.onclick = () => this.rebuild(this.name);
+      node.onclick = (evt) => this.rebuild(this.name, evt.shiftKey || evt.altKey);
     }
     return node;
   }
