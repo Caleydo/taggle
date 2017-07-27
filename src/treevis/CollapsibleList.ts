@@ -8,7 +8,7 @@ import {IRow} from '../data';
 export default class CollapsibleList {
   private readonly $node: d3.Selection<any>;
 
-  constructor(root: HTMLElement, private readonly maxLeafVisCount = 5) {
+  constructor(root: HTMLElement) {
     this.$node = d3.select(root).append('div').classed('treevis', true);
   }
 
@@ -19,9 +19,8 @@ export default class CollapsibleList {
     };
 
     const buildTable = ($node: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
-      const $table = $node.append('table');
       console.assert($node && arr && treeColumnCount > -1);
-      console.log(this.maxLeafVisCount);
+      const $table = $node.append('table');
       const $rows = $table.selectAll('tr')
           .data(arr);
 
