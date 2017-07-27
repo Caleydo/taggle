@@ -23,8 +23,6 @@ export default class CollapsibleList {
 
     const buildTable = ($table: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
       console.assert($table && arr && treeColumnCount > -1);
-
-
       $table.select('td').attr('colspan', treeColumnCount);
       const $tr = $table.select('tbody').selectAll('tr')
           .data(arr);
