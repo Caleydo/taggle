@@ -23,6 +23,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   private readonly columns: ITaggleColumn[];
   private readonly tree: InnerNode;
   private flat: INode[] = [];
+  private TreeVis: CollapsibleList;
 
   private readonly defaultRowHeight: number;
 
@@ -53,6 +54,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     }));
 
     this.rebuildData();
+    this.TreeVis = new CollapsibleList(this.root.parentElement!);
   }
 
   private static createTree(leafHeight: number, groupHeights: [{ renderer: string, height: number }]): InnerNode {
@@ -81,13 +83,12 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     return this.flat[index];
   }
 
-  private createTreeVis() {
-     const cl = new CollapsibleList(this.root.parentElement!);
-     cl.render(this.tree);
+  private renderTreeVis() {
+     this.TreeVis.render(this.tree);
   }
 
   run() {
-    this.createTreeVis();
+    this.renderTreeVis();
     //wait till layouted
     setTimeout(this.init.bind(this), 100);
   }
@@ -108,6 +109,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     }
     this.rebuildData();
     this.recreate();
+    this.renderTreeVis();
   }
 
   private static reorderTree(root: InnerNode, by: string) {

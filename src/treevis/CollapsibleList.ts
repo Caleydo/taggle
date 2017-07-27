@@ -37,8 +37,6 @@ export default class CollapsibleList {
         });
 
       // update phase
-      $tr.attr('data-path', (d) => d.toPathString());
-
       $tr.select('.clickable')
         .on('click', function(this: HTMLElement, d: INode) { // hides all child nodes
           if(d.type === 'leaf' || !this.parentNode) { //should never happen
