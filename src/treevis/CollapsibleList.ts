@@ -3,13 +3,16 @@
  */
 import * as d3 from 'd3';
 import {InnerNode, INode, visit} from '../tree';
-import {IRow} from '../data';
 
 export default class CollapsibleList {
   private readonly $table: d3.Selection<any>;
 
   constructor(root: HTMLElement) {
     this.$table = d3.select(root).append('div').classed('treevis', true).append('table');
+    this.$table.html(`<thead>
+                <tr><td colspan="0">Visual Tree</td></tr>
+              </thead>
+              <tbody></tbody>`);
   }
 
   render(root: InnerNode) {
@@ -21,56 +24,44 @@ export default class CollapsibleList {
     const buildTable = ($table: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
       console.assert($table && arr && treeColumnCount > -1);
 
-      $table
-        .append('thead')
-        .append('tr')
-        .append('th')
-        .attr('colspan', treeColumnCount).text('Visual Tree');
 
-      const $rows = $table.append('tbody').selectAll('tr')
+      $table.select('td').attr('colspan', treeColumnCount);
+      const $tr = $table.select('tbody').selectAll('tr')
           .data(arr);
-      const $tr = $rows.enter().append('tr')
+
+      // enter phase
+      $tr.enter().append('tr')
         .classed('collapsed', false)
         .html((d) => {
           return this.buildRow(treeColumnCount, d);
         });
 
-      // collapses all nodes that are on a deeper level
-      $tr.select('.clickable').on('click', function(this: HTMLElement) {
-        if(!this.parentNode) { //should never happen
-          return;
-        }
-        const $firstItem = d3.select(this.parentNode);
-        const thisLevel = $firstItem.datum().level;
-        invertCollapsedState($firstItem);
+      // update phase
+      $tr.attr('data-path', (d) => d.toPathString());
 
-        // visit all siblings
-        // hide all siblings until a sibling was found that is on the same level
-        let sibling = this.parentNode.nextSibling;
-        if(!sibling) {
-          return;
-        }
-        let $sibling = d3.select(sibling);
-        let nextLevel = $sibling.datum().level;
-        const collapse = $firstItem.classed('collapsed');
-        while(thisLevel !== nextLevel) {
-          $sibling.classed('hidden', collapse);
-          $sibling.classed('collapsed', false);
-          sibling = sibling.nextSibling;
-          if(!sibling) {
-            break;
+      $tr.select('.clickable')
+        .on('click', function(this: HTMLElement, d: INode) { // hides all child nodes
+          if(d.type === 'leaf' || !this.parentNode) { //should never happen
+            return;
           }
-          $sibling = d3.select(sibling);
-          nextLevel = $sibling.datum().level;
-        }
+          const $firstItem = d3.select(this.parentNode);
+          invertCollapsedState($firstItem);
+          const collapse = $firstItem.classed('collapsed');
+
+          // filter all children and subchildren from current node
+          $tr.filter((s) => s.parents.includes(<InnerNode>d))
+            .classed('hidden', collapse)
+            .classed('collapsed', false);
       });
-      $rows.exit().remove();
+
+      // exit phase
+      $tr.exit().remove();
     };
 
     console.assert(root.parent === null);
 
     const arr: INode[] = [];
-    const treeDepth = this.flat(root, arr); // convert tree to list
+    const treeDepth = CollapsibleList.flat(root, arr); // convert tree to list
     buildTable(this.$table, arr, treeDepth+1);
   }
 
@@ -79,22 +70,22 @@ export default class CollapsibleList {
     for(let i = 0; i < treeColumnCount; i++) {
       if(i === node.level) {
         const text = node.level === 0 ? 'root' : node.toString();
-         htmlString = htmlString.concat(`<td class="clickable">${text}</td>`);
+         htmlString = `${htmlString}<td class="clickable">${text}</td>`;
          continue;
       }
-      htmlString = htmlString.concat(`<td></td>`);
+      htmlString = `${htmlString}<td></td>`;
     }
     return htmlString;
   }
 
-  private flat(root: INode, arr: INode[]) {
+  private static flat(root: INode, result: INode[]) {
     console.assert(root);
     let depth = 0;
-    visit<IRow>(root, (inner: InnerNode) => {
-      arr.push(inner);
+    visit<any>(root, (inner: InnerNode) => {
+      result.push(inner);
       return true;
     }, (n) => {
-      arr.push(n);
+      result.push(n);
       if(n.level > depth) {
         depth = n.level;
       }
