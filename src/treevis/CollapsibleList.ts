@@ -33,7 +33,7 @@ export default class CollapsibleList {
 
       // update phase
       $tr
-        .html((d) => `${'<td></td>'.repeat(d.level)}<td class="clickable">${d.level == 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`)
+        .html((d) => `${'<td></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`)
         .select('.clickable')
         .on('click', function(this: HTMLElement, d: INode) { // hides all child nodes
           if(d.type === 'leaf' || !this.parentNode) { //should never happen
