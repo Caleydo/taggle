@@ -8,6 +8,7 @@ import {EAggregationType} from '../tree';
 export default class CollapsibleList {
   private readonly $table: d3.Selection<any>;
   private readonly renderers = ['default', 'mean'];
+
   constructor(root: HTMLElement, private readonly rebuild: (name?: string|null, additional?: boolean)=>void,) {
     this.$table = d3.select(root).append('div').classed('treevis', true).append('table');
     this.$table.html(`<thead>
