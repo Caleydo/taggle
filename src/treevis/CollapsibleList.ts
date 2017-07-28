@@ -23,7 +23,7 @@ export default class CollapsibleList {
 
     const buildTable = ($table: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
       console.assert($table && arr && treeColumnCount > -1);
-      $table.select('td').attr('colspan', treeColumnCount);
+      $table.select('thead tr td').attr('colspan', treeColumnCount);
       const $tr = $table.select('tbody').selectAll('tr')
           .data(arr);
 
@@ -33,9 +33,7 @@ export default class CollapsibleList {
 
       // update phase
       $tr
-        .html((d) => {
-            return this.buildRow(treeColumnCount, d);
-          })
+        .html((d) => `${'<td></td>'.repeat(d.level)}<td class="clickable">${d.level == 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`)
         .select('.clickable')
         .on('click', function(this: HTMLElement, d: INode) { // hides all child nodes
           if(d.type === 'leaf' || !this.parentNode) { //should never happen
