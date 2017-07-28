@@ -12,15 +12,18 @@ export default class CollapsibleList {
   constructor(root: HTMLElement, private renderer: TestRenderer) {
     this.$table = d3.select(root).append('div').classed('treevis', true).append('table');
     this.$table.html(`<thead>
-                <tr><td colspan="0">Visual Tree</td></tr>
-              </thead>
-              <tbody></tbody>`);
+                <tr>
+                  <th colspan="0">Visual Tree</th>
+                  <th>Aggregated</th>
+                </tr>
+                </thead>
+                <tbody></tbody>`);
   }
 
   render(root: InnerNode) {
     const buildTable = ($table: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
       console.assert($table && arr && treeColumnCount > -1);
-      $table.select('thead tr td').attr('colspan', treeColumnCount);
+      $table.select('thead tr th').attr('colspan', treeColumnCount);
       const $tr = $table.select('tbody').selectAll('tr')
           .data(arr);
 
