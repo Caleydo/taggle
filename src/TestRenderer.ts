@@ -53,8 +53,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       }
     }));
 
+    this.treeVis = new CollapsibleList(this.root.parentElement!, rebuilder);
     this.rebuildData();
-    this.treeVis = new CollapsibleList(this.root.parentElement!);
   }
 
   private static createTree(leafHeight: number, groupHeights: [{ renderer: string, height: number }]): InnerNode {

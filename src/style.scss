@@ -1,6 +1,7 @@
 $engine_assets: "~lineupengine/src/assets";
 
 @import "~lineupengine/src/style";
+@import "treevis";
 
 .lineup-engine {
   height: 90vh;
@@ -76,22 +77,3 @@ $engine_assets: "~lineupengine/src/assets";
     }
   }
 }
-
-.treevis {
-  .hidden {
-    display: none;
-  }
-
-  .leaf {
-    color: red;
-  }
-
-  .inner {
-    color: black;
-  }
-
-  .collapsed {
-    color: blue;
-  }
-}
-
