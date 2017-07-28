@@ -60,19 +60,6 @@ export default class CollapsibleList {
     buildTable(this.$table, arr, treeDepth+1);
   }
 
-  private buildRow(treeColumnCount: number, node: INode) {
-    let htmlString = '';
-    for(let i = 0; i < treeColumnCount; i++) {
-      if(i === node.level) {
-        const text = node.level === 0 ? 'root' : node.toString();
-         htmlString = `${htmlString}<td class="clickable">${text}</td>`;
-         continue;
-      }
-      htmlString = `${htmlString}<td></td>`;
-    }
-    return htmlString;
-  }
-
   private static flat(root: INode, result: INode[]) {
     console.assert(root);
     let depth = 0;
