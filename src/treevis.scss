@@ -1,0 +1,48 @@
+.treevis {
+  .hidden {
+    display: none;
+  }
+
+  .leaf {
+    color: red;
+  }
+
+  .inner {
+    color: black;
+  }
+
+  .collapsed {
+    color: blue;
+  }
+
+  tr:nth-child(even) {
+    background-color: #ddd;
+  }
+
+  table {
+    width: 500px;
+    border-style: solid;
+    border-width: thin;
+    border-collapse: collapse;
+  }
+
+  caption {
+    font-size: 22px;
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 10px;
+  }
+
+  th {
+    font-size: 20px;
+    font-weight: bold;
+    height: 40px;
+    padding: 10px;
+    border-bottom-style: solid;
+    border-width: thin;
+  }
+
+  table tbody tr {
+    text-align: center;
+  }
+}

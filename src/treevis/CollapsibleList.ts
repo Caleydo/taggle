@@ -4,12 +4,11 @@
 import * as d3 from 'd3';
 import {InnerNode, INode, visit} from '../tree';
 import {EAggregationType} from '../tree';
-import TestRenderer from '../TestRenderer';
 
 export default class CollapsibleList {
   private readonly $table: d3.Selection<any>;
 
-  constructor(root: HTMLElement, private renderer: TestRenderer) {
+  constructor(root: HTMLElement, private readonly rebuild: (name?: string|null, additional?: boolean)=>void,) {
     this.$table = d3.select(root).append('div').classed('treevis', true).append('table');
     this.$table.html(`<thead>
                 <tr>
@@ -69,7 +68,7 @@ export default class CollapsibleList {
     return depth;
   }
 
-  private addTreeClickhandler($tr: d3.Selection<any>) {
+  private addTreeClickhandler($tr: d3.Selection<INode>) {
     const invertCollapsedState = (node: d3.Selection<any>) => {
       const state = node.classed('collapsed');
       node.classed('collapsed', !state);
@@ -91,12 +90,12 @@ export default class CollapsibleList {
     });
   }
 
-  private addAggregatedClickhandler($tr: d3.Selection<any>) {
+  private addAggregatedClickhandler($tr: d3.Selection<INode>) {
     const that = this;
     $tr.select('.aggregated')
     .on('click', function(this: HTMLInputElement, d: INode) {
       (<InnerNode>d).aggregation = this.checked ? EAggregationType.AGGREGATED : EAggregationType.UNIFORM;
-      that.renderer.updateRenderer();
+      that.rebuild();
     });
   }
 }

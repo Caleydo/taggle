@@ -53,12 +53,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       }
     }));
 
+    this.treeVis = new CollapsibleList(this.root.parentElement!, rebuilder);
     this.rebuildData();
-  }
-
-  updateRenderer() {
-    this.rebuildData();
-    this.recreate();
   }
 
   private static createTree(leafHeight: number, groupHeights: [{ renderer: string, height: number }]): InnerNode {
@@ -92,7 +88,6 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   }
 
   run() {
-    this.treeVis = new CollapsibleList(this.root.parentElement!, this);
     this.renderTreeVis();
     //wait till layouted
     setTimeout(this.init.bind(this), 100);
