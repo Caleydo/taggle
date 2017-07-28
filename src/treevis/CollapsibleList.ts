@@ -29,13 +29,14 @@ export default class CollapsibleList {
 
       // enter phase
       $tr.enter().append('tr')
-        .classed('collapsed', false)
-        .html((d) => {
-          return this.buildRow(treeColumnCount, d);
-        });
+        .classed('collapsed', false);
 
       // update phase
-      $tr.select('.clickable')
+      $tr
+        .html((d) => {
+            return this.buildRow(treeColumnCount, d);
+          })
+        .select('.clickable')
         .on('click', function(this: HTMLElement, d: INode) { // hides all child nodes
           if(d.type === 'leaf' || !this.parentNode) { //should never happen
             return;
