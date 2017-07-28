@@ -2,67 +2,76 @@
  * Created by Martin on 19.07.2017.
  */
 import * as d3 from 'd3';
-import {InnerNode, INode, LeafNode} from '../tree';
+import {InnerNode, INode, visit} from '../tree';
 
 export default class CollapsibleList {
-  private readonly $node: d3.Selection<any>;
+  private readonly $table: d3.Selection<any>;
 
-  constructor(root: HTMLElement, private readonly maxLeafVisCount = 20) {
-    this.$node = d3.select(root).append('div').classed('treevis', true);
+  constructor(root: HTMLElement) {
+    this.$table = d3.select(root).append('div').classed('treevis', true).append('table');
+    this.$table.html(`<thead>
+                <tr><td colspan="0">Visual Tree</td></tr>
+              </thead>
+              <tbody></tbody>`);
   }
 
   render(root: InnerNode) {
-    const chooseItemData = (node: INode) => {
-      if(node.type === 'inner') {
-
-        // separate leafs and inner nodes
-        // if leaf count is > max leaf count then we just want to show a single node
-        const numLeaves = node.children.reduce((a, n) => a + (n.type === 'leaf' ? 1 : 0), 0);
-        const inners = node.children.filter((x) => x.type === 'inner');
-
-        if(numLeaves > this.maxLeafVisCount) {
-          inners.unshift(new LeafNode('${numLeaves} items'));
-          return inners;
-        }
-
-        return node.children;
-      }
-      return [];
+    const invertCollapsedState = (node: d3.Selection<any>) => {
+      const state = node.classed('collapsed');
+      node.classed('collapsed', !state);
     };
 
-    const renderLevel = ($node: d3.Selection<INode>, node: INode) => {
-      $node.classed(node.type, true);
-      const $li = $node.append('ul').classed('hidden', true).selectAll('li').data(chooseItemData(node));
-      $li.enter().append('li')
-        .on('click', function(this: HTMLElement) {
-          const $this = d3.select(this);
-          const hiddenVal = $this.select('ul').classed('hidden');
-          $this.select('ul').classed('hidden', !hiddenVal);
-          (<MouseEvent>d3.event).stopPropagation();
-        });
-      $li.text((d) => d.type === 'inner' ? this.buildInnerNodeLabel(d) : this.buildLeafNodeLabel(d));
-      $li.each(function(this: HTMLElement, d: InnerNode) {
-        renderLevel(d3.select(this), d);
+    const buildTable = ($table: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
+      console.assert($table && arr && treeColumnCount > -1);
+      $table.select('thead tr td').attr('colspan', treeColumnCount);
+      const $tr = $table.select('tbody').selectAll('tr')
+          .data(arr);
+
+      // enter phase
+      $tr.enter().append('tr')
+        .classed('collapsed', false);
+
+      // update phase
+      $tr
+        .html((d) => `${'<td></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`)
+        .select('.clickable')
+        .on('click', function(this: HTMLElement, d: INode) { // hides all child nodes
+          if(d.type === 'leaf' || !this.parentNode) { //should never happen
+            return;
+          }
+          const $firstItem = d3.select(this.parentNode);
+          invertCollapsedState($firstItem);
+          const collapse = $firstItem.classed('collapsed');
+
+          // filter all children and subchildren from current node
+          $tr.filter((s) => s.parents.includes(<InnerNode>d))
+            .classed('hidden', collapse)
+            .classed('collapsed', false);
       });
-      $li.exit().remove();
+
+      // exit phase
+      $tr.exit().remove();
     };
 
-    // create new dummy root
     console.assert(root.parent === null);
 
-    const newRoot = new InnerNode('dummy node');
-    newRoot.children.push(root);
-    renderLevel(this.$node, newRoot);
-    this.$node.select('ul').classed('hidden', false);
+    const arr: INode[] = [];
+    const treeDepth = CollapsibleList.flat(root, arr); // convert tree to list
+    buildTable(this.$table, arr, treeDepth+1);
   }
 
-  private buildLeafNodeLabel(node: LeafNode<any>) {
-    return `${node.item} (Current Height: ${node.height} | Renderer: ${node.renderer} )`;
-  }
-
-  private buildInnerNodeLabel(node: InnerNode) {
-    return `${node.name} (Child Count: ${node.children.length} | Current Height: ${node.height} | Aggr. Height: ${node.aggregatedHeight} | Renderer: ${node.renderer} )`;
+  private static flat(root: INode, result: INode[]) {
+    console.assert(root);
+    let depth = 0;
+    visit<any>(root, (inner: InnerNode) => {
+      result.push(inner);
+      return true;
+    }, (n) => {
+      result.push(n);
+      if(n.level > depth) {
+        depth = n.level;
+      }
+    });
+    return depth;
   }
 }
-
-
