@@ -7,6 +7,7 @@ import {EAggregationType} from '../tree';
 
 export default class CollapsibleList {
   private readonly $table: d3.Selection<any>;
+  private readonly renderers = ['default', 'mean'];
 
   constructor(root: HTMLElement, private readonly rebuild: (name?: string|null, additional?: boolean)=>void,) {
     this.$table = d3.select(root).append('div').classed('treevis', true).append('table');
@@ -14,6 +15,9 @@ export default class CollapsibleList {
                 <tr>
                   <th colspan="0">Visual Tree</th>
                   <th>Aggregated</th>
+                  <th>Used Renderer</th>
+                  <th>Height (px)</th>
+                  <th>DOI (0...1)</th>
                 </tr>
                 </thead>
                 <tbody></tbody>`);
@@ -33,8 +37,9 @@ export default class CollapsibleList {
       // update phase
       const $trComplete = $tr.html((d) => this.buildRow(d, treeColumnCount));
       this.addTreeClickhandler($trComplete);
-      this.addAggregatedClickhandler($trComplete);
-
+      this.updateAggregatedColumn($trComplete);
+      this.updateRendererColumn($trComplete);
+      this.updateHeightColumn($trComplete);
 
       // exit phase
       $tr.exit().remove();
@@ -49,7 +54,21 @@ export default class CollapsibleList {
 
   private buildRow(d: INode, treeColumnCount: number) {
     let resultRow = `${'<td></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
+
+    // aggregated row
     resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''} /></td>` : '<td/>';
+
+    // used renderer row
+    resultRow += `<td><select class="renderer"></select></td>`;
+
+    // height row
+    resultRow += `<td><input class="height" type="number" value="${d.height}" size="5"
+                  ${d.type === 'leaf' || (d.type === 'inner' && (<InnerNode>d).aggregation !== EAggregationType.AGGREGATED) ? '' : 'disabled'}>
+                  </td>`;
+
+    // DOI row
+    resultRow += `<td><input type="number" step="0.01" value="${d.doi}" /></td>`;
+
     return resultRow;
   }
 
@@ -90,12 +109,33 @@ export default class CollapsibleList {
     });
   }
 
-  private addAggregatedClickhandler($tr: d3.Selection<INode>) {
+  private updateAggregatedColumn($tr: d3.Selection<INode>) {
     const that = this;
     $tr.select('.aggregated')
     .on('click', function(this: HTMLInputElement, d: INode) {
       (<InnerNode>d).aggregation = this.checked ? EAggregationType.AGGREGATED : EAggregationType.UNIFORM;
       that.rebuild();
+    });
+  }
+
+  private updateRendererColumn($tr: d3.Selection<INode>) {
+    $tr.select('.renderer').html((d) => `${this.renderers.map((r) => `<option ${r === d.renderer ? 'selected' : ''}>${r}</option>`).join('')}`);
+    const that = this;
+    $tr.select('.renderer')
+    .on('change', function(this: HTMLSelectElement, d: INode) {
+      d.renderer = this.value;
+      that.rebuild();
+    });
+  }
+
+  private updateHeightColumn($tr: d3.Selection<INode>) {
+    const that = this;
+    $tr.select('.height')
+    .on('keyup', function(this: HTMLSelectElement, d: INode) {
+      if((<KeyboardEvent>d3.event).key === 'Enter') {
+        d.height = parseInt(this.value, 10);
+        that.rebuild();
+      }
     });
   }
 }
