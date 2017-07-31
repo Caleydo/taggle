@@ -39,6 +39,7 @@ export default class CollapsibleList {
       this.addTreeClickhandler($trComplete);
       this.updateAggregatedColumn($trComplete);
       this.updateRendererColumn($trComplete);
+      this.updateHeightColumn($trComplete);
 
       // exit phase
       $tr.exit().remove();
@@ -53,8 +54,21 @@ export default class CollapsibleList {
 
   private buildRow(d: INode, treeColumnCount: number) {
     let resultRow = `${'<td></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
+
+    // aggregated row
     resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''} /></td>` : '<td/>';
+
+    // used renderer row
     resultRow += `<td><select class="renderer"></select></td>`;
+
+    // height row
+    resultRow += `<td><input class="height" type="number" value="${d.height}"
+                  ${d.type === 'leaf' || (d.type === 'inner' && (<InnerNode>d).aggregation !== EAggregationType.AGGREGATED) ? '' : 'disabled'}>
+                  </td>`;
+
+    // DOI row
+    resultRow += `<td><input type="number" step="0.01" /></td>`;
+
     return resultRow;
   }
 
@@ -111,6 +125,17 @@ export default class CollapsibleList {
     .on('change', function(this: HTMLSelectElement, d: INode) {
       d.renderer = this.value;
       that.rebuild();
+    });
+  }
+
+  private updateHeightColumn($tr: d3.Selection<INode>) {
+    const that = this;
+    $tr.select('.height')
+    .on('keyup', function(this: HTMLSelectElement, d: INode) {
+      if((<KeyboardEvent>d3.event).key === 'Enter') {
+        d.height = parseInt(this.value, 10);
+        that.rebuild();
+      }
     });
   }
 }
