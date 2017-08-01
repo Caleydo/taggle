@@ -15,7 +15,7 @@ import {
 } from './column';
 import {data, columns, IRow} from './data';
 import CollapsibleList from './treevis/CollapsibleList';
-import FlyoutBar from './controls/FlyoutBar'
+import FlyoutBar from './controls/FlyoutBar';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
