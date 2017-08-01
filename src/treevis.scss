@@ -1,4 +1,35 @@
+div.flyout {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 2vw;
+  height: 100%;
+  background-color: #ddd;
+}
+
+div h1 {
+  transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -webkit-transform: rotate(-90deg);
+  position: relative;
+  bottom: 0px;
+}
+
+div.treevis {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+div.header {
+  background-color: white;
+  border: thin;
+  border-style: solid;
+  border-collapse: collapse;
+}
+
 .treevis {
+  display: none;
   .hidden {
     display: none;
   }
@@ -17,6 +48,10 @@
 
   tr:nth-child(even) {
     background-color: #ddd;
+  }
+
+  tr:nth-child(odd) {
+    background-color: white;
   }
 
   table {

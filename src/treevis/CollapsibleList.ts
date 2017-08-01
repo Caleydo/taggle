@@ -10,7 +10,13 @@ export default class CollapsibleList {
   private readonly renderers = ['default', 'mean'];
 
   constructor(root: HTMLElement, private readonly rebuild: (name?: string|null, additional?: boolean)=>void,) {
-    this.$table = d3.select(root).append('div').classed('treevis', true).append('table');
+    const $parentDiv = d3.select(root).append('div').classed('treevis', true);
+    $parentDiv.append('div').classed('header', true).append('i').classed('fa fa-window-close', true).on('click', (x) => {
+      d3.select('div.treevis').style('display', 'none');
+      d3.select('div.flyout').style('display', 'block');
+    });
+    this.$table = $parentDiv.append('table');
+
     this.$table.html(`<thead>
                 <tr>
                   <th colspan="0">Visual Tree</th>

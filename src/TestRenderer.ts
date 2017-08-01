@@ -15,7 +15,7 @@ import {
 } from './column';
 import {data, columns, IRow} from './data';
 import CollapsibleList from './treevis/CollapsibleList';
-
+import FlyoutBar from './controls/FlyoutBar'
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
@@ -54,6 +54,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     }));
 
     this.treeVis = new CollapsibleList(this.root.parentElement!, rebuilder);
+    new FlyoutBar(this.root.parentElement!);
     this.rebuildData();
   }
 
