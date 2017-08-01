@@ -16,7 +16,11 @@ export default class CollapsibleList {
   }
 
   protected static createHeader($parentDiv: d3.Selection<any>) {
-    $parentDiv.append('div').classed('header', true).append('i').classed('fa fa-window-close', true).on('click', () => {
+    const $div = $parentDiv.append('div').classed('header', true);
+    $div.append('button').text('Settings').on('click', () => {
+      console.log('clicked');
+    });
+    $div.append('i').classed('fa fa-window-close', true).on('click', () => {
       d3.select('div.treevis').style('display', 'none');
       d3.select('div.flyout').style('display', 'block');
     });
