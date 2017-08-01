@@ -11,7 +11,7 @@ export default class CollapsibleList {
 
   constructor(root: HTMLElement, private readonly rebuild: (name?: string|null, additional?: boolean)=>void,) {
     const $parentDiv = d3.select(root).append('div').classed('treevis', true);
-    $parentDiv.append('div').classed('header', true).append('i').classed('fa fa-window-close', true).on('click', (x) => {
+    $parentDiv.append('div').classed('header', true).append('i').classed('fa fa-window-close', true).on('click', () => {
       d3.select('div.treevis').style('display', 'none');
       d3.select('div.flyout').style('display', 'block');
     });

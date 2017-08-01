@@ -5,8 +5,7 @@ import * as d3 from 'd3';
 export default class FlyoutBar {
   private readonly $div: d3.Selection<any>;
   constructor(root: HTMLElement) {
-    this.$div = d3.select(root).append('div').classed('flyout', true).append('h1').text('spodfjisdf');
-    this.$div.on('click', this.handleClick);
+    this.$div = d3.select(root).append('div').classed('flyout', true).on('click', this.handleClick).append('h1').text('Configure Tree');
   }
 
   handleClick() {

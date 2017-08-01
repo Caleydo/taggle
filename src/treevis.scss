@@ -1,35 +1,30 @@
-div.flyout {
+.flyout {
   position: fixed;
   top: 0;
   right: 0;
   width: 2vw;
-  height: 100%;
+  height: 90vh;
   background-color: #ddd;
-}
 
-div h1 {
-  transform: rotate(-90deg);
-  -ms-transform: rotate(-90deg);
-  -webkit-transform: rotate(-90deg);
-  position: relative;
-  bottom: 0px;
+  h1 {
+    transform: rotate(90deg);
+    position: relative;
+    bottom: 0;
+    white-space: nowrap;
+  }
 }
 
 div.treevis {
   position: absolute;
   top: 0;
   right: 0;
-}
-
-div.header {
-  background-color: white;
-  border: thin;
-  border-style: solid;
-  border-collapse: collapse;
+  height: 90vh;
+  overflow: scroll;
 }
 
 .treevis {
   display: none;
+
   .hidden {
     display: none;
   }
@@ -83,5 +78,13 @@ div.header {
 
   input {
     width: 60px;
+  }
+
+  .header {
+    background-color: white;
+    border: thin;
+    border-style: solid;
+    border-collapse: collapse;
+    text-align: right;
   }
 }
