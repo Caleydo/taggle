@@ -1,3 +1,41 @@
+.flyout {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 2vw;
+  height: 90vh;
+  background-color: #ddd;
+
+  h1 {
+    transform: rotate(90deg);
+    position: relative;
+    bottom: 0;
+    white-space: nowrap;
+  }
+
+  .content {
+    background-color: white;
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: thin;
+    border-style: solid;
+    border-collapse: collapse;
+
+    .header {
+      text-align: right;
+    }
+  }
+}
+
+div.treevis {
+  top: 20px;
+  right: 0;
+  height: 90vh;
+  overflow: auto;
+}
+
 .treevis {
   .hidden {
     display: none;
@@ -17,6 +55,10 @@
 
   tr:nth-child(even) {
     background-color: #ddd;
+  }
+
+  tr:nth-child(odd) {
+    background-color: white;
   }
 
   table {

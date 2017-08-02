@@ -6,11 +6,21 @@ import {InnerNode, INode, visit} from '../tree';
 import {EAggregationType} from '../tree';
 
 export default class CollapsibleList {
-  private readonly $table: d3.Selection<any>;
+  private readonly $parentDiv: d3.Selection<any>;
+  private $table: d3.Selection<any>;
   private readonly renderers = ['default', 'mean'];
 
-  constructor(root: HTMLElement, private readonly rebuild: (name?: string|null, additional?: boolean)=>void,) {
-    this.$table = d3.select(root).append('div').classed('treevis', true).append('table');
+  constructor($root: d3.Selection<any>, private readonly rebuild: (name?: string|null, additional?: boolean)=>void) {
+    this.$parentDiv = $root.classed('treevis', true);
+    this.createTable();
+  }
+
+  get node() {
+    return this.$parentDiv;
+  }
+
+  protected createTable() {
+    this.$table = this.$parentDiv.append('table');
     this.$table.html(`<thead>
                 <tr>
                   <th colspan="0">Visual Tree</th>
