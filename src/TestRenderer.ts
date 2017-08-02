@@ -53,8 +53,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       }
     }));
 
-    this.treeVis = new CollapsibleList(this.root.parentElement!, rebuilder);
-    new FlyoutBar(this.root.parentElement!);
+    const fl = new FlyoutBar(this.root.parentElement!);
+    this.treeVis = new CollapsibleList(fl.body, rebuilder);
     this.rebuildData();
   }
 
