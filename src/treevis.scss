@@ -41,12 +41,8 @@ div.treevis {
     display: none;
   }
 
-  .leaf {
-    color: red;
-  }
-
-  .inner {
-    color: black;
+  .clickable {
+    cursor: pointer;
   }
 
   .collapsed {
