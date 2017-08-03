@@ -75,7 +75,13 @@ export default class CollapsibleList {
   private buildRow(d: INode, treeColumnCount: number) {
     let resultRow = `${'<td></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
 
-    resultRow += d.type === 'inner' ? `<td><i class="fa fa-cog" aria-hidden="true"></i></td>` : '<td/>';
+    resultRow += d.type === 'inner' ? `<td>
+                                        <div class="popup">
+                                          <i class="fa fa-cog" aria-hidden="true"></i>
+                                          <div class="popuptext" id="myPopup"></div>
+                                        </div>
+                                       </td>`
+                                    : '<td/>';
 
     // aggregated row
     resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''} /></td>` : '<td/>';
@@ -111,8 +117,9 @@ export default class CollapsibleList {
 
   private addPropertiesClickhandler($tr: d3.Selection<INode>) {
     $tr.select('.fa.fa-cog')
-    .on('click', () => {
-
+    .on('click', function(this: HTMLElement) {
+      const $div = d3.select(this.parentElement!).select('div');
+      $div.classed('show', !$div.classed('show'));
     });
   }
 
