@@ -9,6 +9,7 @@ export default class CollapsibleList {
   private readonly $parentDiv: d3.Selection<any>;
   private $table: d3.Selection<any>;
   private readonly renderers = ['default', 'mean'];
+  private visibleLeafCount = 7000;
 
   constructor($root: d3.Selection<any>, private readonly rebuild: (name?: string|null, additional?: boolean)=>void) {
     this.$parentDiv = $root.classed('treevis', true);
@@ -38,7 +39,14 @@ export default class CollapsibleList {
       console.assert($table && arr && treeColumnCount > -1);
       $table.select('thead tr th').attr('colspan', treeColumnCount);
       const $tr = $table.select('tbody').selectAll('tr')
-          .data(arr);
+          .data(arr.filter((d) => {
+              // only passt the first visibleLeafCount leaf nodes to the data array
+              if(d.type === 'inner' || d.parent === null) {
+                return true;
+              }
+              const val = d.parent.children.slice(0, d.index + 1).reduce((a, n) => a + (n.type === 'leaf' ? 1 : 0), 0);
+              return val <= this.visibleLeafCount;
+            }));
 
       // enter phase
       $tr.enter().append('tr')
