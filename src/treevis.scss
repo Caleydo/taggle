@@ -12,19 +12,31 @@
     bottom: 0;
     white-space: nowrap;
   }
+
+  .content {
+    background-color: white;
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: thin;
+    border-style: solid;
+    border-collapse: collapse;
+
+    .header {
+      text-align: right;
+    }
+  }
 }
 
 div.treevis {
-  position: absolute;
-  top: 0;
+  top: 20px;
   right: 0;
   height: 90vh;
-  overflow: scroll;
+  overflow: auto;
 }
 
 .treevis {
-  display: none;
-
   .hidden {
     display: none;
   }
@@ -78,13 +90,5 @@ div.treevis {
 
   input {
     width: 60px;
-  }
-
-  .header {
-    background-color: white;
-    border: thin;
-    border-style: solid;
-    border-collapse: collapse;
-    text-align: right;
   }
 }
