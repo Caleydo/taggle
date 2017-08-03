@@ -75,13 +75,20 @@ export default class CollapsibleList {
   private buildRow(d: INode, treeColumnCount: number) {
     let resultRow = `${'<td></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
 
-    resultRow += d.type === 'inner' ? `<td>
-                                        <div class="popup">
-                                          <i class="fa fa-cog" aria-hidden="true"></i>
-                                          <div class="popuptext" id="myPopup"></div>
-                                        </div>
-                                       </td>`
-                                    : '<td/>';
+    if(d.type === 'inner') {
+      const leafCount = d.children.reduce((a, n) => a + (n.type === 'leaf' ? 1 : 0), 0);
+      resultRow +=  `<td>
+                        <div class="popup">
+                          <i class="fa fa-cog" aria-hidden="true"></i>
+                          <div class="popupcontent">
+                            <input type="range" value="${this.visibleLeafCount}" min="0" max="${leafCount}" step="1">
+                          </div>
+                         </div>
+                      </td>`;
+    } else {
+      resultRow += '<td/>';
+    }
+
 
     // aggregated row
     resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''} /></td>` : '<td/>';
