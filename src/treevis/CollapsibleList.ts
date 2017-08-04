@@ -24,7 +24,7 @@ export default class CollapsibleList {
     this.$table.html(`<thead>
                 <tr>
                   <th colspan="0">Visual Tree</th>
-                  <th>Aggregated</th>
+                  <th>Aggr.</th>
                   <th>Used Renderer</th>
                   <th>Height (px)</th>
                   <th>DOI (0...1)</th>
