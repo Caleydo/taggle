@@ -72,7 +72,7 @@ export default class InnerNode extends ANode {
         this.aggregatedHeight = value;
         break;
       case EAggregationType.UNIFORM:
-        const hi = this.children.length / value;
+        const hi = value / this.children.length;
         this.children.forEach((n) => n.height = hi);
         break;
       case EAggregationType.NON_UNIFORM:
