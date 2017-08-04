@@ -5,6 +5,7 @@ export default class LeafNode<T> extends ANode {
   height = 20;
 
   doi: number = 0.5;
+  static readonly renderers = ['default', 'mean'];
 
   constructor(public readonly item: T) {
     super();

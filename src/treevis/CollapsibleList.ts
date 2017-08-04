@@ -2,13 +2,12 @@
  * Created by Martin on 19.07.2017.
  */
 import * as d3 from 'd3';
-import {InnerNode, INode, visit} from '../tree';
+import {InnerNode, INode, LeafNode, visit} from '../tree';
 import {EAggregationType} from '../tree';
 
 export default class CollapsibleList {
   private readonly $parentDiv: d3.Selection<any>;
   private $table: d3.Selection<any>;
-  private readonly renderers = ['default', 'mean'];
 
   constructor($root: d3.Selection<any>, private readonly rebuild: (name?: string|null, additional?: boolean)=>void) {
     this.$parentDiv = $root.classed('treevis', true);
@@ -127,7 +126,12 @@ export default class CollapsibleList {
   }
 
   private updateRendererColumn($tr: d3.Selection<INode>) {
-    $tr.select('.renderer').html((d) => `${this.renderers.map((r) => `<option ${r === d.renderer ? 'selected' : ''}>${this.mapRendererString(r)}</option>`).join('')}`);
+    $tr.select('.renderer').html((d) =>
+      (d.type === 'inner' ? InnerNode : LeafNode)
+        .renderers
+        .map((r) => `<option ${r === d.renderer ? 'selected' : ''}>${this.mapRendererString(r)}</option>`)
+        .join('')
+    );
     const that = this;
     $tr.select('.renderer')
     .on('change', function(this: HTMLSelectElement, d: INode) {

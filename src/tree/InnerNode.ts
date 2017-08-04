@@ -15,6 +15,7 @@ export default class InnerNode extends ANode {
   aggregation: EAggregationType = EAggregationType.UNIFORM;
   aggregatedHeight = 100;
   aggregatedDoi = 0.5;
+  static readonly renderers = ['default', 'mean'];
 
   aggregate: any;
 
