@@ -129,11 +129,11 @@ export default class CollapsibleList {
   }
 
   private updateRendererColumn($tr: d3.Selection<INode>) {
-    $tr.select('.renderer').html((d) => `${this.renderers.map((r) => `<option ${r === d.renderer ? 'selected' : ''}>${r}</option>`).join('')}`);
+    $tr.select('.renderer').html((d) => `${this.renderers.map((r) => `<option ${r === d.renderer ? 'selected' : ''}>${this.mapRendererString(r)}</option>`).join('')}`);
     const that = this;
     $tr.select('.renderer')
     .on('change', function(this: HTMLSelectElement, d: INode) {
-      d.renderer = this.value;
+      d.renderer = that.mapRendererString(this.value);
       that.rebuild();
     });
   }
@@ -147,5 +147,15 @@ export default class CollapsibleList {
         that.rebuild();
       }
     });
+  }
+
+  private mapRendererString(rendererName: string) {
+    switch(rendererName) {
+      case 'default': return 'histogram';
+      case 'histogram': return 'default';
+      case 'mean-bar' : return 'mean';
+      case 'mean': return 'mean-bar';
+      default: return 'unknown';
+    }
   }
 }
