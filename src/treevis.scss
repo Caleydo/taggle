@@ -9,7 +9,7 @@
   }
 
   &.in {
-    width: 30vw;
+    width: auto;
 
     h1 {
       display: none;
@@ -61,6 +61,7 @@
   input,
   select {
     min-width: 5em;
+    max-width: 9em;
     width: 100%;
   }
 
@@ -117,6 +118,12 @@
 
       &:nth-child(odd) {
         background-color: white;
+      }
+
+      td.clickable {
+        max-width: 12em;
+        overflow-y: hidden;
+        text-overflow: ellipsis;
       }
 
       &[data-type=inner] {
