@@ -20,14 +20,14 @@ export default class CategoricalColumn extends AColumn {
 
   updateSingle(node: HTMLElement, row: LeafNode<IRow>) {
     const v = String(row.item[this.name]);
-    node.textContent = row.renderer === 'default' ? v : '';
+    node.textContent = row.visType === 'default' ? v : '';
     node.style.backgroundColor = (this.categories.find((c) => c.name === v) || { color: 'magenta'}).color;
     return node;
   }
 
   createGroup(document: Document, row: InnerNode) {
     const n = this.common(document);
-    if (row.renderer === 'default') {
+    if (row.visType === 'default') {
       n.innerHTML = this.categories.map((c) => `<div class="bin" style="background-color: ${c.color}"></div>`).join('');
     } else {
       n.innerHTML = ``;
@@ -38,7 +38,7 @@ export default class CategoricalColumn extends AColumn {
   updateGroup(node: HTMLElement, row: InnerNode) {
     const hist = <number[]>row.aggregate[this.name];
     const max = Math.max(...hist);
-    if (row.renderer === 'default') {
+    if (row.visType === 'default') {
       hist.forEach((bin, i) => {
         const binNode = <HTMLElement>node.children[i];
         binNode.style.height = `${Math.round(bin * 100 / max)}%`;

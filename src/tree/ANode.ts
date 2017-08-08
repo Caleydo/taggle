@@ -4,7 +4,7 @@ import {INode, InnerNode} from './';
 export abstract class ANode {
   parent: InnerNode | null = null;
 
-  renderer = 'default';
+  visType = 'default';
   selected: boolean = false;
 
   get isFirstChild() {

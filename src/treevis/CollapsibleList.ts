@@ -24,7 +24,7 @@ export default class CollapsibleList {
                 <tr>
                   <th colspan="0">Visual Tree</th>
                   <th>Aggr.</th>
-                  <th>Used Renderer</th>
+                  <th>Vis Type</th>
                   <th>Height (px)</th>
                   <th>DOI (0...1)</th>
                 </tr>
@@ -130,14 +130,14 @@ export default class CollapsibleList {
   private updateRendererColumn($tr: d3.Selection<INode>) {
     $tr.select('.renderer').html((d) =>
       (d.type === 'inner' ? InnerNode : LeafNode)
-        .renderers
-        .map((r) => `<option ${r === d.renderer ? 'selected' : ''}>${this.mapRendererString(r)}</option>`)
+        .visTypes
+        .map((r) => `<option ${r === d.visType ? 'selected' : ''}>${this.mapVisTypeName(r, d.type)}</option>`)
         .join('')
     );
     const that = this;
     $tr.select('.renderer')
     .on('change', function(this: HTMLSelectElement, d: INode) {
-      d.renderer = that.mapRendererString(this.value);
+      d.visType = that.mapVisTypeName(this.value, d.type);
       that.rebuild();
     });
   }
@@ -153,13 +153,13 @@ export default class CollapsibleList {
     });
   }
 
-  private mapRendererString(rendererName: string) {
-    switch(rendererName) {
-      case 'default': return 'histogram';
+  private mapVisTypeName(visType: string, nodeType: 'inner'|'leaf') {
+    switch(visType) {
+      case 'default': return nodeType === 'inner' ? 'histogram' : 'default';
       case 'histogram': return 'default';
       case 'mean-bar' : return 'mean';
       case 'mean': return 'mean-bar';
-      default: return rendererName;
+      default: return visType;
     }
   }
 }

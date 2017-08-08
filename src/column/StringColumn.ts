@@ -13,7 +13,7 @@ export default class StringColumn extends AColumn {
   }
 
   updateSingle(node: HTMLElement, row: LeafNode<IRow>) {
-    if (row.renderer === 'default') {
+    if (row.visType === 'default') {
       node.textContent = <string>row.item[this.column.name];
     } else {
       node.textContent = '';

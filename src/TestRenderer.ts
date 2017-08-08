@@ -206,8 +206,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     const row = this.getRow(index);
     const cell = row.type === 'leaf' ? column.createSingle(document, <LeafNode<IRow>>row, index) : column.createGroup(document, <InnerNode>row, index);
     cell.dataset.type = row.type;
-    if (row.renderer !== 'default') {
-      cell.dataset.renderer = row.renderer;
+    if (row.visType !== 'default') {
+      cell.dataset.visType = row.visType;
     }
     return cell;
   }
@@ -217,8 +217,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     const document = node.ownerDocument;
 
     const was = node.dataset.type;
-    const renderer = node.dataset.renderer || 'default';
-    const changed = was !== row.type || renderer !== row.renderer;
+    const visType = node.dataset.visType || 'default';
+    const changed = was !== row.type || visType !== row.visType;
 
     if (changed) {
       return this.createCell(document, index, column);

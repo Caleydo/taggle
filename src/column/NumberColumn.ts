@@ -47,7 +47,7 @@ export default class NumberColumn extends AColumn {
     node.dataset.group = row.parent!.name;
     const bar = <HTMLElement>node.children[0];
     const v = <number>row.item[this.name];
-    const showLabel = row.renderer === 'default';
+    const showLabel = row.visType === 'default';
     if (isNaN(v)) {
       bar.style.width = '0';
       bar.textContent = showLabel ? 'NaN' : '';
@@ -60,7 +60,7 @@ export default class NumberColumn extends AColumn {
 
   createGroup(document: Document, row: InnerNode) {
     const n = this.common(document);
-    if (row.renderer === 'default') {
+    if (row.visType === 'default') {
       n.innerHTML = `<div class="bin"></div><div class="bin"></div><div class="bin"></div><div class="bin"></div><div class="bin"></div>`;
     } else {
       n.innerHTML = `<div class="bar"></div>`;
@@ -70,7 +70,7 @@ export default class NumberColumn extends AColumn {
 
   updateGroup(node: HTMLElement, row: InnerNode) {
     node.dataset.group = row.name;
-    if (row.renderer === 'default') {
+    if (row.visType === 'default') {
       const hist = <number[]>row.aggregate[this.name];
       const max = Math.max(...hist);
       hist.forEach((bin, i) => {
