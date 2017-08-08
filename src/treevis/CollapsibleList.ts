@@ -156,10 +156,13 @@ export default class CollapsibleList {
 
   private static mapVisTypeName(visType: string, nodeType: 'inner'|'leaf') {
     switch(visType) {
-      case 'default': return nodeType === 'inner' ? 'histogram' : 'default';
+      case 'default': return nodeType === 'inner' ? 'histogram' : 'bar';
       case 'histogram': return 'default';
       case 'mean-bar' : return 'mean';
       case 'mean': return 'mean-bar';
+      case 'bar': return 'default';
+      case 'compact': return 'compact bar';
+      case 'compact bar': return 'compact';
       default: return visType;
     }
   }
