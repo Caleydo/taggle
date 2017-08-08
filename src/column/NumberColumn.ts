@@ -15,7 +15,7 @@ export default class NumberColumn extends AColumn {
   createHeader(document: Document) {
     const d = this.common(document);
     d.title = this.name;
-    d.innerHTML = `<span>${this.name}</span><br><input type="range" min="${this.range[0]}" max="${this.range![1]}" value="${this.range[1]}" step="0.1">`;
+    d.innerHTML = `<span>${this.name}</span><br><input type="range" min="${this.range[0]}" max="${this.range![1]}" value="${this.maxValue}" step="0.1">`;
     (<HTMLInputElement>d.lastElementChild).onchange = (evt) => {
       const v = (<HTMLInputElement>evt.target).value;
       this.maxValue = parseFloat(v);
