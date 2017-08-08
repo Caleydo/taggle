@@ -1,39 +1,48 @@
 .flyout {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 2vw;
-  height: 90vh;
-  background-color: #ddd;
+  &:not(.in) {
+    width: 2vw;
+    background-color: #ddd;
+
+    > :nth-child(n+2) {
+      display: none;
+    }
+  }
+
+  &.in {
+    width: 30vw;
+
+    h1 {
+      display: none;
+    }
+  }
 
   h1 {
     transform: rotate(90deg);
     position: relative;
     bottom: 0;
     white-space: nowrap;
-  }
+    cursor: pointer;
 
-  .content {
-    background-color: white;
-    display: block;
-    position: absolute;
-    top: 0;
-    right: 0;
-    border: thin;
-    border-style: solid;
-    border-collapse: collapse;
-
-    .header {
-      text-align: right;
+    &:active,
+    &:focus,
+    &:hover {
+      color: darkgray;
     }
   }
-}
 
-div.treevis {
-  top: 20px;
-  right: 0;
-  height: 90vh;
-  overflow: auto;
+  > .header {
+    text-align: right;
+
+    > i {
+      cursor: pointer;
+
+      &:active,
+      &:focus,
+      &:hover {
+        color: darkgray;
+      }
+    }
+  }
 }
 
 .treevis {
@@ -49,46 +58,90 @@ div.treevis {
     color: black;
   }
 
-  .collapsed {
-    color: blue;
-  }
-
-  tr:nth-child(even) {
-    background-color: #ddd;
-  }
-
-  tr:nth-child(odd) {
-    background-color: white;
+  input,
+  select {
+    min-width: 5em;
+    width: 100%;
   }
 
   table {
-    width: 500px;
-    border-style: solid;
-    border-width: thin;
     border-collapse: collapse;
-  }
 
-  caption {
-    font-size: 22px;
-    font-weight: bold;
-    text-decoration: underline;
-    margin: 10px;
-  }
+    thead {
+      font-weight: bold;
+      border-bottom: thin solid black;
+    }
 
-  th {
-    font-size: 20px;
-    font-weight: bold;
-    height: 40px;
-    padding: 10px;
-    border-bottom-style: solid;
-    border-width: thin;
-  }
+    td.hierarchy {
+      position: relative;
 
-  table tbody tr {
-    text-align: left;
-  }
+      &::before {
+        position: absolute;
+        left: 20%;
+        top: 0;
+        height: 100%;
+        width: 1px;
+        content: '';
+        border-left: 1px solid black;
+      }
+    }
 
-  input {
-    width: 60px;
+    tbody tr {
+      text-align: left;
+
+      > td {
+        white-space: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* hierarchy indicator */
+      &[data-level="1"] > td.hierarchy:nth-child(1),
+      &[data-level="2"] > td.hierarchy:nth-child(2),
+      &[data-level="3"] > td.hierarchy:nth-child(3),
+      &[data-level="4"] > td.hierarchy:nth-child(4) {
+        &::after {
+          position: absolute;
+          left: 20%;
+          top: 0;
+          height: 50%;
+          width: 80%;
+          content: '';
+          border-bottom: 1px solid black;
+        }
+      }
+
+      &:nth-child(even) {
+        background-color: #ddd;
+      }
+
+      &:nth-child(odd) {
+        background-color: white;
+      }
+
+      &[data-type=inner] {
+        td.clickable {
+          cursor: pointer;
+
+          &:focus,
+          &:active,
+          &:hover {
+            &::before {
+              color: blue;
+            }
+          }
+
+          &::before {
+            font-size: 80%;
+            content: '▼';
+            display: inline-block;
+          }
+        }
+
+        &.collapsed td.clickable::before {
+          content: '►';
+        }
+      }
+    }
   }
 }

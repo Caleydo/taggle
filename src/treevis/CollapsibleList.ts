@@ -44,6 +44,8 @@ export default class CollapsibleList {
         .classed('collapsed', false);
 
       // update phase
+      $tr.attr('data-level', (d) => d.level);
+      $tr.attr('data-type', (d) => d.type);
       const $trComplete = $tr.html((d) => this.buildRow(d, treeColumnCount));
       this.addTreeClickhandler($trComplete);
       this.updateAggregatedColumn($trComplete);
@@ -62,7 +64,7 @@ export default class CollapsibleList {
   }
 
   private buildRow(d: INode, treeColumnCount: number) {
-    let resultRow = `${'<td></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
+    let resultRow = `${'<td class="hierarchy"></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
 
     // aggregated row
     resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''} /></td>` : '<td/>';
@@ -71,7 +73,7 @@ export default class CollapsibleList {
     resultRow += `<td><select class="renderer"></select></td>`;
 
     // height row
-    resultRow += `<td><input class="height" type="number" value="${d.height}" size="5"></td>`;
+    resultRow += `<td><input class="height" type="number" value="${d.height}"></td>`;
 
     // DOI row
     resultRow += `<td><input type="number" step="0.01" value="${d.doi}" /></td>`;
