@@ -34,10 +34,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     root.id = 'taggle';
 
     this.defaultRowHeight = 20;
-    this.tree = TestRenderer.createTree(this.defaultRowHeight, [{renderer: 'default', height: 100}, {
-      renderer: 'mean',
-      height: this.defaultRowHeight
-    }]);
+    this.tree = TestRenderer.createTree(this.defaultRowHeight);
 
     const rebuilder = (name: string | null, additional: boolean) => this.rebuild(name, additional);
     this.columns = [new HierarchyColumn(0, {name: '', value: {type: 'string'}}, rebuilder)];
@@ -58,22 +55,22 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     this.rebuildData();
   }
 
-  private static createTree(leafHeight: number, groupHeights: [{ renderer: string, height: number }]): InnerNode {
+  private static createTree(leafHeight: number): InnerNode {
     const root = fromArray(data, leafHeight);
     // initial grouping and sorting
     TestRenderer.restratifyTree(root, ['Continent']);
     TestRenderer.reorderTree(root, 'Population (2017)');
 
     // random aggregation
-    visit<IRow>(root, (inner: InnerNode) => {
-      if (Math.random() < 0.3) {
-        inner.aggregation = EAggregationType.AGGREGATED;
-      }
-      const group = groupHeights[Math.floor(Math.random() * groupHeights.length)];
-      inner.renderer = group.renderer;
-      inner.aggregatedHeight = group.height;
-      return true;
-    }, () => undefined);
+    //visit<IRow>(root, (inner: InnerNode) => {
+    //  if (Math.random() < 0.3) {
+    //    inner.aggregation = EAggregationType.AGGREGATED;
+    //  }
+    //  const group = groupHeights[Math.floor(Math.random() * groupHeights.length)];
+    //   inner.visType = group.renderer;
+    //  inner.aggregatedHeight = group.height;
+    //  return true;
+    //}, () => undefined);
 
     TestRenderer.dump(root);
 
