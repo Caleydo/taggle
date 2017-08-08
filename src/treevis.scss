@@ -11,6 +11,13 @@
     position: relative;
     bottom: 0;
     white-space: nowrap;
+    cursor: pointer;
+
+    &:active,
+    &:focus,
+    &:hover {
+      color: darkgray;
+    }
   }
 
   .content {
@@ -25,6 +32,14 @@
 
     .header {
       text-align: right;
+      > i {
+        cursor: pointer;
+        &:active,
+        &:focus,
+        &:hover {
+          color: darkgray;
+        }
+      }
     }
   }
 }
@@ -49,46 +64,92 @@ div.treevis {
     color: black;
   }
 
-  .collapsed {
-    color: blue;
-  }
-
-  tr:nth-child(even) {
-    background-color: #ddd;
-  }
-
-  tr:nth-child(odd) {
-    background-color: white;
+  input {
+    width: 60px;
   }
 
   table {
-    width: 500px;
-    border-style: solid;
-    border-width: thin;
+    width: 30vw;
     border-collapse: collapse;
-  }
 
-  caption {
-    font-size: 22px;
-    font-weight: bold;
-    text-decoration: underline;
-    margin: 10px;
-  }
+    thead {
+      font-weight: bold;
+      border-bottom: thin solid black;
+    }
 
-  th {
-    font-size: 20px;
-    font-weight: bold;
-    height: 40px;
-    padding: 10px;
-    border-bottom-style: solid;
-    border-width: thin;
-  }
+    td.hierarchy {
+      position: relative;
 
-  table tbody tr {
-    text-align: center;
-  }
+      &::before {
+        position: absolute;
+        left: 20%;
+        top: 0;
+        height: 100%;
+        width: 1px;
 
-  input {
-    width: 60px;
+        content: '';
+        border-left: 1px solid black;
+      }
+    }
+
+    tbody tr {
+      text-align: center;
+
+      > td {
+        white-space: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+      }
+
+      //hierarchy indicator
+      &[data-level="1"] > td.hierarchy:nth-child(1),
+      &[data-level="2"] > td.hierarchy:nth-child(2),
+      &[data-level="3"] > td.hierarchy:nth-child(3),
+      &[data-level="4"] > td.hierarchy:nth-child(4) {
+        &::after {
+          position: absolute;
+          left: 20%;
+          top: 0;
+          height: 50%;
+          width: 80%;
+
+          content: '';
+          border-bottom: 1px solid black;
+        }
+      }
+
+      &:nth-child(even) {
+        background-color: #ddd;
+      }
+
+      &:nth-child(odd) {
+        background-color: white;
+      }
+
+
+      td.clickable {
+        cursor: pointer;
+        text-align: left;
+
+        &:focus,
+        &:active,
+        &:hover {
+          color: darkblue;
+        }
+
+
+      }
+
+      &[data-type=inner] {
+        td.clickable::before {
+          font-size: 80%;
+          content: '▼';
+          display: inline-block;
+        }
+        &.collapsed td.clickable::before {
+          content: '►';
+        }
+      }
+    }
   }
 }
