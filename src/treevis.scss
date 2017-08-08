@@ -1,10 +1,20 @@
 .flyout {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 2vw;
-  height: 90vh;
-  background-color: #ddd;
+  &:not(.in) {
+    width: 2vw;
+    background-color: #ddd;
+
+    > :nth-child(n+2) {
+      display: none;
+    }
+  }
+
+  &.in {
+    width: 30vw;
+
+    h1 {
+      display: none;
+    }
+  }
 
   h1 {
     transform: rotate(90deg);
@@ -20,37 +30,19 @@
     }
   }
 
-  .content {
-    background-color: white;
-    display: block;
-    position: absolute;
-    top: 0;
-    right: 0;
-    border: thin;
-    border-style: solid;
-    border-collapse: collapse;
+  > .header {
+    text-align: right;
 
-    .header {
-      text-align: right;
+    > i {
+      cursor: pointer;
 
-      > i {
-        cursor: pointer;
-
-        &:active,
-        &:focus,
-        &:hover {
-          color: darkgray;
-        }
+      &:active,
+      &:focus,
+      &:hover {
+        color: darkgray;
       }
     }
   }
-}
-
-div.treevis {
-  top: 20px;
-  right: 0;
-  height: 90vh;
-  overflow: auto;
 }
 
 .treevis {
@@ -73,7 +65,6 @@ div.treevis {
   }
 
   table {
-    width: 30vw;
     border-collapse: collapse;
 
     thead {
