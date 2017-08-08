@@ -36,7 +36,14 @@ main > article > div.selected {
     background-color: #5886e6;
     border-radius: 5px;
     transition: all 0.5s;
-    min-height: 2px;
+  }
+
+  &[data-vis-type=compact] {
+    .bar {
+      margin: 0;
+      height: 100%;
+      border-radius: 0;
+    }
   }
 
   &:hover {
@@ -46,7 +53,7 @@ main > article > div.selected {
   }
 }
 
-[data-type="inner"]:not([data-renderer]) {
+[data-type="inner"]:not([data-vis-type]) {
   &.string {
     display: flex;
     align-items: center;

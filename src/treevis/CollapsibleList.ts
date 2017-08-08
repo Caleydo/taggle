@@ -68,16 +68,16 @@ export default class CollapsibleList {
     let resultRow = `${'<td class="hierarchy"></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
 
     // aggregated row
-    resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''} /></td>` : '<td/>';
+    resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''}></td>` : '<td/>';
 
     // used renderer row
-    resultRow += `<td><select></select></td>`;
+    resultRow += `<td><select class="visType"></select></td>`;
 
     // height row
-    resultRow += `<td><input type="number" value="${d.height}"></td>`;
+    resultRow += `<td><input class="height" type="number" value="${d.height}"></td>`;
 
     // DOI row
-    resultRow += `<td><input type="number" step="0.01" value="${d.doi}" /></td>`;
+    resultRow += `<td><input class="doi" type="number" step="0.01" value="${d.doi}"></td>`;
 
     return resultRow;
   }
@@ -129,16 +129,16 @@ export default class CollapsibleList {
   }
 
   private updateRendererColumn($tr: d3.Selection<INode>) {
-    $tr.select('.renderer').html((d) =>
+    $tr.select('.visType').html((d) =>
       (d.type === 'inner' ? InnerNode : LeafNode)
         .visTypes
-        .map((r) => `<option ${r === d.visType ? 'selected' : ''}>${this.mapVisTypeName(r, d.type)}</option>`)
+        .map((r) => `<option ${r === d.visType ? 'selected' : ''}>${CollapsibleList.mapVisTypeName(r, d.type)}</option>`)
         .join('')
     );
     const that = this;
-    $tr.select('.renderer')
+    $tr.select('.visType')
     .on('change', function(this: HTMLSelectElement, d: INode) {
-      d.visType = that.mapVisTypeName(this.value, d.type);
+      d.visType = CollapsibleList.mapVisTypeName(this.value, d.type);
       that.rebuild();
     });
   }
@@ -154,7 +154,7 @@ export default class CollapsibleList {
     });
   }
 
-  private mapVisTypeName(visType: string, nodeType: 'inner'|'leaf') {
+  private static mapVisTypeName(visType: string, nodeType: 'inner'|'leaf') {
     switch(visType) {
       case 'default': return nodeType === 'inner' ? 'histogram' : 'default';
       case 'histogram': return 'default';
