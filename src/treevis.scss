@@ -87,7 +87,7 @@
     }
 
     tbody tr {
-      text-align: center;
+      text-align: left;
 
       > td {
         white-space: nowrap;
@@ -117,10 +117,6 @@
 
       &:nth-child(odd) {
         background-color: white;
-      }
-
-      td.clickable {
-        text-align: left;
       }
 
       &[data-type=inner] {

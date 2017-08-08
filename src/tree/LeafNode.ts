@@ -5,6 +5,7 @@ export default class LeafNode<T> extends ANode {
   height = 20;
 
   doi: number = 0.5;
+  static readonly renderers = ['default', 'mean'];
 
   constructor(public readonly item: T) {
     super();
@@ -31,6 +32,8 @@ export default class LeafNode<T> extends ANode {
   }
 
   toString() {
-    return this.item.toString();
+    // try to find a suitable string
+    const val = Object.values(this.item).find((x) => typeof(x) === 'string');
+    return val ? val : this.item.toString();
   }
 }

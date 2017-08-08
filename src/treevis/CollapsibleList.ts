@@ -2,13 +2,12 @@
  * Created by Martin on 19.07.2017.
  */
 import * as d3 from 'd3';
-import {InnerNode, INode, visit} from '../tree';
+import {InnerNode, INode, LeafNode, visit} from '../tree';
 import {EAggregationType} from '../tree';
 
 export default class CollapsibleList {
   private readonly $parentDiv: d3.Selection<any>;
   private $table: d3.Selection<any>;
-  private readonly renderers = ['default', 'mean'];
 
   constructor($root: d3.Selection<any>, private readonly rebuild: (name?: string|null, additional?: boolean)=>void) {
     this.$parentDiv = $root.classed('treevis', true);
@@ -24,7 +23,7 @@ export default class CollapsibleList {
     this.$table.html(`<thead>
                 <tr>
                   <th colspan="0">Visual Tree</th>
-                  <th>Aggregated</th>
+                  <th>Aggr.</th>
                   <th>Used Renderer</th>
                   <th>Height (px)</th>
                   <th>DOI (0...1)</th>
@@ -74,9 +73,7 @@ export default class CollapsibleList {
     resultRow += `<td><select class="renderer"></select></td>`;
 
     // height row
-    resultRow += `<td><input class="height" type="number" value="${d.height}"
-                  ${d.type === 'leaf' || (d.type === 'inner' && (<InnerNode>d).aggregation !== EAggregationType.AGGREGATED) ? '' : 'disabled'}>
-                  </td>`;
+    resultRow += `<td><input class="height" type="number" value="${d.height}"></td>`;
 
     // DOI row
     resultRow += `<td><input type="number" step="0.01" value="${d.doi}" /></td>`;
@@ -131,11 +128,16 @@ export default class CollapsibleList {
   }
 
   private updateRendererColumn($tr: d3.Selection<INode>) {
-    $tr.select('.renderer').html((d) => `${this.renderers.map((r) => `<option ${r === d.renderer ? 'selected' : ''}>${r}</option>`).join('')}`);
+    $tr.select('.renderer').html((d) =>
+      (d.type === 'inner' ? InnerNode : LeafNode)
+        .renderers
+        .map((r) => `<option ${r === d.renderer ? 'selected' : ''}>${this.mapRendererString(r)}</option>`)
+        .join('')
+    );
     const that = this;
     $tr.select('.renderer')
     .on('change', function(this: HTMLSelectElement, d: INode) {
-      d.renderer = this.value;
+      d.renderer = that.mapRendererString(this.value);
       that.rebuild();
     });
   }
@@ -149,5 +151,15 @@ export default class CollapsibleList {
         that.rebuild();
       }
     });
+  }
+
+  private mapRendererString(rendererName: string) {
+    switch(rendererName) {
+      case 'default': return 'histogram';
+      case 'histogram': return 'default';
+      case 'mean-bar' : return 'mean';
+      case 'mean': return 'mean-bar';
+      default: return 'unknown';
+    }
   }
 }
