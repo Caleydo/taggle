@@ -5,6 +5,7 @@ export abstract class ANode {
   parent: InnerNode | null = null;
 
   renderer = 'default';
+  selected: boolean = false;
 
   get isFirstChild() {
     return (this.parent && this.parent.children[0] === <any>this) || !this.parent;

@@ -18,6 +18,16 @@ main > article > div > * {
   }
 }
 
+main > article > div.selected {
+  outline: 2px solid darkorange;
+  z-index: 2;
+
+  > *.frozen {
+    outline: 2px solid darkorange;
+    z-index: 2;
+  }
+}
+
 [data-type] {
   .bar {
     margin: 2px 0;

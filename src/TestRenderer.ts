@@ -3,17 +3,17 @@
  */
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
-import {fromArray, INode, LeafNode, InnerNode, EAggregationType, groupBy, sort, visit} from './tree';
+import {EAggregationType, fromArray, groupBy, InnerNode, INode, LeafNode, sort, visit} from './tree';
 import {
-  StringColumn,
+  CategoricalColumn,
   computeCategoricalHist,
   computeNumericalHist,
+  HierarchyColumn,
   ITaggleColumn,
   NumberColumn,
-  HierarchyColumn,
-  CategoricalColumn
+  StringColumn
 } from './column';
-import {data, columns, IRow} from './data';
+import {columns, data, IRow} from './data';
 import CollapsibleList from './treevis/CollapsibleList';
 import FlyoutBar from './controls/FlyoutBar';
 
@@ -39,7 +39,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       height: this.defaultRowHeight
     }]);
 
-    const rebuilder = (name: string|null, additional: boolean) => this.rebuild(name, additional);
+    const rebuilder = (name: string | null, additional: boolean) => this.rebuild(name, additional);
     this.columns = [new HierarchyColumn(0, {name: '', value: {type: 'string'}}, rebuilder)];
     this.columns.push(...columns.map((col, i) => {
       switch (col.value.type) {
@@ -85,7 +85,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   }
 
   private renderTreeVis() {
-     this.treeVis.render(this.tree);
+    this.treeVis.render(this.tree);
   }
 
   run() {
@@ -98,11 +98,11 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     return this._context;
   }
 
-  private rebuild(groupOrSortBy: string|null, additional: boolean) {
+  private rebuild(groupOrSortBy: string | null, additional: boolean) {
     if (groupOrSortBy) {
       const column = columns.find((c) => c.name === groupOrSortBy)!;
       if (column.value.type === 'categorical') {
-        this.groupBy =  additional ? this.groupBy.concat([groupOrSortBy]) : [groupOrSortBy];
+        this.groupBy = additional ? this.groupBy.concat([groupOrSortBy]) : [groupOrSortBy];
         TestRenderer.restratifyTree(this.tree, this.groupBy);
       } else {
         TestRenderer.reorderTree(this.tree, groupOrSortBy);
@@ -161,6 +161,23 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     }, (n) => console.log(`${' '.repeat(n.level)}-${n.item.AIDS_Countries}`));
   }
 
+  private selectRow(index: number, additional: boolean, node: HTMLElement) {
+    const row = this.getRow(index);
+    const was = row.selected;
+    if (additional) {
+      row.selected = !was;
+      node.classList.toggle('selected');
+      return;
+    }
+    //clear all
+    this.flat.forEach((n) => n.selected = false);
+    Array.from(this.body.querySelectorAll('.selected')).forEach((n) => n.classList.remove('selected'));
+    //toggle single
+    if (!was) {
+      row.selected = true;
+      node.classList.add('selected');
+    }
+  }
 
   private rebuildData() {
     this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
@@ -212,5 +229,28 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       column.updateGroup(node, <InnerNode>row, index);
     }
     return node;
+  }
+
+  protected createRow(node: HTMLElement, rowIndex: number, ...extras: any[]): void {
+    node.onclick = (evt) => {
+      this.selectRow(rowIndex, evt.shiftKey || evt.altKey || evt.ctrlKey, node);
+      evt.stopPropagation();
+    };
+    if (this.getRow(rowIndex).selected) {
+      node.classList.add('selected');
+    }
+    return super.createRow(node, rowIndex, ...extras);
+  }
+
+  protected updateRow(node: HTMLElement, rowIndex: number, ...extras: any[]): void {
+    node.onclick = (evt) => {
+      this.selectRow(rowIndex, evt.shiftKey || evt.altKey || evt.ctrlKey, node);
+      evt.stopPropagation();
+    };
+    node.classList.remove('selected');
+    if (this.getRow(rowIndex).selected) {
+      node.classList.add('selected');
+    }
+    return super.updateRow(node, rowIndex, ...extras);
   }
 }
