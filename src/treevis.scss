@@ -32,8 +32,10 @@
 
     .header {
       text-align: right;
+
       > i {
         cursor: pointer;
+
         &:active,
         &:focus,
         &:hover {
@@ -86,7 +88,6 @@ div.treevis {
         top: 0;
         height: 100%;
         width: 1px;
-
         content: '';
         border-left: 1px solid black;
       }
@@ -101,7 +102,7 @@ div.treevis {
         text-overflow: ellipsis;
       }
 
-      //hierarchy indicator
+      /* hierarchy indicator */
       &[data-level="1"] > td.hierarchy:nth-child(1),
       &[data-level="2"] > td.hierarchy:nth-child(2),
       &[data-level="3"] > td.hierarchy:nth-child(3),
@@ -112,7 +113,6 @@ div.treevis {
           top: 0;
           height: 50%;
           width: 80%;
-
           content: '';
           border-bottom: 1px solid black;
         }
@@ -126,7 +126,6 @@ div.treevis {
         background-color: white;
       }
 
-
       td.clickable {
         cursor: pointer;
         text-align: left;
@@ -136,8 +135,6 @@ div.treevis {
         &:hover {
           color: darkblue;
         }
-
-
       }
 
       &[data-type=inner] {
@@ -146,6 +143,7 @@ div.treevis {
           content: '▼';
           display: inline-block;
         }
+
         &.collapsed td.clickable::before {
           content: '►';
         }
