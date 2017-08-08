@@ -27,8 +27,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   private treeVis: CollapsibleList;
 
   private defaultRowHeight: number;
-
-  ruleSet: IRuleSet = defaultRuleSet;
+  private ruleSet: IRuleSet = defaultRuleSet;
 
   private groupBy: string[] = [];
 

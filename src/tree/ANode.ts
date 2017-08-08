@@ -53,8 +53,8 @@ export abstract class ANode {
 
   /**
    * returns the nearest sibling that matches the given selector (before or after)
-   * @param {(sibling: ANode) => boolean} matches
-   * @return Infinity if none found else distance
+   * @param {function} matches the selector to find the sibling
+   * @return {number} Infinity if none found else distance
    */
   nearestSibling(matches: (sibling: ANode) => boolean): number {
     if (!this.parent) {
