@@ -71,7 +71,7 @@ export default class CollapsibleList {
     resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''}></td>` : '<td/>';
 
     // used renderer row
-    resultRow += `<td><select class="visType"></select></td>`;
+    resultRow += `<td><select class="visType" ${d.type === 'inner' && d.aggregation !== EAggregationType.AGGREGATED ? 'disabled="disabled"' : ''}></select></td>`;
 
     // height row
     resultRow += `<td><input class="height" type="number" value="${d.height}"></td>`;
