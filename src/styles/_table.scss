@@ -36,6 +36,7 @@ main > article > div.selected {
     background-color: #5886e6;
     border-radius: 5px;
     transition: all 0.5s;
+    min-height: 2px;
   }
 
   &:hover {

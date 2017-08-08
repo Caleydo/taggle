@@ -159,7 +159,7 @@ export default class CollapsibleList {
       case 'histogram': return 'default';
       case 'mean-bar' : return 'mean';
       case 'mean': return 'mean-bar';
-      default: return 'unknown';
+      default: return rendererName;
     }
   }
 }
