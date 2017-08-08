@@ -21,7 +21,7 @@ body {
   height: 98vh;
   background: white;
   border-left: 2px solid black;
-  transition: width 0.5s linear;
+  transition: max-width 0.5s linear;
   display: flex;
   flex-direction: column;
 
