@@ -20,7 +20,7 @@ export default class CategoricalColumn extends AColumn {
 
   updateSingle(node: HTMLElement, row: LeafNode<IRow>) {
     const v = String(row.item[this.name]);
-    node.textContent = v;
+    node.textContent = row.renderer === 'default' ? v : '';
     node.style.backgroundColor = (this.categories.find((c) => c.name === v) || { color: 'magenta'}).color;
     return node;
   }

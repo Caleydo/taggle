@@ -47,12 +47,13 @@ export default class NumberColumn extends AColumn {
     node.dataset.group = row.parent!.name;
     const bar = <HTMLElement>node.children[0];
     const v = <number>row.item[this.name];
+    const showLabel = row.renderer === 'default';
     if (isNaN(v)) {
       bar.style.width = '0';
-      bar.textContent = 'NaN';
+      bar.textContent = showLabel ? 'NaN' : '';
     } else {
       bar.style.width = `${Math.round(this.rescale(v) * 100)}%`;
-      bar.textContent = v.toFixed(2);
+      bar.textContent = showLabel ? v.toFixed(2) : '';
     }
     return node;
   }
