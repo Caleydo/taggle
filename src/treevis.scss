@@ -66,8 +66,10 @@ div.treevis {
     color: black;
   }
 
-  input {
-    width: 60px;
+  input,
+  select {
+    min-width: 5em;
+    width: 100%;
   }
 
   table {

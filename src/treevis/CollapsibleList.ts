@@ -74,7 +74,7 @@ export default class CollapsibleList {
     resultRow += `<td><select class="renderer"></select></td>`;
 
     // height row
-    resultRow += `<td><input class="height" type="number" value="${d.height}" size="5"
+    resultRow += `<td><input class="height" type="number" value="${d.height}"
                   ${d.type === 'leaf' || (d.type === 'inner' && (<InnerNode>d).aggregation !== EAggregationType.AGGREGATED) ? '' : 'disabled'}>
                   </td>`;
 
