@@ -51,6 +51,7 @@ export default class CollapsibleList {
       this.updateAggregatedColumn($trComplete);
       this.updateRendererColumn($trComplete);
       this.updateHeightColumn($trComplete);
+      this.setReadonly($tr);
 
       // exit phase
       $tr.exit().remove();
@@ -70,10 +71,10 @@ export default class CollapsibleList {
     resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''} /></td>` : '<td/>';
 
     // used renderer row
-    resultRow += `<td><select class="renderer"></select></td>`;
+    resultRow += `<td><select></select></td>`;
 
     // height row
-    resultRow += `<td><input class="height" type="number" value="${d.height}"></td>`;
+    resultRow += `<td><input type="number" value="${d.height}"></td>`;
 
     // DOI row
     resultRow += `<td><input type="number" step="0.01" value="${d.doi}" /></td>`;
@@ -161,5 +162,13 @@ export default class CollapsibleList {
       case 'mean': return 'mean-bar';
       default: return visType;
     }
+  }
+
+  private setReadonly($tr: d3.Selection<INode>) {
+    $tr.classed('readonly-cells', false);
+    // have an aggregated parent
+    const $result = $tr.filter((n) => n.parents.some((x) => x.aggregation === EAggregationType.AGGREGATED));
+    $result.classed('readonly-cells', true);
+    $result.selectAll('td input, td select').attr('disabled', 'disabled');
   }
 }
