@@ -50,6 +50,26 @@ export abstract class ANode {
   toPathString() {
     return this.path.reverse().join('.');
   }
+
+  /**
+   * returns the nearest sibling that matches the given selector (before or after)
+   * @param {(sibling: ANode) => boolean} matches
+   * @return Infinity if none found else distance
+   */
+  nearestSibling(matches: (sibling: ANode) => boolean): number {
+    if (!this.parent) {
+      return Infinity;
+    }
+    const c =this.parent.children;
+    const index = c.indexOf(<any>this);
+
+    const fix = (n: number) => n < 0 ? Infinity : n;
+
+    const before = fix(c.slice(0, index).reverse().findIndex(matches));
+    const after = fix(c.slice(index).findIndex(matches));
+
+    return Math.min(before, after);
+  }
 }
 
 export default ANode;
