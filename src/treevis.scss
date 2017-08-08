@@ -127,21 +127,26 @@ div.treevis {
       }
 
       td.clickable {
-        cursor: pointer;
         text-align: left;
-
-        &:focus,
-        &:active,
-        &:hover {
-          color: darkblue;
-        }
       }
 
       &[data-type=inner] {
-        td.clickable::before {
-          font-size: 80%;
-          content: '▼';
-          display: inline-block;
+        td.clickable {
+          cursor: pointer;
+
+          &:focus,
+          &:active,
+          &:hover {
+            &::before {
+              color: blue;
+            }
+          }
+
+          &::before {
+            font-size: 80%;
+            content: '▼';
+            display: inline-block;
+          }
         }
 
         &.collapsed td.clickable::before {
