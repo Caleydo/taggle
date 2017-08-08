@@ -51,6 +51,7 @@ export default class CollapsibleList {
       this.updateAggregatedColumn($trComplete);
       this.updateRendererColumn($trComplete);
       this.updateHeightColumn($trComplete);
+      this.setReadonly($tr);
 
       // exit phase
       $tr.exit().remove();
@@ -76,7 +77,7 @@ export default class CollapsibleList {
     resultRow += `<td><input class="height" type="number" value="${d.height}"></td>`;
 
     // DOI row
-    resultRow += `<td><input type="number" step="0.01" value="${d.doi}" /></td>`;
+    resultRow += `<td><input class="doi" type="number" step="0.01" value="${d.doi}" /></td>`;
 
     return resultRow;
   }
@@ -161,5 +162,18 @@ export default class CollapsibleList {
       case 'mean': return 'mean-bar';
       default: return 'unknown';
     }
+  }
+
+  private setReadonly($tr: d3.Selection<INode>) {
+    $tr.classed('readonly-cells', false);
+    const $result = $tr.filter((n) =>
+      n.path.find((x) => {
+        return (x.type === 'inner' && (<InnerNode>x).aggregation === EAggregationType.AGGREGATED);
+      }) !== undefined
+    );
+    $result.classed('readonly-cells', true);
+    $result.select('td select.renderer').attr('disabled', 'true');
+    $result.selectAll('td input.height').attr('disabled', 'true');
+    $result.selectAll('td input.doi').attr('disabled', 'true');
   }
 }
