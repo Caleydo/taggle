@@ -50,7 +50,7 @@ export default class CollapsibleList {
       this.addTreeClickhandler($trComplete);
       this.updateAggregatedColumn($trComplete);
       this.updateRendererColumn($trComplete);
-      this.updateHeightColumn($trComplete);
+      this.updateInputColumn($trComplete);
       this.setReadonly($tr);
       this.setCollapsedState($tr);
 
@@ -160,20 +160,36 @@ export default class CollapsibleList {
     });
   }
 
-  private updateHeightColumn($tr: d3.Selection<INode>) {
+  private updateInputColumn($tr: d3.Selection<INode>) {
     const that = this;
 
-    const setHeight = (value: string, that: CollapsibleList, d: INode) => {
-      d.height = parseInt(value, 10);
-      that.rebuild();
+    const setValue = (element: HTMLSelectElement) => {
+      if(!element.parentNode || !element.parentNode.parentNode) {
+        return;
+      }
+      const val = parseInt(element.value, 10);
+      const d = d3.select(element.parentNode.parentNode!).datum();
+
+      let attribute = '';
+      if(element.className === 'height') {
+        attribute = 'height';
+      } else if(element.className === 'doi' && d.type === 'inner') {
+        attribute = 'aggregateDoi';
+      } else if(element.className === 'doi' && d.type === 'leaf') {
+        attribute = 'doi';
+      }
+      if(d[attribute] !== val) {
+        d[attribute] = val;
+        that.rebuild();
+      }
     };
-    $tr.select('.height')
-    .on('blur', function(this: HTMLSelectElement, d: INode) {
-      setHeight(this.value, that, d);
+    $tr.selectAll('input.height, input.doi')
+    .on('blur', function(this: HTMLSelectElement) {
+      setValue(this);
     })
-    .on('keyup', function(this: HTMLSelectElement, d: INode) {
+    .on('keyup', function(this: HTMLSelectElement) {
        if((<KeyboardEvent>d3.event).key === 'Enter') {
-         setHeight(this.value, that, d);
+         setValue(this);
        }
     });
   }
