@@ -15,6 +15,10 @@ export default class FlyoutBar {
     this.createBody();
   }
 
+  get node() {
+    return <HTMLElement>this.$node.node();
+  }
+
   get body() {
     return this.$body;
   }
