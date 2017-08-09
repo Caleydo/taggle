@@ -52,6 +52,7 @@ export default class CollapsibleList {
       this.updateRendererColumn($trComplete);
       this.updateHeightColumn($trComplete);
       this.setReadonly($tr);
+      this.setCollapsedState($tr);
 
       // exit phase
       $tr.exit().remove();
@@ -103,6 +104,7 @@ export default class CollapsibleList {
       node.classed('collapsed', !state);
     };
 
+    const that = this;
     $tr.select('.clickable')
     .on('click', function(this: HTMLElement, d: INode) { // hides all child nodes
       if(d.type === 'leaf' || !this.parentNode) { //should never happen
@@ -110,13 +112,28 @@ export default class CollapsibleList {
       }
       const $firstItem = d3.select(this.parentNode);
       invertCollapsedState($firstItem);
-      const collapse = $firstItem.classed('collapsed');
+      that.setCollapsedForChildren($firstItem, $tr, d);
+    });
+  }
 
+  private setCollapsedState($tr: d3.Selection<INode>) {
+    const that = this;
+    $tr.each(function(this: EventTarget, d: INode) {
+      if (d.type === 'leaf') { // we are just interested in inner nodes
+        return;
+      }
+      const element = d3.select(this);
+      element.classed('collapsed', (<InnerNode> d).aggregation === EAggregationType.AGGREGATED);
+      that.setCollapsedForChildren(element, $tr, d);
+    });
+  }
+
+  private setCollapsedForChildren(element: d3.Selection<INode>, $tr: d3.Selection<INode>, d: InnerNode) {
+      const collapse = element.classed('collapsed');
       // filter all children and subchildren from current node
-      $tr.filter((s) => s.parents.includes(<InnerNode>d))
+      $tr.filter((s) => s.parents.includes(d))
         .classed('hidden', collapse)
         .classed('collapsed', false);
-    });
   }
 
   private updateAggregatedColumn($tr: d3.Selection<INode>) {
@@ -145,12 +162,19 @@ export default class CollapsibleList {
 
   private updateHeightColumn($tr: d3.Selection<INode>) {
     const that = this;
+
+    const setHeight = (value: string, that: CollapsibleList, d: INode) => {
+      d.height = parseInt(value, 10);
+      that.rebuild();
+    };
     $tr.select('.height')
+    .on('blur', function(this: HTMLSelectElement, d: INode) {
+      setHeight(this.value, that, d);
+    })
     .on('keyup', function(this: HTMLSelectElement, d: INode) {
-      if((<KeyboardEvent>d3.event).key === 'Enter') {
-        d.height = parseInt(this.value, 10);
-        that.rebuild();
-      }
+       if((<KeyboardEvent>d3.event).key === 'Enter') {
+         setHeight(this.value, that, d);
+       }
     });
   }
 
