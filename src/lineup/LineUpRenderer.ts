@@ -11,7 +11,7 @@ import {
 } from 'lineupjs/src/model/Column';
 import {default as RenderColumn, IRankingContextContainer} from 'lineupjs/src/ui/engine/RenderColumn';
 import {createDOM} from 'lineupjs/src/renderer/index';
-import {isNumberColumn, default as NumberColumn} from 'lineupjs/src/model/NumberColumn';
+import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
 import {debounce} from 'lineupjs/src/utils';
 import {uniformContext} from 'lineupengine/src/logic';
 import StringColumn from 'lineupjs/src/model/StringColumn';
@@ -21,17 +21,23 @@ import {IDataProvider, IDataRow} from 'lineupjs/src/provider/ADataProvider';
 import Ranking from 'lineupjs/src/model/Ranking';
 import {ISelectionColumnDesc} from 'lineupjs/src/model/SelectionColumn';
 import {IValueColumnDesc} from 'lineupjs/src/model/ValueColumn';
-import {models, isCategoricalColumn} from 'lineupjs/src/model';
+import {createRankDesc, createSelectionDesc, isCategoricalColumn, models} from 'lineupjs/src/model';
 import {computeHist, computeStats} from 'lineupjs/src/provider/math';
 import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
-import {createRankDesc, createSelectionDesc} from 'lineupjs/src/model';
 import 'lineupjs/src/style.scss';
+import InnerNode from '../tree/InnerNode';
+import LeafNode from '../tree/LeafNode';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
   summary: boolean;
   renderer: object;
 }
+
+export interface ICallbacks {
+  selectionChanged(selection: Set<number>): void;
+}
+
 
 export default class LineUpRenderer<T> implements IDataProvider {
   private readonly histCache = new Map<string, IStatistics | ICategoricalStatistics>();
@@ -51,14 +57,14 @@ export default class LineUpRenderer<T> implements IDataProvider {
     renderer: {}
   };
 
-  private readonly data: IDataRow[];
+  private leaves: LeafNode<T>[] = [];
 
-  constructor(parent: Element, data: T[], options: Partial<ILineUpRendererOptions>) {
+  constructor(parent: Element, private readonly tree: InnerNode, private readonly callbacks: Partial<ICallbacks>, options: Partial<ILineUpRendererOptions>) {
     Object.assign(this.options, options);
     this.node = parent.ownerDocument.createElement('main');
     parent.appendChild(this.node);
 
-    this.data = data.map((d,i) => ({v: d, dataIndex: i}));
+    this.leaves = this.tree.flatLeaves();
 
     const bodyOptions: any = this.options.renderer;
 
@@ -111,7 +117,7 @@ export default class LineUpRenderer<T> implements IDataProvider {
 
   private sort() {
     const ranking = this.ranking;
-    const arr = ranking.isFiltered() ? this.data.filter((d) => ranking.filter(d.v, d.dataIndex)) : this.data.slice();
+    const arr = ranking.isFiltered() ? this.leaves.filter((d) => ranking.filter(d.v, d.dataIndex)) : this.leaves.slice();
     //sort by the ranking column
     arr.sort((a, b) => ranking.comparator(a.v, b.v, a.dataIndex, b.dataIndex));
 
@@ -121,7 +127,7 @@ export default class LineUpRenderer<T> implements IDataProvider {
   private getRow(index: number): IDataRow {
     //relative index
     const dataIndex = this.ranking.getOrder()[index];
-    return this.data[dataIndex];
+    return this.leaves[dataIndex];
   }
 
   private updateHist() {
@@ -129,7 +135,7 @@ export default class LineUpRenderer<T> implements IDataProvider {
       return;
     }
 
-    const arr = this.ranking.isFiltered() ? this.data.filter((d) => this.ranking.filter(d.v, d.dataIndex)) : this.data;
+    const arr = this.leaves;
     const cols = this.ranking.flatColumns;
     cols.filter((d) => d instanceof NumberColumn && !d.isHidden()).forEach((col: NumberColumn) => {
       const stats = computeStats(arr, arr.map((a) => a.dataIndex), col.getValue.bind(col), [0, 1]);
@@ -196,6 +202,9 @@ export default class LineUpRenderer<T> implements IDataProvider {
 
   private updateSelections() {
     this.renderer.updateSelection(Array.from(this.selection));
+    if (this.callbacks.selectionChanged) {
+      this.callbacks.selectionChanged(this.selection);
+    }
   }
 
   setSelection(dataIndices: number[]) {
@@ -280,7 +289,7 @@ export default class LineUpRenderer<T> implements IDataProvider {
 
   mappingSample(col: Column): number[] {
     console.assert(isNumberColumn(col));
-    return this.data.map((d) => col.getValue(d.v, d.dataIndex));
+    return this.leaves.map((d) => col.getValue(d.v, d.dataIndex));
   }
 
   searchAndJump(_search: string|RegExp, _col: Column) {

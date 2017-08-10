@@ -1,14 +1,19 @@
 import ANode from './ANode';
+import {IDataRow} from 'lineupjs/src/provider/ADataProvider';
 
-export default class LeafNode<T> extends ANode {
+export default class LeafNode<T> extends ANode implements IDataRow {
   readonly type: 'leaf' = 'leaf';
   height = 20;
 
   doi: number = 0.5;
   static readonly visTypes = ['default', 'compact'];
 
-  constructor(public readonly item: T) {
+  constructor(public readonly item: T, public readonly dataIndex: number) {
     super();
+  }
+
+  get v() {
+    return this.item;
   }
 
   set filtered(value: boolean) {
