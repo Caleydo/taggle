@@ -32,7 +32,11 @@ export default class App {
 
     this.renderer = new clazz(parent, columns, {
       update: () => this.update(),
-      selectionChanged: () => undefined
+      selectionChanged: () => {
+        if (typeof this.ruleSet.leaf.height === 'function') {
+          this.update();
+        }
+      }
     });
 
     const defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;

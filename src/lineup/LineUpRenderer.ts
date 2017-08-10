@@ -254,6 +254,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
   }
 
   private updateSelections() {
+    this.leaves.forEach((l) => l.selected = this.selection.has(l.dataIndex));
     this.renderer.updateSelection(Array.from(this.selection));
     this.callbacks.selectionChanged();
   }
