@@ -11,7 +11,7 @@ export default class DebugInterface {
   private readonly fl: FlyoutBar;
 
   constructor(parent: HTMLElement, rebuilder: () => void, ruleChanged: (rule: IRuleSet)=>void) {
-    this.fl = new FlyoutBar(parent.parentElement!);
+    this.fl = new FlyoutBar(parent.parentElement!, rebuilder);
     {
       const node = createChooser(ruleChanged);
       this.fl.node.insertBefore(node, this.fl.node.lastChild);

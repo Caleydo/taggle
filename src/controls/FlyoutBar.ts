@@ -7,7 +7,7 @@ export default class FlyoutBar {
   private $body: d3.Selection<any>;
   private readonly $node: d3.Selection<any>;
 
-  constructor(root: HTMLElement) {
+  constructor(root: HTMLElement, private readonly onBecomingVisible: ()=>void) {
     const $parentDiv = d3.select(root).append('aside').classed('flyout', true);
     $parentDiv.append('h1').text('Configure Tree').on('click', this.handleClick);
     this.$node = $parentDiv;
@@ -32,8 +32,12 @@ export default class FlyoutBar {
   }
 
   private handleClick = () => {
-    this.$node.classed('in', !this.$node.classed('in'));
+    const next = !this.$node.classed('in');
+    this.$node.classed('in', next);
     (<MouseEvent>d3.event).stopPropagation();
+    if (next) {
+      this.onBecomingVisible();
+    }
   }
 
   protected createHeader() {

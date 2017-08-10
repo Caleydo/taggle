@@ -8,11 +8,7 @@ export abstract class ANode {
   selected: boolean = false;
 
   get isFirstChild() {
-    return (this.parent && this.parent.children[0] === <any>this) || !this.parent;
-  }
-
-  get isLastChild() {
-    return (this.parent && this.parent.children[this.parent.children.length - 1] === <any>this) || !this.parent;
+    return this.index <= 0;
   }
 
   get index() {
@@ -44,11 +40,6 @@ export abstract class ANode {
       a = a.parent;
     }
     return r;
-  }
-
-
-  toPathString() {
-    return this.path.reverse().join('.');
   }
 
   /**

@@ -4,95 +4,49 @@
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {EAggregationType, InnerNode, INode, LeafNode} from './tree';
-import {
-  CategoricalColumn,
-  HierarchyColumn,
-  ITaggleColumn,
-  NumberColumn,
-  StringColumn
-} from './column';
-import {columns, data, IRow} from './data';
-import DebugInterface from './DebugInterface';
-import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet} from './rule/index';
-import {createTree, reorderTree, restratifyTree} from './utils';
+import {ITaggleColumn} from './column';
+import {IRow} from './data';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
 
-  private readonly columns: ITaggleColumn[];
-  private readonly tree: InnerNode;
   private flat: INode[] = [];
-  private readonly debug: DebugInterface;
+  private initialized: boolean = false;
 
-  private defaultRowHeight: number;
-  private ruleSet: IRuleSet = defaultRuleSet;
-
-  private groupBy: string[] = [];
-
-  constructor(root: HTMLElement) {
+  constructor(root: HTMLElement, private readonly tree: InnerNode, private readonly columns: ITaggleColumn[], private readonly dirty: () => void) {
     super(root);
     root.id = 'taggle';
-
-    this.defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
-    this.tree = createTree(data, columns, this.defaultRowHeight, this.ruleSet);
-
-    const rebuilder = (name: string | null, additional: boolean) => this.rebuild(name, additional);
-    this.columns = [new HierarchyColumn(0, {name: '', value: {type: 'string'}}, rebuilder)];
-    this.columns.push(...columns.map((col, i) => {
-      switch (col.value.type) {
-        case 'categorical':
-          return new CategoricalColumn(i + 1, col, rebuilder, 150);
-        case 'int':
-        case 'real':
-          return new NumberColumn(i + 1, col, rebuilder, 150);
-        default:
-          return new StringColumn(i + 1, col, rebuilder, 200);
-      }
-    }));
-
-    this.debug = new DebugInterface(this.root.parentElement!, () => this.rebuild(null, false), (rule) => {
-      this.ruleSet = rule;
-      this.defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
-      applyStaticRuleSet(rule, this.tree);
-      this.rebuild(null, false);
-    });
-    this.rebuildData();
   }
-
 
   private getRow(index: number): INode {
     return this.flat[index];
   }
 
-  run() {
-    this.debug.update(this.tree);
-    //wait till layouted
-    setTimeout(this.init.bind(this), 100);
-  }
 
   protected get context() {
     return this._context;
   }
 
-  private rebuild(groupOrSortBy: string | null, additional: boolean) {
-    if (groupOrSortBy) {
-      const column = columns.find((c) => c.name === groupOrSortBy)!;
-      if (column.value.type === 'categorical') {
-        this.groupBy = additional ? this.groupBy.concat([groupOrSortBy]) : [groupOrSortBy];
-        if (this.groupBy.length > this.ruleSet.stratificationLevels) {
-          this.groupBy = this.groupBy.slice(0, this.ruleSet.stratificationLevels);
-        }
-        if (this.groupBy.length > 0) {
-          restratifyTree(columns, this.tree, this.groupBy);
-        }
-      } else if (this.ruleSet.sortLevels > 0) {
-        // TODO support multi sorting
-        reorderTree(columns, this.tree, groupOrSortBy);
-      }
+  rebuild(defaultRowHeight: number) {
+    this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
+    this.flat = this.tree.aggregation === EAggregationType.AGGREGATED ? [this.tree] : this.tree.flatChildren();
+    const exceptions = nonUniformContext(this.flat.map((n) => n.height), defaultRowHeight);
+    const columnExceptions = nonUniformContext(this.columns.map((c) => c.width), 150);
+
+    const scroller = <HTMLElement>this.root.querySelector('main');
+    this._context = Object.assign({
+      scroller,
+      columns: this.columns,
+      column: columnExceptions,
+      htmlId: '#taggle'
+    }, exceptions);
+
+    if (!this.initialized) {
+      this.initialized = true;
+      this.init();
+    } else {
+      this.recreate();
     }
-    this.rebuildData();
-    this.recreate();
-    this.debug.update(this.tree);
   }
 
   private selectRow(index: number, additional: boolean, node: HTMLElement) {
@@ -101,7 +55,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     if (additional) {
       row.selected = !was;
       node.classList.toggle('selected');
-      this.rebuild(null, false);
+      this.dirty();
       return;
     }
     //clear all
@@ -112,23 +66,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       row.selected = true;
       node.classList.add('selected');
     }
-    this.rebuild(null, false);
-  }
-
-  private rebuildData() {
-    applyDynamicRuleSet(this.ruleSet, this.tree);
-    this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
-    this.flat = this.tree.aggregation === EAggregationType.AGGREGATED ? [this.tree] : this.tree.flatChildren();
-    const exceptions = nonUniformContext(this.flat.map((n) => n.height), this.defaultRowHeight);
-    const columnExceptions = nonUniformContext(this.columns.map((c) => c.width), 150);
-    const scroller = <HTMLElement>this.root.querySelector('main');
-
-    this._context = Object.assign({
-      scroller,
-      columns: this.columns,
-      column: columnExceptions,
-      htmlId: '#taggle'
-    }, exceptions);
+    this.dirty();
   }
 
   protected createHeader(document: Document, column: ITaggleColumn) {
