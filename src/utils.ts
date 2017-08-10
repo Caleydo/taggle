@@ -1,0 +1,84 @@
+/**
+ * Created by Samuel Gratzl on 10.08.2017.
+ */
+import {applyStaticRuleSet, IRuleSet} from './rule/index';
+import {fromArray, groupBy, sort, visit} from './tree';
+import {computeCategoricalHist, computeNumericalHist} from './column';
+import InnerNode from './tree/InnerNode';
+import {IColumn, IRow} from './data/index';
+
+
+export function createTree<T extends IRow>(data: any[], columns: IColumn[], leafHeight: number, ruleSet: IRuleSet): InnerNode {
+  const root = fromArray(data, leafHeight);
+  // initial grouping and sorting
+  if (ruleSet.stratificationLevels > 0) {
+    restratifyTree<T>(columns, root, ['Continent']);
+  }
+  if (ruleSet.sortLevels > 0) {
+    reorderTree<T>(columns, root, 'Population (2017)');
+  }
+  // random aggregation
+  //visit<IRow>(root, (inner: InnerNode) => {
+  //  if (Math.random() < 0.3) {
+  //    inner.aggregation = EAggregationType.AGGREGATED;
+  //  }
+  //  const group = groupHeights[Math.floor(Math.random() * groupHeights.length)];
+  //   inner.visType = group.renderer;
+  //  inner.aggregatedHeight = group.height;
+  //  return true;
+  //}, () => undefined);
+  applyStaticRuleSet(ruleSet, root);
+
+  dump(root);
+
+  return root;
+}
+
+
+export function reorderTree<T extends IRow>(columns: IColumn[], root: InnerNode, by: string) {
+  const column = columns.find((c) => c.name === by);
+  if (column && (column.value.type === 'int' || column.value.type === 'real')) {
+    //desc
+    sort<T>(root, (a, b) => {
+      const va = <number>a[by];
+      const vb = <number>b[by];
+      if (isNaN(va) && isNaN(vb)) {
+        return 0;
+      }
+      if (isNaN(va)) {
+        return 1;
+      }
+      if (isNaN(vb)) {
+        return -1;
+      }
+      return vb - va;
+    });
+  } else if (column) {
+    sort<T>(root, (a, b) => (<string>a[by]).localeCompare(<string>b[by]));
+  }
+}
+
+export function restratifyTree<T extends IRow>(columns: IColumn[], root: InnerNode, by: string[]) {
+  groupBy<T>(root, root.flatLeaves(), (a) => by.map((bi) => <string>a[bi]));
+
+  visit(root, (inner: InnerNode) => {
+    inner.aggregate = {};
+    columns.forEach((col) => {
+      if (col.value.type === 'int' || col.value.type === 'real') {
+        inner.aggregate[col.name] = computeNumericalHist(inner.flatLeaves<T>(), col);
+      } else if (col.value.type === 'categorical') {
+        inner.aggregate[col.name] = computeCategoricalHist(inner.flatLeaves<T>(), col);
+      }
+    });
+    return true;
+  }, () => undefined);
+}
+
+export function dump(root: InnerNode) {
+  // random aggregation
+  visit<any>(root, (inner: InnerNode) => {
+    console.log(`${' '.repeat(inner.level)}-${inner.name}`);
+
+    return true;
+  }, (n) => console.log(`${' '.repeat(n.level)}-${n.toString()}`));
+}

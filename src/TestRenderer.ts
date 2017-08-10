@@ -3,11 +3,9 @@
  */
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
-import {EAggregationType, fromArray, groupBy, InnerNode, INode, LeafNode, sort, visit} from './tree';
+import {EAggregationType, InnerNode, INode, LeafNode} from './tree';
 import {
   CategoricalColumn,
-  computeCategoricalHist,
-  computeNumericalHist,
   HierarchyColumn,
   ITaggleColumn,
   NumberColumn,
@@ -16,6 +14,7 @@ import {
 import {columns, data, IRow} from './data';
 import DebugInterface from './DebugInterface';
 import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet} from './rule/index';
+import {createTree, reorderTree, restratifyTree} from './utils';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
@@ -35,7 +34,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     root.id = 'taggle';
 
     this.defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
-    this.tree = TestRenderer.createTree(this.defaultRowHeight, this.ruleSet);
+    this.tree = createTree(data, columns, this.defaultRowHeight, this.ruleSet);
 
     const rebuilder = (name: string | null, additional: boolean) => this.rebuild(name, additional);
     this.columns = [new HierarchyColumn(0, {name: '', value: {type: 'string'}}, rebuilder)];
@@ -60,31 +59,6 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     this.rebuildData();
   }
 
-  private static createTree(leafHeight: number, ruleSet: IRuleSet): InnerNode {
-    const root = fromArray(data, leafHeight);
-    // initial grouping and sorting
-    if (ruleSet.stratificationLevels > 0) {
-      TestRenderer.restratifyTree(root, ['Continent']);
-    }
-    if (ruleSet.sortLevels > 0) {
-      TestRenderer.reorderTree(root, 'Population (2017)');
-    }
-    // random aggregation
-    //visit<IRow>(root, (inner: InnerNode) => {
-    //  if (Math.random() < 0.3) {
-    //    inner.aggregation = EAggregationType.AGGREGATED;
-    //  }
-    //  const group = groupHeights[Math.floor(Math.random() * groupHeights.length)];
-    //   inner.visType = group.renderer;
-    //  inner.aggregatedHeight = group.height;
-    //  return true;
-    //}, () => undefined);
-    applyStaticRuleSet(ruleSet, root);
-
-    TestRenderer.dump(root);
-
-    return root;
-  }
 
   private getRow(index: number): INode {
     return this.flat[index];
@@ -109,64 +83,16 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
           this.groupBy = this.groupBy.slice(0, this.ruleSet.stratificationLevels);
         }
         if (this.groupBy.length > 0) {
-          TestRenderer.restratifyTree(this.tree, this.groupBy);
+          restratifyTree(columns, this.tree, this.groupBy);
         }
       } else if (this.ruleSet.sortLevels > 0) {
         // TODO support multi sorting
-        TestRenderer.reorderTree(this.tree, groupOrSortBy);
+        reorderTree(columns, this.tree, groupOrSortBy);
       }
     }
     this.rebuildData();
     this.recreate();
     this.debug.update(this.tree);
-  }
-
-  private static reorderTree(root: InnerNode, by: string) {
-    const column = columns.find((c) => c.name === by);
-    if (column && (column.value.type === 'int' || column.value.type === 'real')) {
-      //desc
-      sort<IRow>(root, (a, b) => {
-        const va = <number>a[by];
-        const vb = <number>b[by];
-        if (isNaN(va) && isNaN(vb)) {
-          return 0;
-        }
-        if (isNaN(va)) {
-          return 1;
-        }
-        if (isNaN(vb)) {
-          return -1;
-        }
-        return vb - va;
-      });
-    } else if (column) {
-      sort<IRow>(root, (a, b) => (<string>a[by]).localeCompare(<string>b[by]));
-    }
-  }
-
-  private static restratifyTree(root: InnerNode, by: string[]) {
-    groupBy<IRow>(root, root.flatLeaves(), (a) => by.map((bi) => <string>a[bi]));
-
-    visit(root, (inner: InnerNode) => {
-      inner.aggregate = {};
-      columns.forEach((col) => {
-        if (col.value.type === 'int' || col.value.type === 'real') {
-          inner.aggregate[col.name] = computeNumericalHist(inner.flatLeaves<IRow>(), col);
-        } else if (col.value.type === 'categorical') {
-          inner.aggregate[col.name] = computeCategoricalHist(inner.flatLeaves<IRow>(), col);
-        }
-      });
-      return true;
-    }, () => undefined);
-  }
-
-  private static dump(root: InnerNode) {
-    // random aggregation
-    visit<IRow>(root, (inner: InnerNode) => {
-      console.log(`${' '.repeat(inner.level)}-${inner.name}`);
-
-      return true;
-    }, (n) => console.log(`${' '.repeat(n.level)}-${n.item.AIDS_Countries}`));
   }
 
   private selectRow(index: number, additional: boolean, node: HTMLElement) {

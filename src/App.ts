@@ -5,24 +5,25 @@ import LineUpRenderer from './lineup/LineUpRenderer';
 import {columns, data} from './data/index';
 import {toDesc} from './lineup/index';
 import DebugInterface from './DebugInterface';
+import {defaultRuleSet, IRuleSet} from './rule/index';
 
-
+interface ITaggleRenderer {
+  update(): void;
+}
 
 export default class App {
-  private readonly renderer: LineUpRenderer<any>;
+  private readonly renderer: ITaggleRenderer;
   private readonly debug: DebugInterface;
 
+  private ruleSet: IRuleSet = defaultRuleSet;
+
   constructor(parent: HTMLElement) {
-    this.renderer = new LineUpRenderer(parent, data, {});
+    this.renderer = createRenderer(parent);
 
-    this.debug = new DebugInterface(parent, () => this.update(), () => undefined);
-
-    columns.map(toDesc).forEach((desc: any) => {
-      const col = this.renderer.create(desc);
-      if (col) {
-        this.renderer.ranking.push(col);
-      }
+    this.debug = new DebugInterface(parent, () => this.update(), (ruleSet) => {
+      this.ruleSet = ruleSet;
     });
+
   }
 
   update() {
@@ -32,4 +33,15 @@ export default class App {
   }
 
 
+}
+
+function createRenderer(parent: HTMLElement) {
+  const r = new LineUpRenderer(parent, data, {});
+  columns.map(toDesc).forEach((desc: any) => {
+    const col = r.create(desc);
+    if (col) {
+      r.ranking.push(col);
+    }
+  });
+  return r;
 }
