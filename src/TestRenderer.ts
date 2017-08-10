@@ -14,8 +14,7 @@ import {
   StringColumn
 } from './column';
 import {columns, data, IRow} from './data';
-import CollapsibleList from './treevis/CollapsibleList';
-import FlyoutBar from './controls/FlyoutBar';
+import DebugInterface from './DebugInterface';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
@@ -23,7 +22,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   private readonly columns: ITaggleColumn[];
   private readonly tree: InnerNode;
   private flat: INode[] = [];
-  private treeVis: CollapsibleList;
+  private readonly debug: DebugInterface;
 
   private readonly defaultRowHeight: number;
 
@@ -50,8 +49,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       }
     }));
 
-    const fl = new FlyoutBar(this.root.parentElement!);
-    this.treeVis = new CollapsibleList(fl.body, rebuilder);
+    this.debug = new DebugInterface(this.root.parentElement!, () => this.rebuild(null, false));
     this.rebuildData();
   }
 
@@ -81,12 +79,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     return this.flat[index];
   }
 
-  private renderTreeVis() {
-    this.treeVis.render(this.tree);
-  }
-
   run() {
-    this.renderTreeVis();
+    this.debug.update(this.tree);
     //wait till layouted
     setTimeout(this.init.bind(this), 100);
   }
@@ -107,7 +101,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     }
     this.rebuildData();
     this.recreate();
-    this.renderTreeVis();
+    this.debug.update(this.tree);
   }
 
   private static reorderTree(root: InnerNode, by: string) {

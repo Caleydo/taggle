@@ -4,7 +4,7 @@
 import LineUpRenderer from './LineUpRenderer';
 import {columns, data, IColumn} from '../data/index';
 
-function toDesc(col: IColumn): any {
+export function toDesc(col: IColumn): any {
   const base: any = {type: 'string', column: col.name, label: col.name};
   switch (col.value.type) {
   case 'categorical':

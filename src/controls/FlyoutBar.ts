@@ -15,6 +15,10 @@ export default class FlyoutBar {
     this.createBody();
   }
 
+  isVisible() {
+    return this.$node.classed('in');
+  }
+
   get body() {
     return this.$body;
   }
