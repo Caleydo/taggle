@@ -15,7 +15,7 @@ export default class App {
   constructor(parent: HTMLElement) {
     this.renderer = new LineUpRenderer(parent, data, {});
 
-    this.debug = new DebugInterface(parent, () => this.update());
+    this.debug = new DebugInterface(parent, () => this.update(), () => undefined);
 
     columns.map(toDesc).forEach((desc: any) => {
       const col = this.renderer.create(desc);

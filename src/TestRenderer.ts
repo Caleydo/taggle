@@ -15,7 +15,7 @@ import {
 } from './column';
 import {columns, data, IRow} from './data';
 import DebugInterface from './DebugInterface';
-import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet, createChooser} from './rule/index';
+import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet} from './rule/index';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
@@ -51,7 +51,12 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       }
     }));
 
-    this.debug = new DebugInterface(this.root.parentElement!, () => this.rebuild(null, false));
+    this.debug = new DebugInterface(this.root.parentElement!, () => this.rebuild(null, false), (rule) => {
+      this.ruleSet = rule;
+      this.defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
+      applyStaticRuleSet(rule, this.tree);
+      this.rebuild(null, false);
+    });
     this.rebuildData();
   }
 
