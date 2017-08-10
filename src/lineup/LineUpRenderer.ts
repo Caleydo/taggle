@@ -78,6 +78,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
   constructor(parent: Element, columns: IColumn[], private readonly callbacks: ICallbacks, options: Partial<ILineUpRendererOptions> = {}) {
     Object.assign(this.options, options);
     this.node = parent.ownerDocument.createElement('main');
+    this.node.classList.add('lu');
     parent.appendChild(this.node);
 
     const bodyOptions: any = this.options.renderer;
