@@ -24,6 +24,8 @@ import {IValueColumnDesc} from 'lineupjs/src/model/ValueColumn';
 import {models, isCategoricalColumn} from 'lineupjs/src/model';
 import {computeHist, computeStats} from 'lineupjs/src/provider/math';
 import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
+import {createRankDesc, createSelectionDesc} from 'lineupjs/src/model';
+import 'lineupjs/src/style.scss';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -97,6 +99,9 @@ export default class LineUpRenderer<T> implements IDataProvider {
     this.ranking = new Ranking('taggle', 4);
     this.ranking.on(`${Ranking.EVENT_DIRTY_ORDER}.provider`, debounce(() => this.reorder(), 100, null));
     this.ranking.on(`${Ranking.EVENT_ORDER_CHANGED}.provider`, debounce(() => this.updateHist(), 100, null));
+
+    this.ranking.push(this.create(createRankDesc())!);
+    this.ranking.push(this.create(createSelectionDesc())!);
     this.reorder();
   }
 
@@ -178,13 +183,25 @@ export default class LineUpRenderer<T> implements IDataProvider {
       } else {
         this.selection.clear();
       }
+      this.updateSelections();
       return false;
     }
     if (!additional) {
       this.selection.clear();
     }
     this.selection.add(dataIndex);
+    this.updateSelections();
     return true;
+  }
+
+  private updateSelections() {
+    this.renderer.updateSelection(Array.from(this.selection));
+  }
+
+  setSelection(dataIndices: number[]) {
+    this.selection.clear();
+    dataIndices.forEach((d) => this.selection.add(d));
+    this.updateSelections();
   }
 
   isSelected(dataIndex: number) {
@@ -228,7 +245,14 @@ export default class LineUpRenderer<T> implements IDataProvider {
       (<IValueColumnDesc<number>>desc).accessor = (_row: any, index: number) => this.ranking.getOrder().indexOf(index);
     } else if (desc.type === 'selection') {
       (<ISelectionColumnDesc>desc).accessor = (_row: any, index: number) => this.isSelected(index);
-      (<ISelectionColumnDesc>desc).setter = (_row: any, index: number, value: boolean) => value ? this.selection.add(index) : this.selection.delete(index);
+      (<ISelectionColumnDesc>desc).setter = (_row: any, index: number, value: boolean) => {
+        if (value) {
+          this.selection.add(index);
+        } else {
+          this.selection.delete(index);
+        }
+        this.updateSelections();
+      };
     }
   }
 

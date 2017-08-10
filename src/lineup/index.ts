@@ -29,4 +29,6 @@ export function create(parent: HTMLElement) {
       r.ranking.push(col);
     }
   });
+
+  setTimeout(() => r.update(), 100);
 }
