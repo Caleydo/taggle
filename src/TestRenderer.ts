@@ -15,6 +15,7 @@ import {
 } from './column';
 import {columns, data, IRow} from './data';
 import DebugInterface from './DebugInterface';
+import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet, createChooser} from './rule/index';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;
@@ -24,7 +25,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   private flat: INode[] = [];
   private readonly debug: DebugInterface;
 
-  private readonly defaultRowHeight: number;
+  private defaultRowHeight: number;
+  private ruleSet: IRuleSet = defaultRuleSet;
 
   private groupBy: string[] = [];
 
@@ -32,8 +34,8 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     super(root);
     root.id = 'taggle';
 
-    this.defaultRowHeight = 20;
-    this.tree = TestRenderer.createTree(this.defaultRowHeight);
+    this.defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
+    this.tree = TestRenderer.createTree(this.defaultRowHeight, this.ruleSet);
 
     const rebuilder = (name: string | null, additional: boolean) => this.rebuild(name, additional);
     this.columns = [new HierarchyColumn(0, {name: '', value: {type: 'string'}}, rebuilder)];
@@ -53,12 +55,15 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     this.rebuildData();
   }
 
-  private static createTree(leafHeight: number): InnerNode {
+  private static createTree(leafHeight: number, ruleSet: IRuleSet): InnerNode {
     const root = fromArray(data, leafHeight);
     // initial grouping and sorting
-    TestRenderer.restratifyTree(root, ['Continent']);
-    TestRenderer.reorderTree(root, 'Population (2017)');
-
+    if (ruleSet.stratificationLevels > 0) {
+      TestRenderer.restratifyTree(root, ['Continent']);
+    }
+    if (ruleSet.sortLevels > 0) {
+      TestRenderer.reorderTree(root, 'Population (2017)');
+    }
     // random aggregation
     //visit<IRow>(root, (inner: InnerNode) => {
     //  if (Math.random() < 0.3) {
@@ -69,6 +74,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     //  inner.aggregatedHeight = group.height;
     //  return true;
     //}, () => undefined);
+    applyStaticRuleSet(ruleSet, root);
 
     TestRenderer.dump(root);
 
@@ -94,8 +100,14 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       const column = columns.find((c) => c.name === groupOrSortBy)!;
       if (column.value.type === 'categorical') {
         this.groupBy = additional ? this.groupBy.concat([groupOrSortBy]) : [groupOrSortBy];
-        TestRenderer.restratifyTree(this.tree, this.groupBy);
-      } else {
+        if (this.groupBy.length > this.ruleSet.stratificationLevels) {
+          this.groupBy = this.groupBy.slice(0, this.ruleSet.stratificationLevels);
+        }
+        if (this.groupBy.length > 0) {
+          TestRenderer.restratifyTree(this.tree, this.groupBy);
+        }
+      } else if (this.ruleSet.sortLevels > 0) {
+        // TODO support multi sorting
         TestRenderer.reorderTree(this.tree, groupOrSortBy);
       }
     }
@@ -158,6 +170,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     if (additional) {
       row.selected = !was;
       node.classList.toggle('selected');
+      this.rebuild(null, false);
       return;
     }
     //clear all
@@ -168,9 +181,11 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       row.selected = true;
       node.classList.add('selected');
     }
+    this.rebuild(null, false);
   }
 
   private rebuildData() {
+    applyDynamicRuleSet(this.ruleSet, this.tree);
     this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
     this.flat = this.tree.aggregation === EAggregationType.AGGREGATED ? [this.tree] : this.tree.flatChildren();
     const exceptions = nonUniformContext(this.flat.map((n) => n.height), this.defaultRowHeight);
