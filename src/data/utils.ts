@@ -1,11 +1,43 @@
 /**
  * Created by Samuel Gratzl on 10.08.2017.
  */
-import {applyStaticRuleSet, IRuleSet} from './rule/index';
-import {fromArray, groupBy, sort, visit} from './tree';
-import {computeCategoricalHist, computeNumericalHist} from './column';
-import InnerNode from './tree/InnerNode';
-import {IColumn, IRow} from './data/index';
+import {applyStaticRuleSet, IRuleSet} from '../rule/index';
+import {fromArray, groupBy, sort, visit} from '../tree';
+import InnerNode from '../tree/InnerNode';
+import {IColumn, IRow} from './index';
+import LeafNode from '../tree/LeafNode';
+
+
+export function computeNumericalHist(leaves: LeafNode<IRow>[], column: IColumn) {
+  const range = column.value.range!;
+  const bins = [0, 0, 0, 0, 0];
+
+  leaves.forEach((leaf) => {
+    const bin = Math.round(((<number>leaf.item[column.name] - range[0])/(range[1] - range[0])) * 5) % 5;
+    if (!isNaN(bin)) {
+      bins[bin] ++;
+    }
+  });
+
+  return bins;
+}
+
+export function computeCategoricalHist(leaves: LeafNode<IRow>[], column: IColumn) {
+  const categories = column.value.categories!;
+  const bins = categories.map(() => 0);
+
+  leaves.forEach((leaf) => {
+    const v = <string>leaf.item[column.name];
+    const index = categories.findIndex((c) => c.name === v);
+    if (index >= 0) {
+      bins[index] ++;
+    }
+  });
+
+  return bins;
+}
+
+
 
 
 export function createTree<T extends IRow>(data: any[], columns: IColumn[], leafHeight: number, ruleSet: IRuleSet): InnerNode {

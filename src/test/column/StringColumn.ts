@@ -1,6 +1,6 @@
-import {LeafNode, InnerNode} from '../tree';
+import {LeafNode, InnerNode} from '../../tree';
 import AColumn from './AColumn';
-import {IRow, IColumn} from '../data';
+import {IRow, IColumn} from '../../data';
 
 export default class StringColumn extends AColumn {
   constructor(index: number, column: IColumn, rebuild: (name: string|null, additional: boolean)=>void, width = 100) {

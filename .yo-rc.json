@@ -4,7 +4,8 @@
     "app": "Taggle2",
     "clientOnly": true,
     "entries": {
-      "app": "./src/index.ts"
+      "app": "./src/index.ts",
+      "lineup": "./src/lineup/index.ts"
     },
     "libraries": [],
     "modules": [],

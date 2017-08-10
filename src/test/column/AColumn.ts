@@ -1,6 +1,6 @@
-import {LeafNode, InnerNode} from '../tree';
+import {LeafNode, InnerNode} from '../../tree';
 import ITaggleColumn from './ITaggleColumn';
-import {IRow, IColumn} from '../data';
+import {IRow, IColumn} from '../../data';
 
 export abstract class AColumn implements ITaggleColumn {
   constructor(public readonly index: number, public readonly column: IColumn, protected readonly rebuild: (name: string|null, additional: boolean)=>void, public readonly frozen: boolean = false, public readonly width = 100) {

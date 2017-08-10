@@ -3,9 +3,9 @@
  */
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
-import {EAggregationType, InnerNode, INode, LeafNode} from './tree';
+import {EAggregationType, InnerNode, INode, LeafNode} from '../tree';
 import {ITaggleColumn} from './column';
-import {IRow} from './data';
+import {IRow} from '../data';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
   protected _context: ICellRenderContext<ITaggleColumn>;

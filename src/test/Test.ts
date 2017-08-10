@@ -1,23 +1,23 @@
 /**
  * Created by Samuel Gratzl on 10.08.2017.
  */
-import {columns, data} from './data/index';
-import DebugInterface from './DebugInterface';
-import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet} from './rule/index';
+import {columns, data} from '../data/index';
+import DebugInterface from '../DebugInterface';
+import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet} from '../rule/index';
 import TestRenderer from './TestRenderer';
-import InnerNode from './tree/InnerNode';
-import {createTree, reorderTree, restratifyTree} from './utils';
+import InnerNode from '../tree/InnerNode';
+import {createTree, reorderTree, restratifyTree} from '../data/utils';
 import HierarchyColumn from './column/HierarchyColumn';
 import CategoricalColumn from './column/CategoricalColumn';
 import NumberColumn from './column/NumberColumn';
 import {ITaggleColumn} from './column/ITaggleColumn';
-import {StringColumn} from 'taggle2/src/column';
+import {StringColumn} from './column';
 
 interface ITaggleRenderer {
   rebuild(defaultRowHeight: number): void;
 }
 
-export default class App2 {
+export default class Test {
   private readonly renderer: ITaggleRenderer;
   private readonly debug: DebugInterface;
 
