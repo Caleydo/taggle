@@ -163,7 +163,7 @@ export default class CollapsibleList {
   private updateInputColumn($tr: d3.Selection<INode>) {
     const that = this;
 
-    const setValue = (element: HTMLSelectElement) => {
+    const setValue = (element: HTMLInputElement) => {
       if(!element.parentNode || !element.parentNode.parentNode) {
         return;
       }
@@ -174,9 +174,11 @@ export default class CollapsibleList {
       if(element.className === 'height') {
         attribute = 'height';
       } else if(element.className === 'doi' && d.type === 'inner') {
-        attribute = 'aggregateDoi';
+        attribute = 'aggregatedDoi';
       } else if(element.className === 'doi' && d.type === 'leaf') {
         attribute = 'doi';
+      } else {
+        return;
       }
       if(d[attribute] !== val) {
         d[attribute] = val;
@@ -184,10 +186,10 @@ export default class CollapsibleList {
       }
     };
     $tr.selectAll('input.height, input.doi')
-    .on('blur', function(this: HTMLSelectElement) {
+    .on('blur', function(this: HTMLInputElement) {
       setValue(this);
     })
-    .on('keyup', function(this: HTMLSelectElement) {
+    .on('keyup', function(this: HTMLInputElement) {
        if((<KeyboardEvent>d3.event).key === 'Enter') {
          setValue(this);
        }
