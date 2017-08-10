@@ -4,18 +4,30 @@
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {EAggregationType, InnerNode, INode, LeafNode} from '../tree';
-import {ITaggleColumn} from './column';
-import {IRow} from '../data';
+import {IRow, IColumn} from '../data';
+import {ICallbacks, ITaggleRenderer} from '../App';
+import HierarchyColumn from './column/HierarchyColumn';
+import CategoricalColumn from './column/CategoricalColumn';
+import NumberColumn from './column/NumberColumn';
+import {StringColumn, ITaggleColumn} from './column';
+import {reorderTree, restratifyTree} from '../data/utils';
+import {IRuleSet} from '../rule/index';
 
-export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
+export default class TestRenderer extends ACellRenderer<ITaggleColumn> implements ITaggleRenderer {
   protected _context: ICellRenderContext<ITaggleColumn>;
 
+  private readonly columns: ITaggleColumn[];
   private flat: INode[] = [];
   private initialized: boolean = false;
+  private groupBy: string[] = [];
 
-  constructor(root: HTMLElement, private readonly tree: InnerNode, private readonly columns: ITaggleColumn[], private readonly dirty: () => void) {
+  private tree: InnerNode;
+  private ruleSet: IRuleSet;
+
+  constructor(root: HTMLElement, columns: IColumn[], private readonly callbacks: ICallbacks) {
     super(root);
     root.id = 'taggle';
+    this.columns = this.createColumns(columns);
   }
 
   private getRow(index: number): INode {
@@ -27,9 +39,31 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     return this._context;
   }
 
-  rebuild(defaultRowHeight: number) {
-    this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
-    this.flat = this.tree.aggregation === EAggregationType.AGGREGATED ? [this.tree] : this.tree.flatChildren();
+  private createColumns(columns: IColumn[]) {
+    const rebuilder = (name: string | null, additional: boolean) => this.resort(name, additional);
+    const cols = <ITaggleColumn[]>[new HierarchyColumn(0, {name: '', value: {type: 'string'}}, rebuilder)];
+    cols.push(...columns.map((col, i) => {
+      switch (col.value.type) {
+        case 'categorical':
+          return new CategoricalColumn(i + 1, col, rebuilder, 150);
+        case 'int':
+        case 'real':
+          return new NumberColumn(i + 1, col, rebuilder, 150);
+        default:
+          return new StringColumn(i + 1, col, rebuilder, 200);
+      }
+    }));
+    return cols;
+  }
+
+  rebuild(tree: InnerNode, ruleSet: IRuleSet) {
+    this.tree = tree;
+    this.ruleSet = ruleSet;
+
+    const defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
+
+    tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
+    this.flat = tree.aggregation === EAggregationType.AGGREGATED ? [tree] : tree.flatChildren();
     const exceptions = nonUniformContext(this.flat.map((n) => n.height), defaultRowHeight);
     const columnExceptions = nonUniformContext(this.columns.map((c) => c.width), 150);
 
@@ -55,7 +89,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     if (additional) {
       row.selected = !was;
       node.classList.toggle('selected');
-      this.dirty();
+      this.callbacks.selectionChanged();
       return;
     }
     //clear all
@@ -66,7 +100,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       row.selected = true;
       node.classList.add('selected');
     }
-    this.dirty();
+    this.callbacks.selectionChanged();
   }
 
   protected createHeader(document: Document, column: ITaggleColumn) {
@@ -127,5 +161,27 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       node.classList.add('selected');
     }
     return super.updateRow(node, rowIndex, ...extras);
+  }
+
+
+  private resort(groupOrSortBy: string | null, additional: boolean) {
+    if (groupOrSortBy) {
+      const columns = this.columns.map((d) => d.column);
+      const column = columns.find((c) => c.name === groupOrSortBy)!;
+      if (column.value.type === 'categorical') {
+        this.groupBy = additional ? this.groupBy.concat([groupOrSortBy]) : [groupOrSortBy];
+        if (this.groupBy.length > this.ruleSet.stratificationLevels) {
+          this.groupBy = this.groupBy.slice(0, this.ruleSet.stratificationLevels);
+        }
+        if (this.groupBy.length > 0) {
+          restratifyTree(columns, this.tree, this.groupBy);
+        }
+      } else if (this.ruleSet.sortLevels > 0) {
+        // TODO support multi sorting
+        reorderTree(columns, this.tree, groupOrSortBy);
+      }
+    }
+
+    this.update();
   }
 }

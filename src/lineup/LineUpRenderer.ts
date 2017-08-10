@@ -13,7 +13,7 @@ import {default as RenderColumn, IRankingContextContainer} from 'lineupjs/src/ui
 import {createDOM} from 'lineupjs/src/renderer/index';
 import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
 import {debounce} from 'lineupjs/src/utils';
-import {uniformContext} from 'lineupengine/src/logic';
+import {nonUniformContext} from 'lineupengine/src/logic';
 import StringColumn from 'lineupjs/src/model/StringColumn';
 import {filters as defaultFilters} from 'lineupjs/src/dialogs';
 import {renderers as defaultRenderers} from 'lineupjs/src/renderer';
@@ -27,6 +27,9 @@ import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
 import 'lineupjs/src/style.scss';
 import InnerNode from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
+import {IColumn} from '../data/index';
+import {ICallbacks, ITaggleRenderer} from '../App';
+import {IRuleSet} from '../rule/index';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -34,12 +37,24 @@ export interface ILineUpRendererOptions {
   renderer: object;
 }
 
-export interface ICallbacks {
-  selectionChanged(selection: Set<number>): void;
+export function toDesc(col: IColumn): any {
+  const base: any = {type: 'string', column: col.name, label: col.name};
+  switch (col.value.type) {
+  case 'categorical':
+    base.type = 'categorical';
+    base.categories = col.value.categories;
+    break;
+  case 'int':
+  case 'real':
+    base.type = 'number';
+    base.domain = col.value.range;
+    break;
+  }
+  return base;
 }
 
 
-export default class LineUpRenderer<T> implements IDataProvider {
+export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer {
   private readonly histCache = new Map<string, IStatistics | ICategoricalStatistics>();
 
   readonly node: HTMLElement;
@@ -59,12 +74,10 @@ export default class LineUpRenderer<T> implements IDataProvider {
 
   private leaves: LeafNode<T>[] = [];
 
-  constructor(parent: Element, private readonly tree: InnerNode, private readonly callbacks: Partial<ICallbacks>, options: Partial<ILineUpRendererOptions>) {
+  constructor(parent: Element, columns: IColumn[], private readonly callbacks: ICallbacks, options: Partial<ILineUpRendererOptions> = {}) {
     Object.assign(this.options, options);
     this.node = parent.ownerDocument.createElement('main');
     parent.appendChild(this.node);
-
-    this.leaves = this.tree.flatLeaves();
 
     const bodyOptions: any = this.options.renderer;
 
@@ -108,6 +121,14 @@ export default class LineUpRenderer<T> implements IDataProvider {
 
     this.ranking.push(this.create(createRankDesc())!);
     this.ranking.push(this.create(createSelectionDesc())!);
+
+    columns.map(toDesc).forEach((desc: any) => {
+      const col = this.create(desc);
+      if (col) {
+        this.ranking.push(col);
+      }
+    });
+
     this.reorder();
   }
 
@@ -116,6 +137,7 @@ export default class LineUpRenderer<T> implements IDataProvider {
   }
 
   private sort() {
+    //TODO
     const ranking = this.ranking;
     const arr = ranking.isFiltered() ? this.leaves.filter((d) => ranking.filter(d.v, d.dataIndex)) : this.leaves.slice();
     //sort by the ranking column
@@ -147,13 +169,19 @@ export default class LineUpRenderer<T> implements IDataProvider {
     });
   }
 
-  update() {
+  rebuild(tree: InnerNode, ruleSet: IRuleSet) {
+    const defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
+    this.leaves = tree.flatLeaves();
+
+    this.updateImpl(defaultRowHeight);
+  }
+
+  private updateImpl(defaultRowHeight: number) {
     const ranking = this.ranking;
-    const order = ranking.getOrder();
     const that = this;
     ranking.on(`${Ranking.EVENT_DIRTY}.body`, debounce(function (this: { primaryType: string }) {
       if (this.primaryType !== Column.EVENT_WIDTH_CHANGED) {
-        that.update();
+        that.updateImpl(defaultRowHeight);
       }
     }));
 
@@ -173,7 +201,7 @@ export default class LineUpRenderer<T> implements IDataProvider {
       this.renderer.updateColumnWidths();
     }));
 
-    const rowContext = uniformContext(order.length, 20);
+    const rowContext = nonUniformContext(this.leaves.map((d) => d.height), defaultRowHeight);
 
     this.renderer.render(columns, rowContext);
   }
@@ -202,9 +230,7 @@ export default class LineUpRenderer<T> implements IDataProvider {
 
   private updateSelections() {
     this.renderer.updateSelection(Array.from(this.selection));
-    if (this.callbacks.selectionChanged) {
-      this.callbacks.selectionChanged(this.selection);
-    }
+    this.callbacks.selectionChanged();
   }
 
   setSelection(dataIndices: number[]) {
