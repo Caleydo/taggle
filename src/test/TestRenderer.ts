@@ -56,6 +56,27 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
     return cols;
   }
 
+  initTree(tree: InnerNode, ruleSet: IRuleSet) {
+    const columns = this.columns.map((d) => d.column);
+    // initial grouping and sorting
+    if (ruleSet.stratificationLevels > 0) {
+      restratifyTree(columns, tree, ['Continent']);
+    }
+    if (ruleSet.sortLevels > 0) {
+      reorderTree(columns, tree, 'Population (2017)');
+    }
+    // random aggregation
+    //visit<IRow>(root, (inner: InnerNode) => {
+    //  if (Math.random() < 0.3) {
+    //    inner.aggregation = EAggregationType.AGGREGATED;
+    //  }
+    //  const group = groupHeights[Math.floor(Math.random() * groupHeights.length)];
+    //   inner.visType = group.renderer;
+    //  inner.aggregatedHeight = group.height;
+    //  return true;
+    //}, () => undefined);
+  }
+
   rebuild(tree: InnerNode, ruleSet: IRuleSet) {
     this.tree = tree;
     this.ruleSet = ruleSet;

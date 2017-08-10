@@ -72,6 +72,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
     renderer: {}
   };
 
+  private tree: InnerNode;
   private leaves: LeafNode<T>[] = [];
 
   constructor(parent: Element, columns: IColumn[], private readonly callbacks: ICallbacks, options: Partial<ILineUpRendererOptions> = {}) {
@@ -116,8 +117,6 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
     this.renderer = new EngineRankingRenderer(this.node, this.options.idPrefix, this.ctx);
 
     this.ranking = new Ranking('taggle', 4);
-    this.ranking.on(`${Ranking.EVENT_DIRTY_ORDER}.provider`, debounce(() => this.reorder(), 100, null));
-    this.ranking.on(`${Ranking.EVENT_ORDER_CHANGED}.provider`, debounce(() => this.updateHist(), 100, null));
 
     this.ranking.push(this.create(createRankDesc())!);
     this.ranking.push(this.create(createSelectionDesc())!);
@@ -129,21 +128,46 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
       }
     });
 
-    this.reorder();
+    this.ranking.on(`${Ranking.EVENT_DIRTY_ORDER}.provider`, debounce(() => this.reorder(), 100, null));
+    this.ranking.on(`${Ranking.EVENT_ORDER_CHANGED}.provider`, debounce(() => this.updateHist(), 100, null));
   }
 
   protected reorder() {
-    this.ranking.setOrder(this.sort());
+    this.ranking.setOrder(LineUpRenderer.sort(this.ranking, this.tree));
+    this.callbacks.update();
   }
 
-  private sort() {
-    //TODO
-    const ranking = this.ranking;
-    const arr = ranking.isFiltered() ? this.leaves.filter((d) => ranking.filter(d.v, d.dataIndex)) : this.leaves.slice();
-    //sort by the ranking column
-    arr.sort((a, b) => ranking.comparator(a.v, b.v, a.dataIndex, b.dataIndex));
+  initTree(tree: InnerNode) {
+    this.leaves = tree.flatLeaves();
+    this.ranking.setOrder(LineUpRenderer.sort(this.ranking, tree));
+  }
 
-    return arr.map((r) => r.dataIndex);
+  private get orderedLeaves() {
+    const base = this.leaves;
+    return this.ranking.getOrder().map((i) => base[i]);
+  }
+
+  private static sort(ranking: Ranking, tree: InnerNode) {
+    //create a flat hierarchy out of it
+    const leaves = tree.flatLeaves();
+    leaves.forEach((d) => {
+      d.filtered = !ranking.filter(d.v, d.dataIndex);
+      d.parent = tree;
+    });
+
+    //sort by the ranking column
+    leaves.sort((a, b) => {
+      const af = a.filtered;
+      const bf = b.filtered;
+      //filtered are last always
+      if (af || bf) {
+        return af ? (bf ? 0 : +1) : -1;
+      }
+      return ranking.comparator(a.v, b.v, a.dataIndex, b.dataIndex);
+    });
+
+    tree.children = leaves;
+    return leaves.filter((d) => !d.filtered).map((d) => d.dataIndex);
   }
 
   private getRow(index: number): IDataRow {
@@ -170,8 +194,8 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
   }
 
   rebuild(tree: InnerNode, ruleSet: IRuleSet) {
+    this.tree = tree;
     const defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
-    this.leaves = tree.flatLeaves();
 
     this.updateImpl(defaultRowHeight);
   }
@@ -201,7 +225,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
       this.renderer.updateColumnWidths();
     }));
 
-    const rowContext = nonUniformContext(this.leaves.map((d) => d.height), defaultRowHeight);
+    const rowContext = nonUniformContext(this.orderedLeaves.map((d) => d.height), defaultRowHeight);
 
     this.renderer.render(columns, rowContext);
   }

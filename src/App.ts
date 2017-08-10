@@ -5,9 +5,10 @@ import {columns, data, IColumn} from './data/index';
 import DebugInterface from './DebugInterface';
 import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet} from './rule/index';
 import InnerNode from './tree/InnerNode';
-import {createTree} from './data/utils';
+import {fromArray} from './tree/utils';
 
 export interface ITaggleRenderer {
+  initTree(tree: InnerNode, ruleSet: IRuleSet): void;
   rebuild(tree: InnerNode, ruleSet: IRuleSet): void;
 }
 
@@ -28,13 +29,16 @@ export default class App {
   private readonly tree: InnerNode;
 
   constructor(parent: HTMLElement, clazz: ITaggleRendererClass) {
-    const defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
-    this.tree = createTree(data, columns, defaultRowHeight, this.ruleSet);
 
     this.renderer = new clazz(parent, columns, {
       update: () => this.update(),
       selectionChanged: () => undefined
     });
+
+    const defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
+    this.tree = fromArray(data, defaultRowHeight);
+    this.renderer.initTree(this.tree, this.ruleSet);
+    applyStaticRuleSet(this.ruleSet, this.tree);
 
     this.debug = new DebugInterface(parent, () => this.update(), (rule) => {
       this.ruleSet = rule;
