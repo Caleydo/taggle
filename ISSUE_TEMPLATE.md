@@ -3,7 +3,7 @@ title: As a *user type*, I want to *task* so that *goal*
   
 **User Story**
 
-**Sub tasks
+**Sub tasks**
 * 
 
 **Acceptance Criteria**
