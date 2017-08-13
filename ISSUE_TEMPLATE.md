@@ -1,17 +1,21 @@
-* Release number or git hash: 
-* Web browser version and OS: 
-* Environment (local or deployed): 
+# user story
+title: As a *user type*, I want to *task* so that *goal*
+  
+**User Story**
 
-### Steps to reproduce
+**Acceptance Criteria**
+* [ ] 
 
+**Definition of Done**
+
+
+# bug
+title: *bug*: <short bug description>
+  
+**Description**
+
+
+**Steps to reproduce**
 1. 
-2. 
 
-### Observed behavior
-* Any unexpected output or action (or lack of expected output or action)
-* Web browser console errors (including tracebacks)
-* Server errors (relevant messages and tracebacks)
-* Static or animated images showing the UI behavior
-
-### Expected behavior
-* 
+**Supposed behavior**
