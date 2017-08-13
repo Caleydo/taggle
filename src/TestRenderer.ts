@@ -87,7 +87,6 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
     //}, () => undefined);
     applyStaticRuleSet(ruleSet, root);
 
-    TestRenderer.dump(root);
 
     return root;
   }
@@ -168,15 +167,6 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> {
       });
       return true;
     }, () => undefined);
-  }
-
-  private static dump(root: InnerNode) {
-    // random aggregation
-    visit<IRow>(root, (inner: InnerNode) => {
-      console.log(`${' '.repeat(inner.level)}-${inner.name}`);
-
-      return true;
-    }, (n) => console.log(`${' '.repeat(n.level)}-${n.item.AIDS_Countries}`));
   }
 
   private selectRow(index: number, additional: boolean, node: HTMLElement) {

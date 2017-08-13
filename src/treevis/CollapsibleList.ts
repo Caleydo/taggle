@@ -50,8 +50,9 @@ export default class CollapsibleList {
       this.addTreeClickhandler($trComplete);
       this.updateAggregatedColumn($trComplete);
       this.updateRendererColumn($trComplete);
-      this.updateHeightColumn($trComplete);
+      this.updateInputColumn($trComplete);
       this.setReadonly($tr);
+      this.setCollapsedState($tr);
 
       // exit phase
       $tr.exit().remove();
@@ -103,6 +104,7 @@ export default class CollapsibleList {
       node.classed('collapsed', !state);
     };
 
+    const that = this;
     $tr.select('.clickable')
     .on('click', function(this: HTMLElement, d: INode) { // hides all child nodes
       if(d.type === 'leaf' || !this.parentNode) { //should never happen
@@ -110,13 +112,28 @@ export default class CollapsibleList {
       }
       const $firstItem = d3.select(this.parentNode);
       invertCollapsedState($firstItem);
-      const collapse = $firstItem.classed('collapsed');
+      that.setCollapsedForChildren($firstItem, $tr, d);
+    });
+  }
 
+  private setCollapsedState($tr: d3.Selection<INode>) {
+    const that = this;
+    $tr.each(function(this: EventTarget, d: INode) {
+      if (d.type === 'leaf') { // we are just interested in inner nodes
+        return;
+      }
+      const element = d3.select(this);
+      element.classed('collapsed', (<InnerNode> d).aggregation === EAggregationType.AGGREGATED);
+      that.setCollapsedForChildren(element, $tr, d);
+    });
+  }
+
+  private setCollapsedForChildren(element: d3.Selection<INode>, $tr: d3.Selection<INode>, d: InnerNode) {
+      const collapse = element.classed('collapsed');
       // filter all children and subchildren from current node
-      $tr.filter((s) => s.parents.includes(<InnerNode>d))
+      $tr.filter((s) => s.parents.includes(d))
         .classed('hidden', collapse)
         .classed('collapsed', false);
-    });
   }
 
   private updateAggregatedColumn($tr: d3.Selection<INode>) {
@@ -143,14 +160,39 @@ export default class CollapsibleList {
     });
   }
 
-  private updateHeightColumn($tr: d3.Selection<INode>) {
+  private updateInputColumn($tr: d3.Selection<INode>) {
     const that = this;
-    $tr.select('.height')
-    .on('keyup', function(this: HTMLSelectElement, d: INode) {
-      if((<KeyboardEvent>d3.event).key === 'Enter') {
-        d.height = parseInt(this.value, 10);
+
+    const setValue = (element: HTMLInputElement) => {
+      if(!element.parentNode || !element.parentNode.parentNode) {
+        return;
+      }
+      const val = parseInt(element.value, 10);
+      const d = d3.select(element.parentNode.parentNode!).datum();
+
+      let attribute = '';
+      if(element.className === 'height') {
+        attribute = 'height';
+      } else if(element.className === 'doi' && d.type === 'inner') {
+        attribute = 'aggregatedDoi';
+      } else if(element.className === 'doi' && d.type === 'leaf') {
+        attribute = 'doi';
+      } else {
+        return;
+      }
+      if(d[attribute] !== val) {
+        d[attribute] = val;
         that.rebuild();
       }
+    };
+    $tr.selectAll('input.height, input.doi')
+    .on('blur', function(this: HTMLInputElement) {
+      setValue(this);
+    })
+    .on('keyup', function(this: HTMLInputElement) {
+       if((<KeyboardEvent>d3.event).key === 'Enter') {
+         setValue(this);
+       }
     });
   }
 
