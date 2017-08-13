@@ -3,6 +3,9 @@ title: As a *user type*, I want to *task* so that *goal*
   
 **User Story**
 
+**Sub tasks
+* 
+
 **Acceptance Criteria**
 * [ ] 
 
@@ -10,7 +13,7 @@ title: As a *user type*, I want to *task* so that *goal*
 
 
 # bug
-title: *bug*: <short bug description>
+title: *bug*: *short bug description*
   
 **Description**
 
@@ -19,3 +22,8 @@ title: *bug*: <short bug description>
 1. 
 
 **Supposed behavior**
+
+# epic
+title: *short epic name*
+
+**Description**
