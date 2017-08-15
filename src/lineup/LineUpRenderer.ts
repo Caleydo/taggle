@@ -9,7 +9,7 @@ import {
   IFlatColumn,
   IStatistics
 } from 'lineupjs/src/model/Column';
-import {default as RenderColumn, IRankingContextContainer} from 'lineupjs/src/ui/engine/RenderColumn';
+import {default as RenderColumn, IRankingBodyContext} from 'lineupjs/src/ui/engine/RenderColumn';
 import {createDOM} from 'lineupjs/src/renderer/index';
 import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
 import {debounce} from 'lineupjs/src/utils';
@@ -58,7 +58,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
   private readonly histCache = new Map<string, IStatistics | ICategoricalStatistics>();
 
   readonly node: HTMLElement;
-  readonly ctx: IRankingContextContainer;
+  readonly ctx: IRankingBodyContext;
   private readonly renderer: EngineRankingRenderer;
 
   readonly ranking: Ranking;
