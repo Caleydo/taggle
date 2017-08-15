@@ -94,6 +94,7 @@
     "d3": "3.5.17",
     "d3-dsv": "^1.0.5",
     "font-awesome": "^4.7.0",
-    "lineupengine": "github:sgratzl/lineupengine"
+    "lineupengine": "github:sgratzl/lineupengine",
+    "lineupjs": "github:Caleydo/lineup.js#sgratzl/lineupengine"
   }
 }

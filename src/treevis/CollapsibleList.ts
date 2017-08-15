@@ -9,7 +9,7 @@ export default class CollapsibleList {
   private readonly $parentDiv: d3.Selection<any>;
   private $table: d3.Selection<any>;
 
-  constructor($root: d3.Selection<any>, private readonly rebuild: (name?: string|null, additional?: boolean)=>void) {
+  constructor($root: d3.Selection<any>, private readonly rebuild: ()=>void) {
     this.$parentDiv = $root.classed('treevis', true);
     this.createTable();
   }

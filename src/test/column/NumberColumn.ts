@@ -1,6 +1,6 @@
-import {LeafNode, InnerNode} from '../tree';
+import {LeafNode, InnerNode} from '../../tree';
 import AColumn from './AColumn';
-import {IRow, IColumn} from '../data';
+import {IRow, IColumn} from '../../data';
 
 export default class NumberColumn extends AColumn {
   private maxValue: number = 1;
@@ -87,18 +87,4 @@ export default class NumberColumn extends AColumn {
     }
     return node;
   }
-}
-
-export function computeHist(leaves: LeafNode<IRow>[], column: IColumn) {
-  const range = column.value.range!;
-  const bins = [0, 0, 0, 0, 0];
-
-  leaves.forEach((leaf) => {
-    const bin = Math.round(((<number>leaf.item[column.name] - range[0])/(range[1] - range[0])) * 5) % 5;
-    if (!isNaN(bin)) {
-      bins[bin] ++;
-    }
-  });
-
-  return bins;
 }

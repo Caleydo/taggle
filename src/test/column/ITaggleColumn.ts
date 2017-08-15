@@ -1,8 +1,9 @@
 import {IColumn} from 'lineupengine/src/style';
-import {LeafNode, InnerNode} from '../tree';
-import {IRow} from '../data';
+import {LeafNode, InnerNode} from '../../tree';
+import {IRow, IColumn as IDataColumn} from '../../data';
 
 export interface ITaggleColumn extends IColumn {
+  readonly column: IDataColumn;
   createHeader(document: Document): HTMLElement;
   updateHeader(node: HTMLElement): void;
 

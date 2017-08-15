@@ -145,15 +145,6 @@
     "no-regex-spaces": true,
     "ter-no-sparse-arrays": true,
     "no-unexpected-multiline": true,
-    "valid-jsdoc": [true, {
-      "prefer": {
-        "return": "return"
-      },
-      "requireReturn": false,
-      "requireParamDescription": true,
-      "requireReturnDescription": true,
-      "matchDescription": ".+"
-    }],
     "block-spacing": [
       true,
       "always"

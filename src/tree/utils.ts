@@ -83,8 +83,8 @@ export function groupBy<T>(root: InnerNode, leaves: LeafNode<T>[], grouper: (row
 export function fromArray<T>(rows: T[], rowHeight: number, grouper?: (row: T) => string[]|string): InnerNode {
   const root = new InnerNode('');
 
-  const leaves = rows.map((r) => {
-    const n = new LeafNode(r);
+  const leaves = rows.map((r, i) => {
+    const n = new LeafNode(r, i);
     n.height = rowHeight;
     n.parent = root;
     return n;

@@ -1,6 +1,6 @@
-import {LeafNode, InnerNode} from '../tree';
+import {LeafNode, InnerNode} from '../../tree';
 import AColumn from './AColumn';
-import {IRow, IColumn} from '../data';
+import {IRow, IColumn} from '../../data';
 
 
 export default class CategoricalColumn extends AColumn {
@@ -52,20 +52,4 @@ export default class CategoricalColumn extends AColumn {
     return node;
   }
 }
-
-export function computeHist(leaves: LeafNode<IRow>[], column: IColumn) {
-  const categories = column.value.categories!;
-  const bins = categories.map(() => 0);
-
-  leaves.forEach((leaf) => {
-    const v = <string>leaf.item[column.name];
-    const index = categories.findIndex((c) => c.name === v);
-    if (index >= 0) {
-      bins[index] ++;
-    }
-  });
-
-  return bins;
-}
-
 
