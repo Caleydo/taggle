@@ -72,21 +72,27 @@ export default class CollapsibleList {
     const $tr = $table.select('thead .properties');
     $tr.html(() =>
       `<th>
-		<div class="popoup">
-			<i class="fa fa-cog" aria-hidden="true"></i>
-			<div class="popuptext" id="myPopup"></div>
-		</div>
+        <div class="popup">
+          <i class="fa fa-cog" aria-hidden="true"></i>
+          <div class="popupcontent">
+            <input type="text">
+          </div>
+        </div>
 	   </th>`.repeat(treeColumnCount)
     );
-	this.addPropertiesClickhandler($tr);
+	this.addPropertiesClickhandler($tr.selectAll('th'));
   }
-  
+
   private addPropertiesClickhandler($tr: d3.Selection<INode>) {
 	  $tr.select('.fa.fa-cog')
-	  .on('click', function(this: HTMLElement) {
+	  .on('mouseover', function(this: HTMLElement) {
 		const $div = d3.select(this.parentElement!).select('div');
-		$div.classed('show', !$div.classed('show'));
-      });
+		$div.classed('show', true);
+      })
+	  .on('mouseout', function(this: HTMLElement) {
+		  const $div = d3.select(this.parentElement!).select('div');
+		$div.classed('show', false);
+	  });
   }
 
   private buildRow(d: INode, treeColumnCount: number) {
