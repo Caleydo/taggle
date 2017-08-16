@@ -91,7 +91,14 @@ export function reorderTree<T extends IRow>(columns: IColumn[], root: InnerNode,
 }
 
 export function restratifyTree<T extends IRow>(columns: IColumn[], root: InnerNode, by: string[]) {
-  groupBy<T>(root, root.flatLeaves(), (a) => by.map((bi) => <string>a[bi]));
+  if (by.length === 0) {
+    //create flat again
+    const leaves = root.flatLeaves();
+    root.children = leaves;
+    leaves.forEach((l) => l.parent = root);
+  } else {
+    groupBy<T>(root, root.flatLeaves(), (a) => by.map((bi) => <string>a[bi]));
+  }
 
   visit(root, (inner: InnerNode) => {
     inner.aggregate = {};

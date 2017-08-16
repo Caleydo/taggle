@@ -88,6 +88,11 @@ function functor<P, T>(r: T | ((p: P) => T), p: P) {
 }
 
 export function applyStaticRuleSet(ruleSet: IRuleSet, tree: InnerNode) {
+  if (ruleSet.stratificationLevels === 0) {
+    //flat tree
+    tree.children = tree.flatLeaves();
+    tree.children.forEach((d) => d.parent = tree);
+  }
   visit<any>(tree, (inner) => {
     inner.aggregatedHeight = functor(ruleSet.inner.aggregatedHeight, inner);
     inner.visType = functor(ruleSet.inner.visType, inner);
