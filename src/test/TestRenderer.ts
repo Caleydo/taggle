@@ -203,6 +203,6 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
       }
     }
 
-    this.update();
+    this.callbacks.update();
   }
 }
