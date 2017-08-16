@@ -10,7 +10,7 @@ import {
   IStatistics
 } from 'lineupjs/src/model/Column';
 import {default as RenderColumn, IRankingBodyContext} from 'lineupjs/src/ui/engine/RenderColumn';
-import {createDOM} from 'lineupjs/src/renderer/index';
+import {createDOM, createDOMGroup} from 'lineupjs/src/renderer/index';
 import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
 import {debounce} from 'lineupjs/src/utils';
 import {nonUniformContext} from 'lineupengine/src/logic';
@@ -112,7 +112,9 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
         return r;
       },
       renderer: (col: Column) => createDOM(col, defaultRenderers, this.ctx),
+      groupRenderer: (col: Column) => createDOMGroup(col, defaultRenderers, this.ctx),
       idPrefix: this.options.idPrefix,
+      totalNumberOfRows: 0,
       getRow: (index: number) => this.getRow(index)
     };
     this.renderer = new EngineRankingRenderer(this.node, this.options.idPrefix, this.ctx);
@@ -226,6 +228,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
       this.renderer.updateColumnWidths();
     }));
 
+    (<any>this.ctx).totalNumberOfRows = this.orderedLeaves.length;
     const rowContext = nonUniformContext(this.orderedLeaves.map((d) => d.height), defaultRowHeight);
 
     this.renderer.render(columns, rowContext);
