@@ -46,7 +46,7 @@ export default class CollapsibleList {
         .classed('collapsed', false);
 
       // update phase
-      this.updatePropertyRow($table);
+      this.updatePropertyRow($table, treeColumnCount);
       $tr.attr('data-level', (d) => d.level);
       $tr.attr('data-type', (d) => d.type);
       const $trComplete = $tr.html((d) => this.buildRow(d, treeColumnCount));
@@ -68,9 +68,25 @@ export default class CollapsibleList {
     buildTable(this.$table, arr, treeDepth+1);
   }
 
-  private updatePropertyRow($table: d3.Selection<INode>) {
+  private updatePropertyRow($table: d3.Selection<INode>, treeColumnCount: number) {
     const $tr = $table.select('thead .properties');
-    $tr.html(() => `<th><i class="fa fa-cog" aria-hidden="true"></i></th><th><i class="fa fa-cog" aria-hidden="true"></i></th><th><i class="fa fa-cog" aria-hidden="true"></i></th>`);
+    $tr.html(() =>
+      `<th>
+		<div class="popoup">
+			<i class="fa fa-cog" aria-hidden="true"></i>
+			<div class="popuptext" id="myPopup"></div>
+		</div>
+	   </th>`.repeat(treeColumnCount)
+    );
+	this.addPropertiesClickhandler($tr);
+  }
+  
+  private addPropertiesClickhandler($tr: d3.Selection<INode>) {
+	  $tr.select('.fa.fa-cog')
+	  .on('click', function(this: HTMLElement) {
+		const $div = d3.select(this.parentElement!).select('div');
+		$div.classed('show', !$div.classed('show'));
+      });
   }
 
   private buildRow(d: INode, treeColumnCount: number) {
