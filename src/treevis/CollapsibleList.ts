@@ -23,10 +23,12 @@ export default class CollapsibleList {
     this.$table.html(`<thead>
                 <tr>
                   <th colspan="0">Visual Tree</th>
-                  <th>Aggr.</th>
+                  <th>Aggr.</th> 
                   <th>Vis Type</th>
                   <th>Height (px)</th>
                   <th>DOI (0...1)</th>
+                </tr>
+                <tr class="properties">
                 </tr>
                 </thead>
                 <tbody></tbody>`);
@@ -44,6 +46,7 @@ export default class CollapsibleList {
         .classed('collapsed', false);
 
       // update phase
+      this.updatePropertyRow($table);
       $tr.attr('data-level', (d) => d.level);
       $tr.attr('data-type', (d) => d.type);
       const $trComplete = $tr.html((d) => this.buildRow(d, treeColumnCount));
@@ -63,6 +66,11 @@ export default class CollapsibleList {
     const arr: INode[] = [];
     const treeDepth = CollapsibleList.flat(root, arr); // convert tree to list
     buildTable(this.$table, arr, treeDepth+1);
+  }
+
+  private updatePropertyRow($table: d3.Selection<INode>) {
+    const $tr = $table.select('thead .properties');
+    $tr.html(() => `<th><i class="fa fa-cog" aria-hidden="true"></i></th><th><i class="fa fa-cog" aria-hidden="true"></i></th><th><i class="fa fa-cog" aria-hidden="true"></i></th>`);
   }
 
   private buildRow(d: INode, treeColumnCount: number) {
