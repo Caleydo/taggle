@@ -8,6 +8,7 @@ import {EAggregationType} from '../tree';
 export default class CollapsibleList {
   private readonly $parentDiv: d3.Selection<any>;
   private $table: d3.Selection<any>;
+  private tree: InnerNode;
 
   constructor($root: d3.Selection<any>, private readonly rebuild: ()=>void) {
     this.$parentDiv = $root.classed('treevis', true);
@@ -35,6 +36,7 @@ export default class CollapsibleList {
   }
 
   render(root: InnerNode) {
+	  this.tree = root;
     const buildTable = ($table: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
       console.assert($table && arr && treeColumnCount > -1);
       $table.select('thead tr th').attr('colspan', treeColumnCount);
@@ -75,24 +77,53 @@ export default class CollapsibleList {
         <div class="popup">
           <i class="fa fa-cog" aria-hidden="true"></i>
           <div class="popupcontent">
-            <input type="text">
+            <input type="text" class='heightInput'>
+            <input type="checkbox" class='aggregatedOnly'>
           </div>
         </div>
 	   </th>`.repeat(treeColumnCount)
     );
 	this.addPropertiesClickhandler($tr.selectAll('th'));
+	this.addNodeHeightClickhandler($tr);
   }
 
-  private addPropertiesClickhandler($tr: d3.Selection<INode>) {
-	  $tr.select('.fa.fa-cog')
+  private addNodeHeightClickhandler($tr: d3.Selection<INode>) {
+	  const that = this;
+	  $tr.selectAll('th .heightInput').on('blur', function(this: HTMLInputElement) {
+		console.log('sdf');
+    })
+    .on('keyup', function(this: HTMLInputElement, datum: INode, index: number) {
+       if((<KeyboardEvent>d3.event).key === 'Enter') {
+          const arr: INode[] = [];
+			CollapsibleList.flat(that.tree, arr);
+			const checked = <HTMLInputElement>$tr.selectAll('th .aggregatedOnly')[0][index];
+			let aggregationType: EAggregationType = EAggregationType.UNIFORM;
+			if(checked) {
+			  aggregationType = EAggregationType.AGGREGATED;
+      }
+			const nodesOnLevel = arr.filter((x) => {
+			  if(x.type == 'inner') {
+			    return x.level === index && x.aggregation === aggregationType;
+        }
+			  return x.level === index;
+      });
+			const val = parseInt(this.value, 10);
+			nodesOnLevel.forEach((n) => n.height = val);
+			that.rebuild();
+       }
+    });
+  }
+
+  private addPropertiesClickhandler($th: d3.Selection<INode>) {
+	  $th.select('.fa.fa-cog')
 	  .on('mouseover', function(this: HTMLElement) {
 		const $div = d3.select(this.parentElement!).select('div');
 		$div.classed('show', true);
-      })
+      });/*
 	  .on('mouseout', function(this: HTMLElement) {
 		  const $div = d3.select(this.parentElement!).select('div');
 		$div.classed('show', false);
-	  });
+	  });*/
   }
 
   private buildRow(d: INode, treeColumnCount: number) {
