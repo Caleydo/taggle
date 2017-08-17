@@ -24,7 +24,7 @@ export default class CollapsibleList {
     this.$table.html(`<thead>
                 <tr>
                   <th colspan="0">Visual Tree</th>
-                  <th>Aggr.</th> 
+                  <th>Aggr.</th>
                   <th>Vis Type</th>
                   <th>Height (px)</th>
                   <th>DOI (0...1)</th>
@@ -89,28 +89,27 @@ export default class CollapsibleList {
 
   private addNodeHeightClickhandler($tr: d3.Selection<INode>) {
 	  const that = this;
-	  $tr.selectAll('th .heightInput').on('blur', function(this: HTMLInputElement) {
-		console.log('sdf');
-    })
-    .on('keyup', function(this: HTMLInputElement, datum: INode, index: number) {
-       if((<KeyboardEvent>d3.event).key === 'Enter') {
-          const arr: INode[] = [];
-			CollapsibleList.flat(that.tree, arr);
-			const checked = <HTMLInputElement>$tr.selectAll('th .aggregatedOnly')[0][index];
-			let aggregationType: EAggregationType = EAggregationType.UNIFORM;
-			if(checked) {
-			  aggregationType = EAggregationType.AGGREGATED;
+	  $tr.selectAll('th .heightInput')
+    .on('keyup', function(this: HTMLInputElement, _, index: number) {
+      if((<KeyboardEvent>d3.event).key !== 'Enter') {
+       return;
       }
-			const nodesOnLevel = arr.filter((x) => {
-			  if(x.type == 'inner') {
-			    return x.level === index && x.aggregation === aggregationType;
+      const arr: INode[] = [];
+      CollapsibleList.flat(that.tree, arr);
+      const checked = <HTMLInputElement>$tr.selectAll('th .aggregatedOnly')[0][index];
+      let aggregationType: EAggregationType = EAggregationType.UNIFORM;
+      if(checked) {
+        aggregationType = EAggregationType.AGGREGATED;
+      }
+      const nodesOnLevel = arr.filter((x) => {
+        if(x.type === 'inner') {
+          return x.level === index && x.aggregation === aggregationType;
         }
-			  return x.level === index;
+        return x.level === index;
       });
-			const val = parseInt(this.value, 10);
-			nodesOnLevel.forEach((n) => n.height = val);
-			that.rebuild();
-       }
+      const val = parseInt(this.value, 10);
+      nodesOnLevel.forEach((n) => n.height = val);
+      that.rebuild();
     });
   }
 
