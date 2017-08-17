@@ -117,7 +117,7 @@ export default class CollapsibleList {
 	  $th.select('.fa.fa-cog')
 	  .on('mouseover', function(this: HTMLElement) {
 		const $div = d3.select(this.parentElement!).select('div');
-		$div.transition().duration(2000).styleTween('opacity', function() { return d3.interpolate("0", "1"); });
+		$div.transition().duration(2000).styleTween('opacity', function() { return d3.interpolate('0', '1'); });
 		$div.classed('show', true);
       });/*
 	  .on('mouseout', function(this: HTMLElement) {
