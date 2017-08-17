@@ -98,7 +98,7 @@ export default class CollapsibleList {
       CollapsibleList.flat(that.tree, arr);
       const checked = <HTMLInputElement>$tr.selectAll('th .aggregatedOnly')[0][index];
       let aggregationType: EAggregationType = EAggregationType.UNIFORM;
-      if(checked) {
+      if(checked.checked) {
         aggregationType = EAggregationType.AGGREGATED;
       }
       const nodesOnLevel = arr.filter((x) => {
