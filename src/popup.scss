@@ -2,8 +2,11 @@
 .popup {
   position: relative;
   display: inline-block;
-  cursor: pointer;
   user-select: none;
+
+  i {
+    cursor: pointer;
+  }
 }
 
 /* The actual popup */
@@ -23,8 +26,6 @@
   top: 40px;
 }
 
-/* Toggle this class - hide and show the popup */
-.popup .show {
-  opacity: 0;
+.popup:hover .popupcontent {
   visibility: visible;
 }

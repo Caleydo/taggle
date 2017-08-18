@@ -72,22 +72,42 @@ export default class CollapsibleList {
 
   private updatePropertyRow($table: d3.Selection<INode>, treeColumnCount: number) {
     const $tr = $table.select('thead .properties');
-    $tr.html(() =>
-      `<th>
-        <div class="popup">
-          <i class="fa fa-cog" aria-hidden="true"></i>
+    for(let i = 0; i < treeColumnCount; i++) {
+      $tr.append('th')
+    }
+    const $th = $tr.selectAll('th').html((_, index: number) =>
+      `<div class="popup">
+        <i class="fa fa-cog" aria-hidden="true"></i>
+        <form action="#">
           <div class="popupcontent">
-            <input type="text" class='heightInput'>
+            <div>
+              <label for="hi${index}1">Height (unaggr.):</label>
+              <input type="text" id="hi${index}1" class='heightInput'>
+            </div>
+            <div>
+              <label for="hi${index}2">Height (aggr): </label>
+              <input type="text" id="hi${index}2" class='heightInput'>
+            </div>
+            <div>
+              <button class="submit_button" type="submit">Send your message</button>
+            </div>
             <input type="checkbox" class='aggregatedOnly'>
           </div>
-        </div>
-	   </th>`.repeat(treeColumnCount)
+        </form>
+      </div>`
     );
-	this.addPropertiesClickhandler($tr.selectAll('th'));
-	this.addNodeHeightClickhandler($tr);
+    this.addFormhandler($th);
+	//this.addNodeHeightClickhandler($tr);
   }
 
-  private addNodeHeightClickhandler($tr: d3.Selection<INode>) {
+  private addFormhandler($th: d3.Selection<INode>) {
+    $th.selectAll('.submit_button')
+      .on('click', function(this: HTMLInputElement) {
+        console.log('posdfj');
+      });
+  }
+
+  /*private addNodeHeightClickhandler($tr: d3.Selection<INode>) {
 	  const that = this;
 	  $tr.selectAll('th .heightInput')
     .on('keyup', function(this: HTMLInputElement, _, index: number) {
@@ -111,20 +131,7 @@ export default class CollapsibleList {
       nodesOnLevel.forEach((n) => n.height = val);
       that.rebuild();
     });
-  }
-
-  private addPropertiesClickhandler($th: d3.Selection<INode>) {
-	  $th.select('.fa.fa-cog')
-	  .on('mouseover', function(this: HTMLElement) {
-		const $div = d3.select(this.parentElement!).select('div');
-		$div.transition().duration(2000).styleTween('opacity', function() { return d3.interpolate('0', '1'); });
-		$div.classed('show', true);
-      });/*
-	  .on('mouseout', function(this: HTMLElement) {
-		  const $div = d3.select(this.parentElement!).select('div');
-		$div.classed('show', false);
-	  });*/
-  }
+  }*/
 
   private buildRow(d: INode, treeColumnCount: number) {
     let resultRow = `${'<td class="hierarchy"></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
