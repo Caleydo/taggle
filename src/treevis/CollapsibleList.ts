@@ -78,7 +78,7 @@ export default class CollapsibleList {
     const $th = $tr.selectAll('th').html((_, index: number) =>
       `<div class="popup">
         <i class="fa fa-cog" aria-hidden="true"></i>
-        <form action="#">
+        <form id="property_form" action="#">
           <div class="popupcontent">
             <div>
               <label for="hi${index}1">Height (unaggr.):</label>
@@ -86,7 +86,7 @@ export default class CollapsibleList {
             </div>
             <div>
               <label for="hi${index}2">Height (aggr): </label>
-              <input type="text" id="hi${index}2" class='heightInput'>
+              <input type="text" id="hi${index}2" class='aggrheightInput'>
             </div>
             <div>
               <button class="submit_button" type="submit">Send your message</button>
@@ -101,37 +101,31 @@ export default class CollapsibleList {
   }
 
   private addFormhandler($th: d3.Selection<INode>) {
-    $th.selectAll('.submit_button')
-      .on('click', function(this: HTMLInputElement) {
-        console.log('posdfj');
+    const that = this;
+    $th.selectAll('#property_form')
+      .on('submit', function(this: HTMLFormElement, _, __, index: number) {
+        const strVal0 = d3.select(this).select('.heightInput').property('value');
+        const unaggrVal = parseInt(strVal0, 10);
+
+        const strVal1 = d3.select(this).select('.aggrheightInput').property('value');
+        const aggrVal = parseInt(strVal1, 10);
+
+        const arr: INode[] = [];
+        CollapsibleList.flat(that.tree, arr);
+
+        if(!isNaN(unaggrVal)) {
+          const arrLeaves = arr.filter((n) => n.level === index && n.type === 'leaf');
+          arrLeaves.forEach((n) => n.height = unaggrVal);
+        }
+
+        if(!isNaN(aggrVal)) {
+          const arrInners = arr.filter((n) => n.level === index && n.type === 'inner');
+          arrInners.forEach((n: InnerNode) => n.height = n.aggregation === EAggregationType.AGGREGATED ? aggrVal : unaggrVal);
+        }
+        that.rebuild();
+        return false;
       });
   }
-
-  /*private addNodeHeightClickhandler($tr: d3.Selection<INode>) {
-	  const that = this;
-	  $tr.selectAll('th .heightInput')
-    .on('keyup', function(this: HTMLInputElement, _, index: number) {
-      if((<KeyboardEvent>d3.event).key !== 'Enter') {
-       return;
-      }
-      const arr: INode[] = [];
-      CollapsibleList.flat(that.tree, arr);
-      const checked = <HTMLInputElement>$tr.selectAll('th .aggregatedOnly')[0][index];
-      let aggregationType: EAggregationType = EAggregationType.UNIFORM;
-      if(checked.checked) {
-        aggregationType = EAggregationType.AGGREGATED;
-      }
-      const nodesOnLevel = arr.filter((x) => {
-        if(x.type === 'inner') {
-          return x.level === index && x.aggregation === aggregationType;
-        }
-        return x.level === index;
-      });
-      const val = parseInt(this.value, 10);
-      nodesOnLevel.forEach((n) => n.height = val);
-      that.rebuild();
-    });
-  }*/
 
   private buildRow(d: INode, treeColumnCount: number) {
     let resultRow = `${'<td class="hierarchy"></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
