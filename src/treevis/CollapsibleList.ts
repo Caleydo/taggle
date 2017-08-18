@@ -73,7 +73,7 @@ export default class CollapsibleList {
   private updatePropertyRow($table: d3.Selection<INode>, treeColumnCount: number) {
     const $tr = $table.select('thead .properties');
     for(let i = 0; i < treeColumnCount; i++) {
-      $tr.append('th')
+      $tr.append('th');
     }
     const $th = $tr.selectAll('th').html((_, index: number) =>
       `<div class="popup">
@@ -89,15 +89,13 @@ export default class CollapsibleList {
               <input type="text" id="hi${index}2" class='aggrheightInput'>
             </div>
             <div>
-              <button class="submit_button" type="submit">Send your message</button>
+              <button class="submit_button" type="submit">Apply</button>
             </div>
-            <input type="checkbox" class='aggregatedOnly'>
           </div>
         </form>
       </div>`
     );
     this.addFormhandler($th);
-	//this.addNodeHeightClickhandler($tr);
   }
 
   private addFormhandler($th: d3.Selection<INode>) {
