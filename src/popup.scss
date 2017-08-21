@@ -18,12 +18,20 @@
   text-align: center;
   border-radius: 6px;
   padding: 8px 0;
-  position: relative;
-  z-index: 1;
-  bottom: 125%;
+  position: absolute;
+  z-index: 2;
   left: 50%;
-  margin-left: -80px;
-  top: 40px;
+  margin-left: -10px;
+}
+
+.popupcontent::after {
+  z-index: -1;
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -10px;
+  bottom: -10px;
+  left: -10px;
 }
 
 .popup:hover .popupcontent {

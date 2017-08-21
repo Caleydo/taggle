@@ -78,8 +78,8 @@ export default class CollapsibleList {
     const $th = $tr.selectAll('th').html((_, index: number) =>
       `<div class="popup">
         <i class="fa fa-cog" aria-hidden="true"></i>
-        <form id="property_form" action="#">
-          <div class="popupcontent">
+        <div class="popupcontent">
+          <form action="#" class="property_form">
             <div>
               <label for="hi${index}1">Height (unaggr.):</label>
               <input type="text" id="hi${index}1" class='heightInput'>
@@ -91,8 +91,8 @@ export default class CollapsibleList {
             <div>
               <button class="submit_button" type="submit">Apply</button>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>`
     );
     this.addFormhandler($th);
@@ -100,7 +100,7 @@ export default class CollapsibleList {
 
   private addFormhandler($th: d3.Selection<INode>) {
     const that = this;
-    $th.selectAll('#property_form')
+    $th.selectAll('.property_form')
       .on('submit', function(this: HTMLFormElement, _, __, index: number) {
         const strVal0 = d3.select(this).select('.heightInput').property('value');
         const unaggrVal = parseInt(strVal0, 10);
@@ -123,7 +123,7 @@ export default class CollapsibleList {
           arrInners.forEach((n: InnerNode) => n.height = n.aggregation === EAggregationType.AGGREGATED ? aggrVal : n.height);
         }
         that.rebuild();
-        (<MouseEvent>d3.event).stopPropagation();
+        //(<MouseEvent>d3.event).stopPropagation();
         return false;
       });
   }
