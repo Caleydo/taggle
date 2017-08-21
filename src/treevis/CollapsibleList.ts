@@ -37,7 +37,7 @@ export default class CollapsibleList {
 
   render(root: InnerNode) {
 	  this.tree = root;
-    const buildTable = ($table: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
+    const buildTableBody = ($table: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
       console.assert($table && arr && treeColumnCount > -1);
       $table.select('thead tr th').attr('colspan', treeColumnCount);
       const $tr = $table.select('tbody').selectAll('tr')
@@ -48,7 +48,6 @@ export default class CollapsibleList {
         .classed('collapsed', false);
 
       // update phase
-      this.updatePropertyRow($table, treeColumnCount);
       $tr.attr('data-level', (d) => d.level);
       $tr.attr('data-type', (d) => d.type);
       const $trComplete = $tr.html((d) => this.buildRow(d, treeColumnCount));
@@ -67,15 +66,23 @@ export default class CollapsibleList {
 
     const arr: INode[] = [];
     const treeDepth = CollapsibleList.flat(root, arr); // convert tree to list
-    buildTable(this.$table, arr, treeDepth+1);
+    const treeColumnCount = treeDepth + 1;
+    this.updatePropertyRow(treeColumnCount);
+    buildTableBody(this.$table, arr, treeColumnCount);
   }
 
-  private updatePropertyRow($table: d3.Selection<INode>, treeColumnCount: number) {
-    const $tr = $table.select('thead .properties');
+  private updatePropertyRow(treeColumnCount: number) {
+    const $tr = this.$table.select('thead .properties');
+    let $th = $tr.selectAll('th');
+    if($th[0].length === treeColumnCount) {
+      return;
+    }
+    // rebuild the property row if the tree depth has changed
+    $th.remove();
     for(let i = 0; i < treeColumnCount; i++) {
       $tr.append('th');
     }
-    const $th = $tr.selectAll('th').html((_, index: number) =>
+    $th = $tr.selectAll('th').html((_, index: number) =>
       `<div class="popup">
         <i class="fa fa-cog" aria-hidden="true"></i>
         <div class="popupcontent">
@@ -123,7 +130,6 @@ export default class CollapsibleList {
           arrInners.forEach((n: InnerNode) => n.height = n.aggregation === EAggregationType.AGGREGATED ? aggrVal : n.height);
         }
         that.rebuild();
-        //(<MouseEvent>d3.event).stopPropagation();
         return false;
       });
   }
