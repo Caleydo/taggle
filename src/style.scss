@@ -4,6 +4,11 @@ $engine_assets: "~lineupengine/src/assets";
 
 @import "~lineupengine/src/style";
 
+body {
+  font-family: "Yantramanav", "Arial", sans-serif;
+  font-size: 95%;
+}
+
 .lineup-engine {
   position: absolute;
   width: 97vw;
