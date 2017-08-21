@@ -111,16 +111,19 @@ export default class CollapsibleList {
         const arr: INode[] = [];
         CollapsibleList.flat(that.tree, arr);
 
+        const arrLeaves = arr.filter((n) => n.level === index && n.type === 'leaf');
+        const arrInners = arr.filter((n) => n.level === index && n.type === 'inner');
+
         if(!isNaN(unaggrVal)) {
-          const arrLeaves = arr.filter((n) => n.level === index && n.type === 'leaf');
           arrLeaves.forEach((n) => n.height = unaggrVal);
+          arrInners.forEach((n: InnerNode) => n.height = n.aggregation !== EAggregationType.AGGREGATED ? unaggrVal : n.aggregatedHeight);
         }
 
         if(!isNaN(aggrVal)) {
-          const arrInners = arr.filter((n) => n.level === index && n.type === 'inner');
-          arrInners.forEach((n: InnerNode) => n.height = n.aggregation === EAggregationType.AGGREGATED ? aggrVal : unaggrVal);
+          arrInners.forEach((n: InnerNode) => n.height = n.aggregation === EAggregationType.AGGREGATED ? aggrVal : n.height);
         }
         that.rebuild();
+        (<MouseEvent>d3.event).stopPropagation();
         return false;
       });
   }
