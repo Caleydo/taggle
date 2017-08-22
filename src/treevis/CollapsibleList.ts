@@ -74,7 +74,7 @@ export default class CollapsibleList {
   private updatePropertyRow(treeColumnCount: number) {
     const $tr = this.$table.select('thead .properties');
     let $th = $tr.selectAll('th');
-    // rebuild the property row if the tree depth has changed
+    // only rebuild the property row if the tree depth has changed
     if($th[0].length === treeColumnCount) {
       return;
     }

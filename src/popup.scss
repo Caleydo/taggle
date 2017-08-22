@@ -28,10 +28,9 @@
   z-index: -1;
   content: '';
   position: absolute;
-  top: -50px;
-  right: -50px;
-  bottom: -50px;
-  left: -50px;
+  right: -200px;
+  bottom: -200px;
+  left: -200px;
 }
 
 .popup:hover .popupcontent {
