@@ -31,6 +31,53 @@ export interface IRuleSet {
   };
 }
 
+interface ITaggleRuleSet extends IRuleSet {
+  spacefilling: boolean;
+  proportional: boolean;
+  atomicItemHeight: number;
+  aggrItemHeight: number;
+}
+
+const taggleRule1: ITaggleRuleSet = {
+  spacefilling: false,
+  proportional: false,
+  atomicItemHeight: 20,
+  aggrItemHeight: 40,
+
+  stratificationLevels: +Infinity,
+  sortLevels: +Infinity,
+  leaf: {
+    height: 20,
+    visType: 'default'
+  },
+  inner: {
+    aggregatedHeight: 100,
+    visType: 'default'
+  }
+};
+
+/*const taggleRule2: ATaggleRuleSet = {
+  spacefilling: false,
+  proportional: false,
+  atomicItemHeight: 20,
+  aggrItemHeight: 40
+};
+
+const taggleRule3: ATaggleRuleSet = {
+  spacefilling: false,
+  proportional: false,
+  atomicItemHeight: 20,
+  aggrItemHeight: 40
+};
+
+const taggleRule4: ATaggleRuleSet = {
+  spacefilling: false,
+  proportional: false,
+  atomicItemHeight: 20,
+  aggrItemHeight: 40
+};*/
+
+
 export const defaultRuleSet: IRuleSet = {
   stratificationLevels: +Infinity,
   sortLevels: +Infinity,
@@ -128,5 +175,6 @@ export const ruleSets = [
   { name: 'taggle', ruleSet: defaultRuleSet},
   { name: 'table', ruleSet: tableRuleSet},
   { name: 'compact', ruleSet: compactRuleSet},
-  { name: 'tablelens', ruleSet: tableLensRuleSet}
+  { name: 'tablelens', ruleSet: tableLensRuleSet},
+  { name: 'tablelens', ruleSet: taggleRule1}
 ];
