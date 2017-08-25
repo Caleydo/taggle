@@ -34,16 +34,13 @@ export interface IRuleSet {
 interface ITaggleRuleSet extends IRuleSet {
   spacefilling: boolean;
   proportional: boolean;
-  atomicItemHeight: number;
-  aggrItemHeight: number;
 }
 
-const taggleRule1: ITaggleRuleSet = {
+const taggleRuleSet1: ITaggleRuleSet = {
   spacefilling: false,
   proportional: false,
-  atomicItemHeight: 20,
-  aggrItemHeight: 40,
 
+  //Todo try to put this code in an abstact class
   stratificationLevels: +Infinity,
   sortLevels: +Infinity,
   leaf: {
@@ -51,19 +48,38 @@ const taggleRule1: ITaggleRuleSet = {
     visType: 'default'
   },
   inner: {
-    aggregatedHeight: 100,
+    aggregatedHeight: 40,
     visType: 'default'
   }
 };
 
-/*const taggleRule2: ATaggleRuleSet = {
+const taggleRuleSet2: ITaggleRuleSet = {
   spacefilling: false,
-  proportional: false,
-  atomicItemHeight: 20,
-  aggrItemHeight: 40
+  proportional: true,
+
+  //Todo add scaling factor to force it to a minimum height
+  //Todo try to put this code in an abstact class
+  stratificationLevels: +Infinity,
+  sortLevels: +Infinity,
+  leaf: {
+    height: 1,
+    visType: 'default'
+  },
+  inner: {
+    aggregatedHeight: (node: InnerNode)=> {
+      let accumulatedHeight = 0;
+       visit<any>(node, () => {
+        return true;
+      }, () => {
+        accumulatedHeight += 1;
+      });
+      return accumulatedHeight;
+    },
+    visType: 'default'
+  }
 };
 
-const taggleRule3: ATaggleRuleSet = {
+/*const taggleRule3: ATaggleRuleSet = {
   spacefilling: false,
   proportional: false,
   atomicItemHeight: 20,
@@ -76,7 +92,6 @@ const taggleRule4: ATaggleRuleSet = {
   atomicItemHeight: 20,
   aggrItemHeight: 40
 };*/
-
 
 export const defaultRuleSet: IRuleSet = {
   stratificationLevels: +Infinity,
@@ -176,5 +191,6 @@ export const ruleSets = [
   { name: 'table', ruleSet: tableRuleSet},
   { name: 'compact', ruleSet: compactRuleSet},
   { name: 'tablelens', ruleSet: tableLensRuleSet},
-  { name: 'tablelens', ruleSet: taggleRule1}
+  { name: 'taggle ruleset 1', ruleSet: taggleRuleSet1},
+  { name: 'taggle ruleset 2', ruleSet: taggleRuleSet2}
 ];
