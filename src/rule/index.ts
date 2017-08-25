@@ -4,7 +4,6 @@
 import LeafNode from '../tree/LeafNode';
 import InnerNode from '../tree/InnerNode';
 import {visit} from '../tree/utils';
-
 export {default as createChooser} from './RuleSwitcher';
 
 export interface IRuleSet {
@@ -20,7 +19,7 @@ export interface IRuleSet {
    */
   sortLevels: number;
 
-  leaf: {
+  leaf:{
     height: number|((node: LeafNode<any>)=>number);
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
   };
@@ -32,14 +31,9 @@ export interface IRuleSet {
 }
 
 interface ITaggleRuleSet extends IRuleSet {
-  spacefilling: boolean;
-  proportional: boolean;
 }
 
 const taggleRuleSet1: ITaggleRuleSet = {
-  spacefilling: false,
-  proportional: false,
-
   //Todo try to put this code in an abstact class
   stratificationLevels: +Infinity,
   sortLevels: +Infinity,
@@ -54,9 +48,6 @@ const taggleRuleSet1: ITaggleRuleSet = {
 };
 
 const taggleRuleSet2: ITaggleRuleSet = {
-  spacefilling: false,
-  proportional: true,
-
   //Todo add scaling factor to force it to a minimum height
   //Todo try to put this code in an abstact class
   stratificationLevels: +Infinity,
@@ -79,12 +70,32 @@ const taggleRuleSet2: ITaggleRuleSet = {
   }
 };
 
-/*const taggleRule3: ATaggleRuleSet = {
-  spacefilling: false,
-  proportional: false,
-  atomicItemHeight: 20,
-  aggrItemHeight: 40
+/*
+const taggleRuleSet3: ITaggleRuleSet = {
+  stratificationLevels: +Infinity,
+  sortLevels: +Infinity,
+  leaf: {
+    height: (node: LeafNode<any>) => {
+      let visibleHeight = 400;
+      getVisibleHeight();
+      return 0;
+    },
+    visType: 'default'
+  },
+  inner: {
+    aggregatedHeight: (node: InnerNode)=> {
+      let accumulatedHeight = 0;
+       visit<any>(node, () => {
+        return true;
+      }, () => {
+        accumulatedHeight += 1;
+      });
+      return accumulatedHeight;
+    },
+    visType: 'default'
+  }
 };
+
 
 const taggleRule4: ATaggleRuleSet = {
   spacefilling: false,
@@ -191,6 +202,6 @@ export const ruleSets = [
   { name: 'table', ruleSet: tableRuleSet},
   { name: 'compact', ruleSet: compactRuleSet},
   { name: 'tablelens', ruleSet: tableLensRuleSet},
-  { name: 'taggle ruleset 1', ruleSet: taggleRuleSet1},
-  { name: 'taggle ruleset 2', ruleSet: taggleRuleSet2}
+  { name: 'not_spacefilling not_proportional', ruleSet: taggleRuleSet1},
+  { name: 'not_spacefilling proportional', ruleSet: taggleRuleSet2}
 ];

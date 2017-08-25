@@ -6,6 +6,7 @@ import DebugInterface from './DebugInterface';
 import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet} from './rule/index';
 import InnerNode from './tree/InnerNode';
 import {fromArray} from './tree/utils';
+import {createTaggleRuleSets, updateRuleSets} from './rule/TaggleRuleSet';
 
 export interface ITaggleRenderer {
   initTree(tree: InnerNode, ruleSet: IRuleSet): void;
@@ -42,6 +43,7 @@ export default class App {
     const defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
     this.tree = fromArray(data, defaultRowHeight);
     this.renderer.initTree(this.tree, this.ruleSet);
+    createTaggleRuleSets(this.tree, parent)
     applyStaticRuleSet(this.ruleSet, this.tree);
 
     this.debug = new DebugInterface(parent, () => this.update(), (rule) => {
@@ -52,6 +54,7 @@ export default class App {
   }
 
   update() {
+    updateRuleSets(this.tree);
     applyDynamicRuleSet(this.ruleSet, this.tree);
     this.renderer.rebuild(this.tree, this.ruleSet);
     this.debug.update(this.tree);
