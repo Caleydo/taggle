@@ -1,4 +1,4 @@
-import {toArray, flatLeaves, visit} from '../tree/utils';
+import {toArray, flatLeaves} from '../tree/utils';
 import InnerNode from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {EAggregationType} from '../tree';
@@ -50,13 +50,19 @@ class TaggleRuleSet2 implements IRuleSet  {
     visType: 'default'|'mean'|((node: InnerNode) => 'default'|'mean');
   } = {
     aggregatedHeight: (node: InnerNode) => {
-      let accumulatedHeight = 0;
-       visit<any>(node, () => {
-        return true;
-      }, () => {
-        accumulatedHeight += 1;
-      });
-      return accumulatedHeight;
+      if(node.aggregation !== EAggregationType.AGGREGATED) {
+        return node.aggregatedHeight;
+      }
+      let height = flatLeaves(node).length;
+      if(height < minAggrHeight) {
+        console.error(`Aggr item height (${height} pixels) is smaller than minimum height (${minAggrHeight} pixels) => set it to minimum height`);
+        height = minAggrHeight;
+      }
+      if(height > maxAggrHeight) {
+        console.error(`Aggr item height (${height} pixels) is greater than maximum height (${maxAggrHeight} pixels) => set it to maximum height`);
+        height = maxAggrHeight;
+      }
+      return height
     },
     visType: 'default'
   };
@@ -166,11 +172,10 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
 }
 
 export function createTaggleRuleSets(root: InnerNode) {
-
   ruleSets.push({name: 'not_spacefilling not_proportional', ruleSet: new TaggleRuleSet1()});
-  ruleSets.push({ name: 'not_spacefilling proportional', ruleSet: new TaggleRuleSet2()});
-  ruleSets.push({ name: 'spacefilling not_proportional', ruleSet: new TaggleRuleSet3(root)});
-  ruleSets.push({ name: 'spacefilling proportional', ruleSet: new TaggleRuleSet4(root)});
+  ruleSets.push({name: 'not_spacefilling proportional', ruleSet: new TaggleRuleSet2()});
+  ruleSets.push({name: 'spacefilling not_proportional', ruleSet: new TaggleRuleSet3(root)});
+  ruleSets.push({name: 'spacefilling proportional', ruleSet: new TaggleRuleSet4(root)});
 }
 
 export function updateRuleSets(root: InnerNode, params: any[]) {
