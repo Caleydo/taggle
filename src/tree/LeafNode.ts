@@ -8,9 +8,6 @@ export default class LeafNode<T> extends ANode implements IDataRow {
   doi: number = 0.5;
   static readonly visTypes = ['default', 'compact'];
 
-  minHeight: number = 1;
-  maxHeight: number = 20;
-
   constructor(public readonly item: T, public readonly dataIndex: number) {
     super();
   }
