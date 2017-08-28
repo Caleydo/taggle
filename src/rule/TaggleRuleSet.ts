@@ -8,7 +8,6 @@ interface IUpdate {
   update(root: InnerNode, params: any[]): void;
 }
 
-
 const minLeafHeight: number = 1;
 const maxLeafHeight: number = 20;
 
@@ -37,16 +36,16 @@ class TaggleRuleSet31 implements IRuleSet, IUpdate {
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
   } = {
     height: () => {
-      let x: number = this.unaggrItemCount > 0 ? (this.visibleHeight - this.aggrItemCount * this.inner.aggregatedHeight) / this.unaggrItemCount : 1;
-      if(x < minLeafHeight) {
-        console.error(`Item height is smaller than minimum height (${minLeafHeight} pixels) => set it to minimum height`);
-        x = minLeafHeight;
+      let height: number = this.unaggrItemCount > 0 ? (this.visibleHeight - this.aggrItemCount * this.inner.aggregatedHeight) / this.unaggrItemCount : 1;
+      if(height < minLeafHeight) {
+        console.error(`Item height (${height} pixels) is smaller than minimum height (${minLeafHeight} pixels) => set it to minimum height`);
+        height = minLeafHeight;
       }
-      if(x > maxLeafHeight) {
-        console.error(`Item height is greater than maximum height (${maxLeafHeight} pixels) => set it to maximum height`);
-        x = maxLeafHeight;
+      if(height > maxLeafHeight) {
+        console.error(`Item height (${height} pixels) is greater than maximum height (${maxLeafHeight} pixels) => set it to maximum height`);
+        height = maxLeafHeight;
       }
-      return x;
+      return height;
     },
     visType: 'default'
   };
@@ -80,16 +79,16 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
   } = {
     height: () => {
-      let x: number = this.itemCount > 0 ? this.visibleHeight / this.itemCount : 1;
-      if(x < minLeafHeight) {
-        console.error(`Item height is smaller than minimum height (${minLeafHeight} pixels) => set it to minimum height`);
-        x = minLeafHeight;
+      let height: number = this.itemCount > 0 ? this.visibleHeight / this.itemCount : 1;
+      if(height < minLeafHeight) {
+        console.error(`Item height (${height} pixels) is smaller than minimum height (${minLeafHeight} pixels) => set it to minimum height`);
+        height = minLeafHeight;
       }
-      if(x > maxLeafHeight) {
-        console.error(`Item height is greater than maximum height (${maxLeafHeight} pixels) => set it to maximum height`);
-        x = maxLeafHeight;
+      if(height > maxLeafHeight) {
+        console.error(`Item height (${height} pixels) is greater than maximum height (${maxLeafHeight} pixels) => set it to maximum height`);
+        height = maxLeafHeight;
       }
-      return x;
+      return height;
     },
     visType: 'default'
   };
@@ -103,16 +102,16 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
         return node.aggregatedHeight;
       }
       const itemsInGroup = flatLeaves(node).length;
-      let x: number = this.itemCount > 0 ? this.visibleHeight / this.itemCount * itemsInGroup : 1;
-      if(x < minAggrHeight) {
-        console.error(`Item height is smaller than minimum height (${minAggrHeight} pixels) => set it to minimum height`);
-        x = minAggrHeight;
+      let height: number = this.itemCount > 0 ? this.visibleHeight / this.itemCount * itemsInGroup : 1;
+      if(height < minAggrHeight) {
+        console.error(`Aggr item height (${height} pixels) is smaller than minimum height (${minAggrHeight} pixels) => set it to minimum height`);
+        height = minAggrHeight;
       }
-      if(x > maxAggrHeight) {
-        console.error(`Item height is greater than maximum height (${maxAggrHeight} pixels) => set it to maximum height`);
-        x = maxAggrHeight;
+      if(height > maxAggrHeight) {
+        console.error(`Aggr item height (${height} pixels) is greater than maximum height (${maxAggrHeight} pixels) => set it to maximum height`);
+        height = maxAggrHeight;
       }
-      return x;
+      return height;
     },
     visType: 'default'
   };

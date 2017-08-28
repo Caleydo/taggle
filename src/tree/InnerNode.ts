@@ -13,7 +13,7 @@ export default class InnerNode extends ANode {
   readonly type: 'inner' = 'inner';
   children: INode[] = [];
   aggregation: EAggregationType = EAggregationType.UNIFORM;
-  aggregatedHeight = 100;
+  aggregatedHeight = 40;
   aggregatedDoi = 0.5;
   static readonly visTypes = ['default', 'mean'];
 
