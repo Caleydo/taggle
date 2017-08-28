@@ -5,24 +5,24 @@ import {EAggregationType} from '../tree';
 import {ruleSets, IRuleSet} from './';
 
 interface IUpdate {
-  update(root: InnerNode): void;
+  update(root: InnerNode, params: any[]): void;
 }
 
 class TaggleRuleSet31 implements IRuleSet, IUpdate {
-  readonly visibleHeight: number;
+  visibleHeight: number;
   aggrItemCount: number;
   unaggrItemCount: number;
 
-  constructor(root: InnerNode, visibleHeight: number) {
-    this.visibleHeight = visibleHeight;
-    this.update(root);
+  constructor(root: InnerNode) {
+    this.update(root, [400]); // arbitrary constant just for initialization
   }
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
 
-  update(root: InnerNode) {
+  update(root: InnerNode, params: any[]) {
+    this.visibleHeight = params[0];
     this.aggrItemCount = toArray(root).filter((n) => n.type === 'inner' && (<InnerNode>n).aggregation === EAggregationType.AGGREGATED).length;
-    this.unaggrItemCount = toArray(root).filter((n) => n.type === 'leaf').length;
+    this.unaggrItemCount = toArray(root).filter((n) => n.type === 'leaf' && !n.parents.find((n2) => n2.aggregation === EAggregationType.AGGREGATED)).length;
   }
 
   leaf : {
@@ -30,9 +30,9 @@ class TaggleRuleSet31 implements IRuleSet, IUpdate {
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
   } = {
     height: () => {
-      let x: number = (this.visibleHeight - this.aggrItemCount * this.inner.aggregatedHeight) / this.unaggrItemCount;
+      let x: number = this.unaggrItemCount > 0 ? (this.visibleHeight - this.aggrItemCount * this.inner.aggregatedHeight) / this.unaggrItemCount : 1;
       if(x < 1) {
-        console.error('Space filling not possible. Item has subpixel size.')
+        console.error('Space filling not possible. Item has subpixel size.');
         x = 1;
       }
       return x;
@@ -49,22 +49,15 @@ class TaggleRuleSet31 implements IRuleSet, IUpdate {
   };
 }
 
-export function createTaggleRuleSets(root: InnerNode, parent: HTMLElement)
-{
-  console.log(parent);
-  const tg31 = new TaggleRuleSet31(root, inViewport(null));
+export function createTaggleRuleSets(root: InnerNode) {
+  const tg31 = new TaggleRuleSet31(root);
   ruleSets.push({ name: 'spacefilling not_proportional', ruleSet: tg31});
 }
 
-function inViewport($el: any) {
-  console.log($el);
-   return 100;
-}
-
-export function updateRuleSets(root: InnerNode) {
+export function updateRuleSets(root: InnerNode, params: any[]) {
   ruleSets.forEach((r) => {
     if(isUpdate(r.ruleSet)) {
-      r.ruleSet.update(root);
+      r.ruleSet.update(root, params);
     }
   });
 }

@@ -30,10 +30,7 @@ export interface IRuleSet {
   };
 }
 
-interface ITaggleRuleSet extends IRuleSet {
-}
-
-const taggleRuleSet1: ITaggleRuleSet = {
+const taggleRuleSet1: IRuleSet = {
   //Todo try to put this code in an abstact class
   stratificationLevels: +Infinity,
   sortLevels: +Infinity,
@@ -47,7 +44,7 @@ const taggleRuleSet1: ITaggleRuleSet = {
   }
 };
 
-const taggleRuleSet2: ITaggleRuleSet = {
+const taggleRuleSet2: IRuleSet = {
   //Todo add scaling factor to force it to a minimum height
   //Todo try to put this code in an abstact class
   stratificationLevels: +Infinity,
@@ -57,7 +54,7 @@ const taggleRuleSet2: ITaggleRuleSet = {
     visType: 'default'
   },
   inner: {
-    aggregatedHeight: (node: InnerNode)=> {
+    aggregatedHeight: (node: InnerNode) => {
       let accumulatedHeight = 0;
        visit<any>(node, () => {
         return true;
