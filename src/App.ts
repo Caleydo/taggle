@@ -52,6 +52,8 @@ export default class App {
       applyStaticRuleSet(rule, this.tree);
       this.update();
     });
+
+    window.addEventListener('resize', () => this.update());
   }
 
   update() {

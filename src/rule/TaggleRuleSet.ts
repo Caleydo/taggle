@@ -37,7 +37,7 @@ class TaggleRuleSet31 implements IRuleSet, IUpdate {
       }
       if(x > node.maxHeight) {
         console.error(`Item height is greater than maximum height (${node.maxHeight} pixels) => set it to maximum height`);
-        x = node.maxHeight
+        x = node.maxHeight;
       }
       return x;
     },
