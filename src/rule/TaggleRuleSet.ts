@@ -1,4 +1,4 @@
-import {toArray, flatLeaves} from '../tree/utils';
+import {toArray, flatLeaves, visit} from '../tree/utils';
 import InnerNode from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {EAggregationType} from '../tree';
@@ -14,7 +14,55 @@ const maxLeafHeight: number = 20;
 const minAggrHeight: number = 20;
 const maxAggrHeight: number = 500;
 
-class TaggleRuleSet31 implements IRuleSet, IUpdate {
+class TaggleRuleSet1 implements IRuleSet {
+  stratificationLevels = +Infinity;
+  sortLevels = +Infinity;
+  leaf: {
+    height: number|((node: LeafNode<any>)=>number);
+    visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
+  } = {
+    height: 20,
+    visType: 'default'
+  };
+
+  inner: {
+    aggregatedHeight: number;
+    visType: 'default'|'mean'|((node: InnerNode) => 'default'|'mean');
+  } = {
+    aggregatedHeight: 40,
+    visType: 'default'
+  };
+}
+
+class TaggleRuleSet2 implements IRuleSet  {
+  stratificationLevels = +Infinity;
+  sortLevels = +Infinity;
+  leaf: {
+    height: number|((node: LeafNode<any>)=>number);
+    visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
+  } = {
+    height: 1,
+    visType: 'default'
+  };
+
+  inner: {
+    aggregatedHeight: number|((node: InnerNode)=>number);
+    visType: 'default'|'mean'|((node: InnerNode) => 'default'|'mean');
+  } = {
+    aggregatedHeight: (node: InnerNode) => {
+      let accumulatedHeight = 0;
+       visit<any>(node, () => {
+        return true;
+      }, () => {
+        accumulatedHeight += 1;
+      });
+      return accumulatedHeight;
+    },
+    visType: 'default'
+  };
+};
+
+class TaggleRuleSet3 implements IRuleSet, IUpdate {
   visibleHeight: number;
   aggrItemCount: number;
   unaggrItemCount: number;
@@ -118,11 +166,11 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
 }
 
 export function createTaggleRuleSets(root: InnerNode) {
-  const tg31 = new TaggleRuleSet31(root);
-  ruleSets.push({ name: 'spacefilling not_proportional', ruleSet: tg31});
 
-  const tg41 = new TaggleRuleSet4(root);
-  ruleSets.push({ name: 'spacefilling proportional', ruleSet: tg41});
+  ruleSets.push({name: 'not_spacefilling not_proportional', ruleSet: new TaggleRuleSet1()});
+  ruleSets.push({ name: 'not_spacefilling proportional', ruleSet: new TaggleRuleSet2()});
+  ruleSets.push({ name: 'spacefilling not_proportional', ruleSet: new TaggleRuleSet3(root)});
+  ruleSets.push({ name: 'spacefilling proportional', ruleSet: new TaggleRuleSet4(root)});
 }
 
 export function updateRuleSets(root: InnerNode, params: any[]) {

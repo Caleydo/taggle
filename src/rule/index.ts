@@ -30,77 +30,6 @@ export interface IRuleSet {
   };
 }
 
-const taggleRuleSet1: IRuleSet = {
-  //Todo try to put this code in an abstact class
-  stratificationLevels: +Infinity,
-  sortLevels: +Infinity,
-  leaf: {
-    height: 20,
-    visType: 'default'
-  },
-  inner: {
-    aggregatedHeight: 40,
-    visType: 'default'
-  }
-};
-
-const taggleRuleSet2: IRuleSet = {
-  //Todo add scaling factor to force it to a minimum height
-  //Todo try to put this code in an abstact class
-  stratificationLevels: +Infinity,
-  sortLevels: +Infinity,
-  leaf: {
-    height: 1,
-    visType: 'default'
-  },
-  inner: {
-    aggregatedHeight: (node: InnerNode) => {
-      let accumulatedHeight = 0;
-       visit<any>(node, () => {
-        return true;
-      }, () => {
-        accumulatedHeight += 1;
-      });
-      return accumulatedHeight;
-    },
-    visType: 'default'
-  }
-};
-
-/*
-const taggleRuleSet3: ITaggleRuleSet = {
-  stratificationLevels: +Infinity,
-  sortLevels: +Infinity,
-  leaf: {
-    height: (node: LeafNode<any>) => {
-      let visibleHeight = 400;
-      getVisibleHeight();
-      return 0;
-    },
-    visType: 'default'
-  },
-  inner: {
-    aggregatedHeight: (node: InnerNode)=> {
-      let accumulatedHeight = 0;
-       visit<any>(node, () => {
-        return true;
-      }, () => {
-        accumulatedHeight += 1;
-      });
-      return accumulatedHeight;
-    },
-    visType: 'default'
-  }
-};
-
-
-const taggleRule4: ATaggleRuleSet = {
-  spacefilling: false,
-  proportional: false,
-  atomicItemHeight: 20,
-  aggrItemHeight: 40
-};*/
-
 export const defaultRuleSet: IRuleSet = {
   stratificationLevels: +Infinity,
   sortLevels: +Infinity,
@@ -198,7 +127,5 @@ export const ruleSets = [
   { name: 'taggle', ruleSet: defaultRuleSet},
   { name: 'table', ruleSet: tableRuleSet},
   { name: 'compact', ruleSet: compactRuleSet},
-  { name: 'tablelens', ruleSet: tableLensRuleSet},
-  { name: 'not_spacefilling not_proportional', ruleSet: taggleRuleSet1},
-  { name: 'not_spacefilling proportional', ruleSet: taggleRuleSet2}
+  { name: 'tablelens', ruleSet: tableLensRuleSet}
 ];
