@@ -29,11 +29,15 @@ class TaggleRuleSet31 implements IRuleSet, IUpdate {
     height: number|((node: LeafNode<any>)=>number);
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
   } = {
-    height: () => {
+    height: (node) => {
       let x: number = this.unaggrItemCount > 0 ? (this.visibleHeight - this.aggrItemCount * this.inner.aggregatedHeight) / this.unaggrItemCount : 1;
-      if(x < 1) {
-        console.error('Space filling not possible. Item has subpixel size.');
-        x = 1;
+      if(x < node.minHeight) {
+        console.error(`Item height is smaller than minimum height (${node.minHeight} pixels) => set it to minimum height`);
+        x = node.minHeight;
+      }
+      if(x > node.maxHeight) {
+        console.error(`Item height is greater than maximum height (${node.maxHeight} pixels) => set it to maximum height`);
+        x = node.maxHeight
       }
       return x;
     },
