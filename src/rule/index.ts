@@ -30,9 +30,9 @@ export interface IRuleSet {
   };
 }
 
-export const defaultRuleSet: IRuleSet = {
-  stratificationLevels: +Infinity,
-  sortLevels: +Infinity,
+const tableRuleSet: IRuleSet = {
+  stratificationLevels: 0,
+  sortLevels: 1,
   leaf: {
     height: 20,
     visType: 'default'
@@ -43,12 +43,9 @@ export const defaultRuleSet: IRuleSet = {
   }
 };
 
-export const tableRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
-  stratificationLevels: 0,
-  sortLevels: 1
-});
+export const defaultRuleSet = tableRuleSet;
 
-export const compactRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
+const compactRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
   stratificationLevels: 0,
   sortLevels: 1,
   leaf: {
@@ -64,7 +61,7 @@ function tableLensHeight(distance: number) {
   return Math.max(2, 40 * Math.sin(Math.PI / 2 * ((7 - Math.min(distance, 7)) / 7)));
 }
 
-export const tableLensRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
+const tableLensRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
   stratificationLevels: 0,
   sortLevels: 1,
   leaf: {
@@ -124,7 +121,6 @@ export function applyDynamicRuleSet(ruleSet: IRuleSet, tree: InnerNode) {
 }
 
 export const ruleSets = [
-  { name: 'taggle', ruleSet: defaultRuleSet},
   { name: 'table', ruleSet: tableRuleSet},
   { name: 'compact', ruleSet: compactRuleSet},
   { name: 'tablelens', ruleSet: tableLensRuleSet}
