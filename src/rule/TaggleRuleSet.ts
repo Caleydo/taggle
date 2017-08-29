@@ -13,8 +13,6 @@ const minLeafHeight: number = 1;
 const maxLeafHeight: number = 20;
 
 const defaultAggrHeight: number = 40;
-const minAggrHeight: number = 20;
-const maxAggrHeight: number = 500;
 
 function printTooSmall(height: number, minHeight: number, item: string) {
   console.error(`Height of item ${item} (${height} pixels) is smaller than minimum height (${minHeight} pixels) => set it to minimum height`);
@@ -83,7 +81,6 @@ class TaggleRuleSet2 implements IRuleSet  {
         return node.aggregatedHeight;
       }
       let height = flatLeaves(node).length * minLeafHeight;
-      height = checkHeightBoundaries(height, minAggrHeight, maxAggrHeight, node.toString());
       return height;
     },
     visType: 'default'
@@ -132,7 +129,7 @@ class TaggleRuleSet3 implements IRuleSet, IUpdate {
     aggregatedHeight: number;
     visType: 'default'|'mean'|((node: InnerNode) => 'default'|'mean');
   } = {
-    aggregatedHeight: 40,
+    aggregatedHeight: defaultAggrHeight,
     visType: 'default'
   };
 }
@@ -184,7 +181,6 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
       }
       const itemsInGroup = flatLeaves(node);
       let height: number = this.itemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.selectedItemCount * defaultLeafHeight) / (this.itemCount - this.selectedItemCount) * itemsInGroup.length : 1;
-      height = checkHeightBoundaries(height, minAggrHeight, maxAggrHeight, node.toString());
       return height;
     },
     visType: 'default'
