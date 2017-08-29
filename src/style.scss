@@ -1,9 +1,5 @@
 @import url("https://fonts.googleapis.com/css?family=Yantramanav:700,500,400");
 
-$engine_assets: "~lineupengine/src/assets";
-
-@import "~lineupengine/src/style";
-
 body {
   font-family: "Yantramanav", "Arial", sans-serif;
   font-size: 95%;
@@ -16,6 +12,8 @@ body {
 
   @import "./styles/table";
 }
+
+@import "./styles/lineup";
 
 .flyout {
   z-index: 1;
