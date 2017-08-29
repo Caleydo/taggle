@@ -24,7 +24,6 @@ import {IValueColumnDesc} from 'lineupjs/src/model/ValueColumn';
 import {createRankDesc, createSelectionDesc, isCategoricalColumn, models} from 'lineupjs/src/model';
 import {computeHist, computeStats} from 'lineupjs/src/provider/math';
 import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
-import 'lineupjs/src/style.scss';
 import InnerNode from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {IColumn} from '../data/index';
@@ -197,6 +196,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
   rebuild(tree: InnerNode, ruleSet: IRuleSet) {
     this.tree = tree;
     const defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
+    this.node.dataset.ruleSet = ruleSet.name;
 
     this.updateImpl(defaultRowHeight);
   }

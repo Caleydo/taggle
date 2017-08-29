@@ -80,6 +80,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
   rebuild(tree: InnerNode, ruleSet: IRuleSet) {
     this.tree = tree;
     this.ruleSet = ruleSet;
+    this.root.dataset.ruleSet = ruleSet.name;
 
     const defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
 
@@ -189,13 +190,23 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
     if (groupOrSortBy) {
       const columns = this.columns.map((d) => d.column);
       const column = columns.find((c) => c.name === groupOrSortBy)!;
-      if (column.value.type === 'categorical') {
-        this.groupBy = additional ? this.groupBy.concat([groupOrSortBy]) : [groupOrSortBy];
-        if (this.groupBy.length > this.ruleSet.stratificationLevels) {
-          this.groupBy = this.groupBy.slice(0, this.ruleSet.stratificationLevels);
-        }
-        if (this.groupBy.length > 0) {
-          restratifyTree(columns, this.tree, this.groupBy);
+      if (column.value.type === 'categorical' && this.ruleSet.stratificationLevels > 0) {
+        const index = this.groupBy.indexOf(groupOrSortBy);
+        if (index >= 0) {
+          //deselect again
+          if (additional) {
+            this.groupBy.splice(index, 1);
+          } else {
+            this.groupBy = [];
+          }
+        } else {
+          this.groupBy = additional ? this.groupBy.concat([groupOrSortBy]) : [groupOrSortBy];
+          if (this.groupBy.length > this.ruleSet.stratificationLevels) {
+            this.groupBy = this.groupBy.slice(0, this.ruleSet.stratificationLevels);
+          }
+          if (this.groupBy.length > 0) {
+            restratifyTree(columns, this.tree, this.groupBy);
+          }
         }
       } else if (this.ruleSet.sortLevels > 0) {
         // TODO support multi sorting
@@ -203,6 +214,6 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
       }
     }
 
-    this.update();
+    this.callbacks.update();
   }
 }
