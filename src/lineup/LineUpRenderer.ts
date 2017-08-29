@@ -24,7 +24,7 @@ import {IDataProvider} from 'lineupjs/src/provider/ADataProvider';
 import Ranking from 'lineupjs/src/model/Ranking';
 import {ISelectionColumnDesc} from 'lineupjs/src/model/SelectionColumn';
 import {IValueColumnDesc} from 'lineupjs/src/model/ValueColumn';
-import {createRankDesc, createSelectionDesc, isCategoricalColumn, models} from 'lineupjs/src/model';
+import {createRankDesc, createSelectionDesc, createAggregateDesc, isCategoricalColumn, models} from 'lineupjs/src/model';
 import {computeHist, computeStats} from 'lineupjs/src/provider/math';
 import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
 import InnerNode, {EAggregationType} from '../tree/InnerNode';
@@ -129,6 +129,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
 
     this.ranking = new Ranking('taggle', 4);
 
+    this.ranking.push(this.create(createAggregateDesc())!);
     this.ranking.push(this.create(createRankDesc())!);
     this.ranking.push(this.create(createSelectionDesc())!);
 
@@ -156,6 +157,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
 
   initTree(tree: InnerNode) {
     this.leaves = tree.flatLeaves();
+    this.updateHist();
   }
 
   private sortAndGroup(ranking: Ranking, tree: InnerNode) {
@@ -163,7 +165,8 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
     const group = ranking.getGroupCriteria();
     if (!group) {
       // create a flat tree
-      LineUpRenderer.sort(ranking, tree, this.leaves);
+      // slice since inplace sorting
+      LineUpRenderer.sort(ranking, tree, this.leaves.slice());
       return;
     }
 
@@ -225,14 +228,15 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
       return;
     }
 
-    const arr = this.leaves;
+    const arr = this.leaves.map((l) => l.item);
+    const indices = this.leaves.map((l) => l.dataIndex);
     const cols = this.ranking.flatColumns;
     cols.filter((d) => d instanceof NumberColumn && !d.isHidden()).forEach((col: NumberColumn) => {
-      const stats = computeStats(arr, arr.map((a) => a.dataIndex), col.getValue.bind(col), [0, 1]);
+      const stats = computeStats(arr, indices, col.getValue.bind(col), [0, 1]);
       this.histCache.set(col.id, stats);
     });
     cols.filter((d) => isCategoricalColumn(d) && !d.isHidden()).forEach((col: ICategoricalColumn&Column) => {
-      const stats = computeHist(arr, arr.map((a) => a.dataIndex), col.getCategories.bind(col), col.categories);
+      const stats = computeHist(arr, indices, col.getCategories.bind(col), col.categories);
       this.histCache.set(col.id, stats);
     });
   }
@@ -345,7 +349,9 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
     //generate the accessor
     (<any>desc).accessor = (<any>desc).accessor || ((row: any) => row[(<any>desc).column]);
     if (desc.type === 'rank') {
-      (<IValueColumnDesc<number>>desc).accessor = (row: any) => (<LeafNode<T>>row).relativeIndex;
+      (<IValueColumnDesc<number>>desc).accessor = (_row: any, index: number) => {
+        return this.leaves[index].relativeIndex + 1;
+      };
     } else if (desc.type === 'selection') {
       (<ISelectionColumnDesc>desc).accessor = (_row: any, index: number) => this.isSelected(index);
       (<ISelectionColumnDesc>desc).setter = (_row: any, index: number, value: boolean) => {
