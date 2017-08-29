@@ -49,6 +49,7 @@ export default class App {
 
     this.debug = new DebugInterface(parent, () => this.update(), (rule) => {
       this.ruleSet = rule;
+      this.renderer.initTree(this.tree, this.ruleSet);
       applyStaticRuleSet(rule, this.tree);
       this.update();
     });
