@@ -16,6 +16,14 @@ const defaultAggrHeight: number = 40;
 const minAggrHeight: number = 20;
 const maxAggrHeight: number = 500;
 
+function printTooSmall(height: number, minAggrHeight: number, item: string) {
+  console.error(`Height of item ${item} (${height} pixels) is smaller than minimum height (${minAggrHeight} pixels) => set it to minimum height`);
+}
+
+function printTooBig(height: number, maxAggrHeight: number, item: string) {
+  console.error(`Height of item ${item} (${height} pixels) is bigger than minimum height (${maxAggrHeight} pixels) => set it to minimum height`);
+}
+
 class TaggleRuleSet1 implements IRuleSet {
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
@@ -64,11 +72,11 @@ class TaggleRuleSet2 implements IRuleSet  {
       }
       let height = flatLeaves(node).length * minLeafHeight;
       if(height < minAggrHeight) {
-        console.error(`Aggr item height (${height} pixels) is smaller than minimum height (${minAggrHeight} pixels) => set it to minimum height`);
+        printTooSmall(height, minAggrHeight, node.toString());
         height = minAggrHeight;
       }
       if(height > maxAggrHeight) {
-        console.error(`Aggr item height (${height} pixels) is greater than maximum height (${maxAggrHeight} pixels) => set it to maximum height`);
+        printTooBig(height, maxAggrHeight, node.toString())
         height = maxAggrHeight;
       }
       return height
@@ -109,11 +117,11 @@ class TaggleRuleSet3 implements IRuleSet, IUpdate {
         height = defaultLeafHeight;
       }
       if(height < minLeafHeight) {
-        console.error(`Item height (${height} pixels) is smaller than minimum height (${minLeafHeight} pixels) => set it to minimum height`);
+        printTooSmall(height, minLeafHeight, n);
         height = minLeafHeight;
       }
       if(height > maxLeafHeight) {
-        console.error(`Item height (${height} pixels) is greater than maximum height (${maxLeafHeight} pixels) => set it to maximum height`);
+        printTooBig(height, maxLeafHeight, n);
         height = maxLeafHeight;
       }
       return height;
@@ -160,11 +168,11 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
         height = defaultLeafHeight;
       }
       if(height < minLeafHeight) {
-        console.error(`Item height (${height} pixels) is smaller than minimum height (${minLeafHeight} pixels) => set it to minimum height`);
+        printTooSmall(height, minLeafHeight, n.toString());
         height = minLeafHeight;
       }
       if(height > maxLeafHeight) {
-        console.error(`Item height (${height} pixels) is greater than maximum height (${maxLeafHeight} pixels) => set it to maximum height`);
+        printTooBig(height, maxLeafHeight, n.toString());
         height = maxLeafHeight;
       }
       return height;
@@ -183,11 +191,11 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
       const itemsInGroup = flatLeaves(node);
       let height: number = this.itemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.selectedItemCount * defaultLeafHeight) / (this.itemCount - this.selectedItemCount) * itemsInGroup.length : 1;
       if(height < minAggrHeight) {
-        console.error(`Aggr item height (${height} pixels) is smaller than minimum height (${minAggrHeight} pixels) => set it to minimum height`);
+        printTooSmall(height, minAggrHeight, node.toString());
         height = minAggrHeight;
       }
       if(height > maxAggrHeight) {
-        console.error(`Aggr item height (${height} pixels) is greater than maximum height (${maxAggrHeight} pixels) => set it to maximum height`);
+        printTooBig(height, maxAggrHeight, node.toString());
         height = maxAggrHeight;
       }
       return height;
