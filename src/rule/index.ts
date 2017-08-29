@@ -8,6 +8,7 @@ import {visit} from '../tree/utils';
 export {default as createChooser} from './RuleSwitcher';
 
 export interface IRuleSet {
+  name: string;
   /**
    * number of possible stratification levels = inner node levels
    * @default +Infinity
@@ -32,6 +33,7 @@ export interface IRuleSet {
 }
 
 export const defaultRuleSet: IRuleSet = {
+  name: 'taggle',
   stratificationLevels: +Infinity,
   sortLevels: +Infinity,
   leaf: {
@@ -45,11 +47,13 @@ export const defaultRuleSet: IRuleSet = {
 };
 
 export const tableRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
+  name: 'table',
   stratificationLevels: 0,
   sortLevels: 1
 });
 
 export const compactRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
+  name: 'compact',
   stratificationLevels: 0,
   sortLevels: 1,
   leaf: {
@@ -66,6 +70,7 @@ function tableLensHeight(distance: number) {
 }
 
 export const tableLensRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
+  name: 'tablelens',
   stratificationLevels: 0,
   sortLevels: 1,
   leaf: {
