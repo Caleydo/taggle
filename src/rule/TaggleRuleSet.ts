@@ -8,6 +8,7 @@ interface IUpdate {
   update(root: InnerNode, params: any[]): void;
 }
 
+const defaultLeafHeight: number = 20;
 const minLeafHeight: number = 1;
 const maxLeafHeight: number = 20;
 
@@ -17,6 +18,7 @@ const maxAggrHeight: number = 500;
 class TaggleRuleSet1 implements IRuleSet {
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
+
   leaf: {
     height: number|((node: LeafNode<any>)=>number);
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
@@ -37,6 +39,7 @@ class TaggleRuleSet1 implements IRuleSet {
 class TaggleRuleSet2 implements IRuleSet  {
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
+
   leaf: {
     height: number|((node: LeafNode<any>)=>number);
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
@@ -69,28 +72,36 @@ class TaggleRuleSet2 implements IRuleSet  {
 };
 
 class TaggleRuleSet3 implements IRuleSet, IUpdate {
+  stratificationLevels = +Infinity;
+  sortLevels = +Infinity;
+
   visibleHeight: number;
   aggrItemCount: number;
   unaggrItemCount: number;
+  selectedItemCount: number;
 
   constructor(root: InnerNode) {
     this.update(root, [400]); // arbitrary constant just for initialization
   }
-  stratificationLevels = +Infinity;
-  sortLevels = +Infinity;
 
   update(root: InnerNode, params: any[]) {
     this.visibleHeight = params[0];
     this.aggrItemCount = toArray(root).filter((n) => n.type === 'inner' && (<InnerNode>n).aggregation === EAggregationType.AGGREGATED).length;
     this.unaggrItemCount = toArray(root).filter((n) => n.type === 'leaf' && !n.parents.find((n2) => n2.aggregation === EAggregationType.AGGREGATED)).length;
+
+    // find number of selected items
+    this.selectedItemCount = toArray(root).filter(n => n.type === 'leaf' && n.selected && !n.parents.find((x) => x.aggregation === EAggregationType.AGGREGATED)).length;
   }
 
   leaf : {
     height: number|((node: LeafNode<any>)=>number);
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
   } = {
-    height: () => {
-      let height: number = this.unaggrItemCount > 0 ? (this.visibleHeight - this.aggrItemCount * this.inner.aggregatedHeight) / this.unaggrItemCount : 1;
+    height: (n: LeafNode<any>) => {
+      let height: number = this.unaggrItemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.aggrItemCount * this.inner.aggregatedHeight - this.selectedItemCount * defaultLeafHeight) / (this.unaggrItemCount - this.selectedItemCount) : 1;
+      if(n.selected) {
+        height = defaultLeafHeight;
+      }
       if(height < minLeafHeight) {
         console.error(`Item height (${height} pixels) is smaller than minimum height (${minLeafHeight} pixels) => set it to minimum height`);
         height = minLeafHeight;
@@ -114,26 +125,34 @@ class TaggleRuleSet3 implements IRuleSet, IUpdate {
 }
 
 class TaggleRuleSet4 implements IRuleSet, IUpdate {
+  stratificationLevels = +Infinity;
+  sortLevels = +Infinity;
+
   visibleHeight: number;
   itemCount: number;
+  selectedItemCount: number;
 
   constructor(root: InnerNode) {
     this.update(root, [400]); // arbitrary constant just for initializationvisi
   }
-  stratificationLevels = +Infinity;
-  sortLevels = +Infinity;
 
   update(root: InnerNode, params: any[]) {
     this.visibleHeight = params[0];
     this.itemCount = toArray(root).filter((n) => n.type === 'leaf').length;
+
+    // find number of selected items
+    this.selectedItemCount = toArray(root).filter(n => n.type === 'leaf' && n.selected && !n.parents.find((x) => x.aggregation === EAggregationType.AGGREGATED)).length;
   }
 
   leaf : {
     height: number|((node: LeafNode<any>)=>number);
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
   } = {
-    height: () => {
-      let height: number = this.itemCount > 0 ? this.visibleHeight / this.itemCount : 1;
+    height: (n: LeafNode<any>) => {
+      let height: number = this.itemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.selectedItemCount * defaultLeafHeight) / (this.itemCount - this.selectedItemCount) : 1;
+      if(n.selected) {
+        height = defaultLeafHeight;
+      }
       if(height < minLeafHeight) {
         console.error(`Item height (${height} pixels) is smaller than minimum height (${minLeafHeight} pixels) => set it to minimum height`);
         height = minLeafHeight;
@@ -155,8 +174,8 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
       if(node.aggregation !== EAggregationType.AGGREGATED) {
         return node.aggregatedHeight;
       }
-      const itemsInGroup = flatLeaves(node).length;
-      let height: number = this.itemCount > 0 ? this.visibleHeight / this.itemCount * itemsInGroup : 1;
+      const itemsInGroup = flatLeaves(node);
+      let height: number = this.itemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.selectedItemCount * defaultLeafHeight) / (this.itemCount - this.selectedItemCount) * itemsInGroup.length : 1;
       if(height < minAggrHeight) {
         console.error(`Aggr item height (${height} pixels) is smaller than minimum height (${minAggrHeight} pixels) => set it to minimum height`);
         height = minAggrHeight;
