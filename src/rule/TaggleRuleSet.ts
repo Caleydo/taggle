@@ -30,9 +30,10 @@ function checkHeightBoundaries(height: number, minHeight: number, maxHeight: num
     height = minHeight;
   }
   if(height > maxHeight) {
-    printTooBig(height, maxHeight, item)
+    printTooBig(height, maxHeight, item);
     height = maxHeight;
   }
+  return height;
 }
 
 class TaggleRuleSet1 implements IRuleSet {
@@ -82,12 +83,12 @@ class TaggleRuleSet2 implements IRuleSet  {
         return node.aggregatedHeight;
       }
       let height = flatLeaves(node).length * minLeafHeight;
-      checkHeightBoundaries(height, minAggrHeight, maxAggrHeight, node.toString());
-      return height
+      height = checkHeightBoundaries(height, minAggrHeight, maxAggrHeight, node.toString());
+      return height;
     },
     visType: 'default'
   };
-};
+}
 
 class TaggleRuleSet3 implements IRuleSet, IUpdate {
   stratificationLevels = +Infinity;
@@ -104,11 +105,12 @@ class TaggleRuleSet3 implements IRuleSet, IUpdate {
 
   update(root: InnerNode, params: any[]) {
     this.visibleHeight = params[0];
-    this.aggrItemCount = toArray(root).filter((n) => n.type === 'inner' && (<InnerNode>n).aggregation === EAggregationType.AGGREGATED).length;
-    this.unaggrItemCount = toArray(root).filter((n) => n.type === 'leaf' && !n.parents.find((n2) => n2.aggregation === EAggregationType.AGGREGATED)).length;
+    const items = toArray(root);
+    this.aggrItemCount = items.filter((n) => n.type === 'inner' && (<InnerNode>n).aggregation === EAggregationType.AGGREGATED).length;
+    this.unaggrItemCount = items.filter((n) => n.type === 'leaf' && !n.parents.find((n2) => n2.aggregation === EAggregationType.AGGREGATED)).length;
 
     // find number of selected items
-    this.selectedItemCount = toArray(root).filter(n => n.type === 'leaf' && n.selected && !n.parents.find((x) => x.aggregation === EAggregationType.AGGREGATED)).length;
+    this.selectedItemCount = items.filter((n) => n.type === 'leaf' && n.selected && !n.parents.find((x) => x.aggregation === EAggregationType.AGGREGATED)).length;
   }
 
   leaf : {
@@ -120,7 +122,7 @@ class TaggleRuleSet3 implements IRuleSet, IUpdate {
       if(n.selected) {
         height = defaultLeafHeight;
       }
-      checkHeightBoundaries(height, minLeafHeight, maxLeafHeight, n.toString());
+      height = checkHeightBoundaries(height, minLeafHeight, maxLeafHeight, n.toString());
       return height;
     },
     visType: 'default'
@@ -149,10 +151,12 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
 
   update(root: InnerNode, params: any[]) {
     this.visibleHeight = params[0];
-    this.itemCount = toArray(root).filter((n) => n.type === 'leaf').length;
+
+    const items = toArray(root);
+    this.itemCount = items.filter((n) => n.type === 'leaf').length;
 
     // find number of selected items
-    this.selectedItemCount = toArray(root).filter(n => n.type === 'leaf' && n.selected && !n.parents.find((x) => x.aggregation === EAggregationType.AGGREGATED)).length;
+    this.selectedItemCount = items.filter((n) => n.type === 'leaf' && n.selected && !n.parents.find((x) => x.aggregation === EAggregationType.AGGREGATED)).length;
   }
 
   leaf : {
@@ -164,7 +168,7 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
       if(n.selected) {
         height = defaultLeafHeight;
       }
-      checkHeightBoundaries(height, minLeafHeight, maxLeafHeight, n.toString());
+      height = checkHeightBoundaries(height, minLeafHeight, maxLeafHeight, n.toString());
       return height;
     },
     visType: 'default'
@@ -180,7 +184,7 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
       }
       const itemsInGroup = flatLeaves(node);
       let height: number = this.itemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.selectedItemCount * defaultLeafHeight) / (this.itemCount - this.selectedItemCount) * itemsInGroup.length : 1;
-      checkHeightBoundaries(height, minAggrHeight, maxAggrHeight, node.toString());
+      height = checkHeightBoundaries(height, minAggrHeight, maxAggrHeight, node.toString());
       return height;
     },
     visType: 'default'
