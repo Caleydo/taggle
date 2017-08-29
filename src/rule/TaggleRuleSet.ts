@@ -12,6 +12,7 @@ const defaultLeafHeight: number = 20;
 const minLeafHeight: number = 1;
 const maxLeafHeight: number = 20;
 
+const defaultAggrHeight: number = 40;
 const minAggrHeight: number = 20;
 const maxAggrHeight: number = 500;
 
@@ -23,7 +24,7 @@ class TaggleRuleSet1 implements IRuleSet {
     height: number|((node: LeafNode<any>)=>number);
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
   } = {
-    height: 20,
+    height: defaultLeafHeight,
     visType: 'default'
   };
 
@@ -31,7 +32,7 @@ class TaggleRuleSet1 implements IRuleSet {
     aggregatedHeight: number;
     visType: 'default'|'mean'|((node: InnerNode) => 'default'|'mean');
   } = {
-    aggregatedHeight: 40,
+    aggregatedHeight: defaultAggrHeight,
     visType: 'default'
   };
 }
@@ -44,7 +45,12 @@ class TaggleRuleSet2 implements IRuleSet  {
     height: number|((node: LeafNode<any>)=>number);
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
   } = {
-    height: 1,
+    height: (n: LeafNode<any>) => {
+      if(n.selected) {
+        return defaultLeafHeight;
+      }
+      return minLeafHeight;
+    },
     visType: 'default'
   };
 
@@ -56,7 +62,7 @@ class TaggleRuleSet2 implements IRuleSet  {
       if(node.aggregation !== EAggregationType.AGGREGATED) {
         return node.aggregatedHeight;
       }
-      let height = flatLeaves(node).length;
+      let height = flatLeaves(node).length * minLeafHeight;
       if(height < minAggrHeight) {
         console.error(`Aggr item height (${height} pixels) is smaller than minimum height (${minAggrHeight} pixels) => set it to minimum height`);
         height = minAggrHeight;
