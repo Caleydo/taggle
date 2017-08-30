@@ -3,10 +3,9 @@
  */
 import {columns, data, IColumn} from './data/index';
 import DebugInterface from './DebugInterface';
-import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet} from './rule/index';
+import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet, createRuleSets, updateRuleSets} from './rule/index';
 import InnerNode from './tree/InnerNode';
 import {fromArray} from './tree/utils';
-import {createTaggleRuleSets, updateRuleSets} from './rule/TaggleRuleSet';
 import * as d3 from 'd3';
 
 export interface ITaggleRenderer {
@@ -43,8 +42,8 @@ export default class App {
 
     const defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
     this.tree = fromArray(data, defaultRowHeight);
+    createRuleSets(this.tree);
     this.renderer.initTree(this.tree, this.ruleSet);
-    createTaggleRuleSets(this.tree);
     applyStaticRuleSet(this.ruleSet, this.tree);
 
     this.debug = new DebugInterface(parent, () => this.update(), (rule) => {

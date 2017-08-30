@@ -2,9 +2,9 @@ import {toArray, flatLeaves} from '../tree/utils';
 import InnerNode from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {EAggregationType} from '../tree';
-import {ruleSets, IRuleSet} from './';
+import {IRuleSet} from './';
 
-interface IUpdate {
+export interface IUpdate {
   update(root: InnerNode, params: any[]): void;
 }
 
@@ -34,7 +34,7 @@ function checkHeightBoundaries(height: number, minHeight: number, maxHeight: num
   return height;
 }
 
-class NotSpacefillingNotProportional implements IRuleSet {
+export class NotSpacefillingNotProportional implements IRuleSet {
   name = 'not_spacefilling_not_proportional';
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
@@ -56,7 +56,7 @@ class NotSpacefillingNotProportional implements IRuleSet {
   };
 }
 
-class NotSpacefillingProportional implements IRuleSet  {
+export class NotSpacefillingProportional implements IRuleSet  {
   name = 'not_spacefilling_proportional';
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
@@ -89,7 +89,7 @@ class NotSpacefillingProportional implements IRuleSet  {
   };
 }
 
-class SpacefillingNotProportional implements IRuleSet, IUpdate {
+export class SpacefillingNotProportional implements IRuleSet, IUpdate {
   name = 'spacefilling_not_proportional';
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
@@ -137,7 +137,7 @@ class SpacefillingNotProportional implements IRuleSet, IUpdate {
   };
 }
 
-class SpacefillingProportional implements IRuleSet, IUpdate {
+export class SpacefillingProportional implements IRuleSet, IUpdate {
   name = 'spacefilling_proportional';
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
@@ -189,23 +189,4 @@ class SpacefillingProportional implements IRuleSet, IUpdate {
     },
     visType: 'default'
   };
-}
-
-export function createTaggleRuleSets(root: InnerNode) {
-  ruleSets.push({name: 'not_spacefilling not_proportional', ruleSet: new NotSpacefillingNotProportional()});
-  ruleSets.push({name: 'not_spacefilling proportional', ruleSet: new NotSpacefillingProportional()});
-  ruleSets.push({name: 'spacefilling not_proportional', ruleSet: new SpacefillingNotProportional(root)});
-  ruleSets.push({name: 'spacefilling proportional', ruleSet: new SpacefillingProportional(root)});
-}
-
-export function updateRuleSets(root: InnerNode, params: any[]) {
-  ruleSets.forEach((r) => {
-    if(isUpdate(r.ruleSet)) {
-      r.ruleSet.update(root, params);
-    }
-  });
-}
-
-function isUpdate(arg: any): arg is IUpdate {
-    return arg.update !== undefined;
 }

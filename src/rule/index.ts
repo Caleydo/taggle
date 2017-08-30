@@ -6,6 +6,9 @@ import InnerNode from '../tree/InnerNode';
 import {visit} from '../tree/utils';
 
 export {default as createChooser} from './RuleSwitcher';
+import {NotSpacefillingNotProportional, SpacefillingNotProportional, NotSpacefillingProportional, SpacefillingProportional, IUpdate} from './TaggleRuleSet';
+
+export const ruleSets:{name: string, ruleSet: IRuleSet}[] = [];
 
 export interface IRuleSet {
   name: string;
@@ -125,9 +128,24 @@ export function applyDynamicRuleSet(ruleSet: IRuleSet, tree: InnerNode) {
   });
 }
 
-export const ruleSets = [
-  { name: 'taggle', ruleSet: defaultRuleSet},
-  { name: 'table', ruleSet: tableRuleSet},
-  { name: 'compact', ruleSet: compactRuleSet},
-  { name: 'tablelens', ruleSet: tableLensRuleSet}
-];
+export function updateRuleSets(root: InnerNode, params: any[]) {
+  ruleSets.forEach((r) => {
+    if(isUpdate(r.ruleSet)) {
+      (<IUpdate>r.ruleSet).update(root, params);
+    }
+  });
+}
+
+function isUpdate(arg: any): arg is IUpdate {
+    return arg.update !== undefined;
+}
+
+export function createRuleSets(tree: InnerNode) {
+  ruleSets.push({ name: 'table', ruleSet: tableRuleSet});
+  ruleSets.push({ name: 'compact', ruleSet: compactRuleSet});
+  ruleSets.push({ name: 'tablelens', ruleSet: tableLensRuleSet});
+  ruleSets.push({name: 'not_spacefilling not_proportional', ruleSet: new NotSpacefillingNotProportional()});
+  ruleSets.push({name: 'not_spacefilling proportional', ruleSet: new NotSpacefillingProportional()});
+  ruleSets.push({name: 'spacefilling not_proportional', ruleSet: new SpacefillingNotProportional(tree)});
+  ruleSets.push({name: 'spacefilling proportional', ruleSet: new SpacefillingProportional(tree)});
+}
