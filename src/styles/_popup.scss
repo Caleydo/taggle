@@ -1,4 +1,4 @@
-/* Popup container - can be anything you want */
+/* The actual popup */
 .popup {
   position: relative;
   display: inline-block;
@@ -7,10 +7,7 @@
   i {
     cursor: pointer;
   }
-}
 
-/* The actual popup */
-.popup {
   .popupcontent {
     display: none;
     width: 160px;
@@ -29,6 +26,8 @@
 .popupcontent::after {
   content: '';
   position: absolute;
+  z-index: -1;
+  top: 0;
   right: -200px;
   bottom: -200px;
   left: -200px;

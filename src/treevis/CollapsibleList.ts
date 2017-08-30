@@ -73,27 +73,19 @@ export default class CollapsibleList {
 
   private updatePropertyRow(treeColumnCount: number) {
     const $tr = this.$table.select('thead .properties');
-    let $th = $tr.selectAll('th');
-    // only rebuild the property row if the tree depth has changed
-    if($th[0].length === treeColumnCount) {
-      return;
-    }
-    $th.remove();
-    for(let i = 0; i < treeColumnCount; i++) {
-      $tr.append('th');
-    }
-    $th = $tr.selectAll('th').html((_, index: number) =>
+    const $th = $tr.selectAll('th').data(new Array(treeColumnCount));
+    $th.enter().append('th').html((_, index: number) =>
       `<div class="popup">
         <i class="fa fa-cog" aria-hidden="true"></i>
         <div class="popupcontent">
           <form action="#" class="property_form">
             <div>
               <label for="hi${index}1">Height (unaggr.):</label>
-              <input type="text" id="hi${index}1" class='heightInput'>
+              <input type="number" id="hi${index}1" class='heightInput'>
             </div>
             <div>
               <label for="hi${index}2">Height (aggr): </label>
-              <input type="text" id="hi${index}2" class='aggrheightInput'>
+              <input type="number" id="hi${index}2" class='aggrheightInput'>
             </div>
             <div>
               <button class="submit_button" type="submit">Apply</button>
@@ -102,10 +94,11 @@ export default class CollapsibleList {
         </div>
       </div>`
     );
+    $th.exit().remove();
     this.addFormhandler($th);
   }
 
-  private addFormhandler($th: d3.Selection<INode>) {
+  private addFormhandler($th: d3.Selection<any>) {
     const that = this;
     $th.selectAll('.property_form')
       .on('submit', function(this: HTMLFormElement, _, __, index: number) {
@@ -144,7 +137,7 @@ export default class CollapsibleList {
     resultRow += `<td><select class="visType" ${d.type === 'inner' && d.aggregation !== EAggregationType.AGGREGATED ? 'disabled="disabled"' : ''}></select></td>`;
 
     // height row
-    resultRow += `<td><input class="height" type="number" value="${d.height}"></td>`;
+    resultRow += `<td><input class="height" type="number" value="${Math.round(d.height)}"></td>`;
 
     // DOI row
     resultRow += `<td><input class="doi" type="number" step="0.01" value="${d.doi}"></td>`;
