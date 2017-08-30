@@ -9,26 +9,31 @@ import {
   IFlatColumn,
   IStatistics
 } from 'lineupjs/src/model/Column';
-import {default as RenderColumn, IRankingBodyContext} from 'lineupjs/src/ui/engine/RenderColumn';
-import {createDOM} from 'lineupjs/src/renderer/index';
+import {
+  default as RenderColumn, IGroupData, IGroupItem,
+  IRankingBodyContext
+} from 'lineupjs/src/ui/engine/RenderColumn';
+import {createDOM, createDOMGroup} from 'lineupjs/src/renderer/index';
 import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
 import {debounce} from 'lineupjs/src/utils';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import StringColumn from 'lineupjs/src/model/StringColumn';
 import {filters as defaultFilters} from 'lineupjs/src/dialogs';
 import {renderers as defaultRenderers} from 'lineupjs/src/renderer';
-import {IDataProvider, IDataRow} from 'lineupjs/src/provider/ADataProvider';
+import {IDataProvider} from 'lineupjs/src/provider/ADataProvider';
 import Ranking from 'lineupjs/src/model/Ranking';
 import {ISelectionColumnDesc} from 'lineupjs/src/model/SelectionColumn';
 import {IValueColumnDesc} from 'lineupjs/src/model/ValueColumn';
-import {createRankDesc, createSelectionDesc, isCategoricalColumn, models} from 'lineupjs/src/model';
+import {createRankDesc, createSelectionDesc, createAggregateDesc, isCategoricalColumn, models} from 'lineupjs/src/model';
 import {computeHist, computeStats} from 'lineupjs/src/provider/math';
 import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
-import InnerNode from '../tree/InnerNode';
+import InnerNode, {EAggregationType} from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {IColumn} from '../data/index';
 import {ICallbacks, ITaggleRenderer} from '../App';
 import {IRuleSet} from '../rule/index';
+import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
+import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -72,6 +77,8 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
   };
 
   private tree: InnerNode;
+  private defaultRowHeight: number = 20;
+  private flat: (InnerNode|LeafNode<T>)[] = [];
   private leaves: LeafNode<T>[] = [];
 
   constructor(parent: Element, columns: IColumn[], private readonly callbacks: ICallbacks, options: Partial<ILineUpRendererOptions> = {}) {
@@ -111,13 +118,18 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
         return r;
       },
       renderer: (col: Column) => createDOM(col, defaultRenderers, this.ctx),
+      groupRenderer: (col: Column) => createDOMGroup(col, defaultRenderers, this.ctx),
       idPrefix: this.options.idPrefix,
+      totalNumberOfRows: 0,
+      isGroup: (index: number) => this.isGroup(index),
+      getGroup: (index: number) => this.getGroup(index),
       getRow: (index: number) => this.getRow(index)
     };
     this.renderer = new EngineRankingRenderer(this.node, this.options.idPrefix, this.ctx);
 
     this.ranking = new Ranking('taggle', 4);
 
+    this.ranking.push(this.create(createAggregateDesc())!);
     this.ranking.push(this.create(createRankDesc())!);
     this.ranking.push(this.create(createSelectionDesc())!);
 
@@ -130,29 +142,59 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
 
     this.ranking.on(`${Ranking.EVENT_DIRTY_ORDER}.provider`, debounce(() => this.reorder(), 100, null));
     this.ranking.on(`${Ranking.EVENT_ORDER_CHANGED}.provider`, debounce(() => this.updateHist(), 100, null));
+    const that = this;
+    this.ranking.on(`${Ranking.EVENT_DIRTY}.body`, debounce(function (this: { primaryType: string }) {
+      if (this.primaryType !== Column.EVENT_WIDTH_CHANGED) {
+        that.updateImpl();
+      }
+    }));
   }
 
   protected reorder() {
-    this.ranking.setOrder(LineUpRenderer.sort(this.ranking, this.tree));
+    this.sortAndGroup(this.ranking, this.tree);
     this.callbacks.update();
   }
 
   initTree(tree: InnerNode) {
     this.leaves = tree.flatLeaves();
-    this.ranking.setOrder(LineUpRenderer.sort(this.ranking, tree));
+    this.updateHist();
   }
 
-  private get orderedLeaves() {
-    const base = this.leaves;
-    return this.ranking.getOrder().map((i) => base[i]);
-  }
-
-  private static sort(ranking: Ranking, tree: InnerNode) {
+  private sortAndGroup(ranking: Ranking, tree: InnerNode) {
     //create a flat hierarchy out of it
-    const leaves = tree.flatLeaves();
+    const group = ranking.getGroupCriteria();
+    if (!group) {
+      // create a flat tree
+      // slice since inplace sorting
+      LineUpRenderer.sort(ranking, tree, this.leaves.slice());
+      return;
+    }
+
+    const groups = new Map<string, InnerNode>();
+    this.leaves.forEach((node) => {
+      const group = ranking.grouper(node.v, node.dataIndex) || defaultGroup;
+      if (!groups.has(group.name)) {
+        const inner = new InnerNode(group.name, group.color);
+        inner.parent = tree;
+        groups.set(group.name, inner);
+      }
+      const ggroup = groups.get(group.name)!;
+      node.parent = ggroup;
+      ggroup.children.push(node);
+    });
+
+    const inner = Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name));
+    tree.children = inner;
+    inner.forEach((group) => {
+      // sort within the group
+      LineUpRenderer.sort(ranking, group, <LeafNode<T>[]>group.children);
+    });
+  }
+
+  private static sort(ranking: Ranking, parent: InnerNode, leaves: LeafNode<any>[]) {
     leaves.forEach((d) => {
       d.filtered = !ranking.filter(d.v, d.dataIndex);
-      d.parent = tree;
+      d.parent = parent;
     });
 
     //sort by the ranking column
@@ -166,14 +208,19 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
       return ranking.comparator(a.v, b.v, a.dataIndex, b.dataIndex);
     });
 
-    tree.children = leaves;
-    return leaves.filter((d) => !d.filtered).map((d) => d.dataIndex);
+    parent.children = leaves;
   }
 
-  private getRow(index: number): IDataRow {
-    //relative index
-    const dataIndex = this.ranking.getOrder()[index];
-    return this.leaves[dataIndex];
+  private isGroup(index: number) {
+    return this.flat[index].type === 'inner';
+  }
+
+  private getGroup(index: number) {
+    return <IGroupData>this.flat[index];
+  }
+
+  private getRow(index: number): IGroupItem {
+    return <IGroupItem>this.flat[index];
   }
 
   private updateHist() {
@@ -181,41 +228,39 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
       return;
     }
 
-    const arr = this.leaves;
+    const arr = this.leaves.map((l) => l.item);
+    const indices = this.leaves.map((l) => l.dataIndex);
     const cols = this.ranking.flatColumns;
     cols.filter((d) => d instanceof NumberColumn && !d.isHidden()).forEach((col: NumberColumn) => {
-      const stats = computeStats(arr, arr.map((a) => a.dataIndex), col.getValue.bind(col), [0, 1]);
+      const stats = computeStats(arr, indices, col.getValue.bind(col), [0, 1]);
       this.histCache.set(col.id, stats);
     });
     cols.filter((d) => isCategoricalColumn(d) && !d.isHidden()).forEach((col: ICategoricalColumn&Column) => {
-      const stats = computeHist(arr, arr.map((a) => a.dataIndex), col.getCategories.bind(col), col.categories);
+      const stats = computeHist(arr, indices, col.getCategories.bind(col), col.categories);
       this.histCache.set(col.id, stats);
     });
   }
 
   rebuild(tree: InnerNode, ruleSet: IRuleSet) {
     this.tree = tree;
-    const defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
+    this.defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
     this.node.dataset.ruleSet = ruleSet.name;
 
-    this.updateImpl(defaultRowHeight);
+    this.flat = this.tree.flatChildren();
+    this.updateImpl();
   }
 
-  private updateImpl(defaultRowHeight: number) {
+  private updateImpl() {
     const ranking = this.ranking;
-    const that = this;
-    ranking.on(`${Ranking.EVENT_DIRTY}.body`, debounce(function (this: { primaryType: string }) {
-      if (this.primaryType !== Column.EVENT_WIDTH_CHANGED) {
-        that.updateImpl(defaultRowHeight);
-      }
-    }));
 
     const flatCols: IFlatColumn[] = [];
     ranking.flatten(flatCols, 0, 1, 0);
     const cols = flatCols.map((c) => c.col);
     const columns = cols.map((c, i) => {
-      const renderer = createDOM(c, defaultRenderers, this.ctx);
-      return new RenderColumn(c, c.getRendererType(), renderer, i);
+      const single = createDOM(c, defaultRenderers, this.ctx);
+      const group = createDOMGroup(c, defaultRenderers, this.ctx);
+      const renderers = { single, group, singleId: c.getRendererType(), groupId: c.getGroupRenderer()};
+      return new RenderColumn(c, renderers, i);
     });
 
     if (this.histCache.size === 0) {
@@ -226,7 +271,8 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
       this.renderer.updateColumnWidths();
     }));
 
-    const rowContext = nonUniformContext(this.orderedLeaves.map((d) => d.height), defaultRowHeight);
+    (<any>this.ctx).totalNumberOfRows = this.flat.length;
+    const rowContext = nonUniformContext(this.flat.map((d) => d.height), this.defaultRowHeight);
 
     this.renderer.render(columns, rowContext);
   }
@@ -303,7 +349,9 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
     //generate the accessor
     (<any>desc).accessor = (<any>desc).accessor || ((row: any) => row[(<any>desc).column]);
     if (desc.type === 'rank') {
-      (<IValueColumnDesc<number>>desc).accessor = (_row: any, index: number) => this.ranking.getOrder().indexOf(index);
+      (<IValueColumnDesc<number>>desc).accessor = (_row: any, index: number) => {
+        return this.leaves[index].relativeIndex + 1;
+      };
     } else if (desc.type === 'selection') {
       (<ISelectionColumnDesc>desc).accessor = (_row: any, index: number) => this.isSelected(index);
       (<ISelectionColumnDesc>desc).setter = (_row: any, index: number, value: boolean) => {
@@ -313,6 +361,13 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
           this.selection.delete(index);
         }
         this.updateSelections();
+      };
+    } else if (desc.type === 'aggregate') {
+      (<IAggregateGroupColumnDesc>desc).isAggregated = (_ranking: Ranking, group: IGroup) => (<InnerNode>group).aggregation === EAggregationType.AGGREGATED;
+      (<IAggregateGroupColumnDesc>desc).setAggregated = (_ranking: Ranking, group: IGroup, value: boolean) => {
+        const node = <InnerNode>group;
+        node.aggregation = value ? EAggregationType.AGGREGATED : EAggregationType.UNIFORM;
+        this.callbacks.update();
       };
     }
   }

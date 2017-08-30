@@ -1,7 +1,8 @@
 import ANode from './ANode';
-import {IDataRow} from 'lineupjs/src/provider/ADataProvider';
+import {IGroupItem} from 'lineupjs/src/ui/engine/RenderColumn';
+import {defaultGroup} from 'lineupjs/src/model/Group';
 
-export default class LeafNode<T> extends ANode implements IDataRow {
+export default class LeafNode<T> extends ANode implements IGroupItem {
   readonly type: 'leaf' = 'leaf';
   height = 20;
 
@@ -14,6 +15,17 @@ export default class LeafNode<T> extends ANode implements IDataRow {
 
   get v() {
     return this.item;
+  }
+
+  get group() {
+    return this.parent || defaultGroup;
+  }
+
+  get relativeIndex() {
+    if (!this.parent) {
+      return 0;
+    }
+    return this.parent.rows.indexOf(this);
   }
 
   set filtered(value: boolean) {
