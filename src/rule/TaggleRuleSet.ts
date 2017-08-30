@@ -35,6 +35,7 @@ function checkHeightBoundaries(height: number, minHeight: number, maxHeight: num
 }
 
 class NotSpacefillingNotProportional implements IRuleSet {
+  name = 'not_spacefilling_not_proportional';
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
 
@@ -56,6 +57,7 @@ class NotSpacefillingNotProportional implements IRuleSet {
 }
 
 class NotSpacefillingProportional implements IRuleSet  {
+  name = 'not_spacefilling_proportional';
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
 
@@ -88,6 +90,7 @@ class NotSpacefillingProportional implements IRuleSet  {
 }
 
 class SpacefillingNotProportional implements IRuleSet, IUpdate {
+  name = 'spacefilling_not_proportional';
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
 
@@ -135,6 +138,7 @@ class SpacefillingNotProportional implements IRuleSet, IUpdate {
 }
 
 class SpacefillingProportional implements IRuleSet, IUpdate {
+  name = 'spacefilling_proportional';
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
 
