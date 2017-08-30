@@ -4,9 +4,11 @@
 import LeafNode from '../tree/LeafNode';
 import InnerNode from '../tree/InnerNode';
 import {visit} from '../tree/utils';
+
 export {default as createChooser} from './RuleSwitcher';
 
 export interface IRuleSet {
+  name: string;
   /**
    * number of possible stratification levels = inner node levels
    * @default +Infinity
@@ -19,7 +21,7 @@ export interface IRuleSet {
    */
   sortLevels: number;
 
-  leaf:{
+  leaf: {
     height: number|((node: LeafNode<any>)=>number);
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
   };
@@ -31,6 +33,7 @@ export interface IRuleSet {
 }
 
 const tableRuleSet: IRuleSet = {
+  name: 'table',
   stratificationLevels: 0,
   sortLevels: 1,
   leaf: {
@@ -46,6 +49,7 @@ const tableRuleSet: IRuleSet = {
 export const defaultRuleSet = tableRuleSet;
 
 const compactRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
+  name: 'compact',
   stratificationLevels: 0,
   sortLevels: 1,
   leaf: {
@@ -62,6 +66,7 @@ function tableLensHeight(distance: number) {
 }
 
 const tableLensRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
+  name: 'tablelens',
   stratificationLevels: 0,
   sortLevels: 1,
   leaf: {
@@ -121,6 +126,7 @@ export function applyDynamicRuleSet(ruleSet: IRuleSet, tree: InnerNode) {
 }
 
 export const ruleSets = [
+  { name: 'taggle', ruleSet: defaultRuleSet},
   { name: 'table', ruleSet: tableRuleSet},
   { name: 'compact', ruleSet: compactRuleSet},
   { name: 'tablelens', ruleSet: tableLensRuleSet}

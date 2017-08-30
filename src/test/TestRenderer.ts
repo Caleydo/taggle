@@ -80,6 +80,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
   rebuild(tree: InnerNode, ruleSet: IRuleSet) {
     this.tree = tree;
     this.ruleSet = ruleSet;
+    this.root.dataset.ruleSet = ruleSet.name;
 
     const defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
 

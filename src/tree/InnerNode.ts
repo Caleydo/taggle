@@ -2,6 +2,7 @@ import {INode} from './';
 import {flat, flatLeaves} from './utils';
 import LeafNode from './LeafNode';
 import ANode from './ANode';
+import {IGroupData} from 'lineupjs/src/ui/engine/RenderColumn';
 
 export enum EAggregationType {
   AGGREGATED,
@@ -9,7 +10,7 @@ export enum EAggregationType {
   UNIFORM
 }
 
-export default class InnerNode extends ANode {
+export default class InnerNode extends ANode implements IGroupData {
   readonly type: 'inner' = 'inner';
   children: INode[] = [];
   aggregation: EAggregationType = EAggregationType.UNIFORM;
@@ -19,8 +20,12 @@ export default class InnerNode extends ANode {
 
   aggregate: any;
 
-  constructor(public readonly name: string) {
+  constructor(public readonly name: string, public readonly color: string = 'gray') {
     super();
+  }
+
+  get rows() {
+    return this.flatLeaves();
   }
 
   get filtered(): boolean {
