@@ -58,7 +58,7 @@ export default class App {
   }
 
   update() {
-    updateRuleSets(this.tree, [(<HTMLElement>d3.select('main')[0][0]).clientHeight]);
+    updateRuleSets(this.tree, [(<HTMLElement>d3.select('main').node()).clientHeight]);
     applyDynamicRuleSet(this.ruleSet, this.tree);
     this.renderer.rebuild(this.tree, this.ruleSet);
     this.debug.update(this.tree);

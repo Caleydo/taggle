@@ -34,7 +34,7 @@ function checkHeightBoundaries(height: number, minHeight: number, maxHeight: num
   return height;
 }
 
-class TaggleRuleSet1 implements IRuleSet {
+class NotSpacefillingNotProportional implements IRuleSet {
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
 
@@ -55,7 +55,7 @@ class TaggleRuleSet1 implements IRuleSet {
   };
 }
 
-class TaggleRuleSet2 implements IRuleSet  {
+class NotSpacefillingProportional implements IRuleSet  {
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
 
@@ -87,7 +87,7 @@ class TaggleRuleSet2 implements IRuleSet  {
   };
 }
 
-class TaggleRuleSet3 implements IRuleSet, IUpdate {
+class SpacefillingNotProportional implements IRuleSet, IUpdate {
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
 
@@ -104,7 +104,7 @@ class TaggleRuleSet3 implements IRuleSet, IUpdate {
     this.visibleHeight = params[0];
     const items = toArray(root);
     this.aggrItemCount = items.filter((n) => n.type === 'inner' && (<InnerNode>n).aggregation === EAggregationType.AGGREGATED).length;
-    this.unaggrItemCount = items.filter((n) => n.type === 'leaf' && !n.parents.find((n2) => n2.aggregation === EAggregationType.AGGREGATED)).length;
+    this.unaggrItemCount = items.filter((n) => n.type === 'leaf' && !n.parents.find((n2) => n2.aggregation === EAggregationType.AGGREGATED) && !(<LeafNode<any>>n).filtered).length;
 
     // find number of selected items
     this.selectedItemCount = items.filter((n) => n.type === 'leaf' && n.selected && !n.parents.find((x) => x.aggregation === EAggregationType.AGGREGATED)).length;
@@ -134,7 +134,7 @@ class TaggleRuleSet3 implements IRuleSet, IUpdate {
   };
 }
 
-class TaggleRuleSet4 implements IRuleSet, IUpdate {
+class SpacefillingProportional implements IRuleSet, IUpdate {
   stratificationLevels = +Infinity;
   sortLevels = +Infinity;
 
@@ -150,7 +150,7 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
     this.visibleHeight = params[0];
 
     const items = toArray(root);
-    this.itemCount = items.filter((n) => n.type === 'leaf').length;
+    this.itemCount = items.filter((n) => n.type === 'leaf' && !(<LeafNode<any>>n).filtered).length;
 
     // find number of selected items
     this.selectedItemCount = items.filter((n) => n.type === 'leaf' && n.selected && !n.parents.find((x) => x.aggregation === EAggregationType.AGGREGATED)).length;
@@ -188,10 +188,10 @@ class TaggleRuleSet4 implements IRuleSet, IUpdate {
 }
 
 export function createTaggleRuleSets(root: InnerNode) {
-  ruleSets.push({name: 'not_spacefilling not_proportional', ruleSet: new TaggleRuleSet1()});
-  ruleSets.push({name: 'not_spacefilling proportional', ruleSet: new TaggleRuleSet2()});
-  ruleSets.push({name: 'spacefilling not_proportional', ruleSet: new TaggleRuleSet3(root)});
-  ruleSets.push({name: 'spacefilling proportional', ruleSet: new TaggleRuleSet4(root)});
+  ruleSets.push({name: 'not_spacefilling not_proportional', ruleSet: new NotSpacefillingNotProportional()});
+  ruleSets.push({name: 'not_spacefilling proportional', ruleSet: new NotSpacefillingProportional()});
+  ruleSets.push({name: 'spacefilling not_proportional', ruleSet: new SpacefillingNotProportional(root)});
+  ruleSets.push({name: 'spacefilling proportional', ruleSet: new SpacefillingProportional(root)});
 }
 
 export function updateRuleSets(root: InnerNode, params: any[]) {

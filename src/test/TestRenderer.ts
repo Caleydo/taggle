@@ -83,7 +83,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
 
     const defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
 
-    tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
+
     this.flat = tree.aggregation === EAggregationType.AGGREGATED ? [tree] : tree.flatChildren();
     const exceptions = nonUniformContext(this.flat.map((n) => n.height), defaultRowHeight);
     const columnExceptions = nonUniformContext(this.columns.map((c) => c.width), 150);
@@ -186,6 +186,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
 
 
   private resort(groupOrSortBy: string | null, additional: boolean) {
+    this.tree.flatLeaves<IRow>().forEach((n) => n.filtered = !this.columns.every((c) => c.filter(n)));
     if (groupOrSortBy) {
       const columns = this.columns.map((d) => d.column);
       const column = columns.find((c) => c.name === groupOrSortBy)!;
