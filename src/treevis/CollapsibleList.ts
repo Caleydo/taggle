@@ -82,8 +82,7 @@ export default class CollapsibleList {
   private aggrItemsOnLevel(level: number) {
     const arr: INode[] = [];
     CollapsibleList.flat(this.tree, arr);
-    const aggrInners = arr.filter((n) => n.level === level && n.type === 'inner' && n.aggregation === EAggregationType.AGGREGATED);
-    return aggrInners;
+    return arr.filter((n) => n.level === level && n.type === 'inner' && n.aggregation === EAggregationType.AGGREGATED);
   }
 
   private updatePropertyRow(treeColumnCount: number) {
