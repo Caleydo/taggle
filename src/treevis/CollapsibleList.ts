@@ -78,7 +78,7 @@ export default class CollapsibleList {
       `<div class="popup">
         <i class="fa fa-cog" aria-hidden="true"></i>
         <div class="popupcontent">
-          <form action="#" class="property_form">
+          <form action="" class="property_form">
             <div>
               <label for="hi${index}1">Height (unaggr.):</label>
               <input type="number" id="hi${index}1" class='heightInput'>
@@ -102,6 +102,8 @@ export default class CollapsibleList {
     const that = this;
     $th.selectAll('.property_form')
       .on('submit', function(this: HTMLFormElement, _, __, index: number) {
+        (<any>d3.event).stopPropagation();
+        (<any>d3.event).preventDefault();
         const strVal0 = d3.select(this).select('.heightInput').property('value');
         const unaggrVal = parseInt(strVal0, 10);
 
