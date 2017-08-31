@@ -71,21 +71,39 @@ export default class CollapsibleList {
     buildTableBody(this.$table, arr, treeColumnCount);
   }
 
+  private unaggrItemsOnLevel(level: number) {
+    const arr: INode[] = [];
+    CollapsibleList.flat(this.tree, arr);
+    const arrLeaves = arr.filter((n) => n.level === level && n.type === 'leaf');
+    const unaggrInners = arr.filter((n) => n.level === level && n.type === 'inner' && n.aggregation !== EAggregationType.AGGREGATED);
+    return arrLeaves.concat(unaggrInners);
+  }
+
+  private aggrItemsOnLevel(level: number) {
+    const arr: INode[] = [];
+    CollapsibleList.flat(this.tree, arr);
+    const aggrInners = arr.filter((n) => n.level === level && n.type === 'inner' && n.aggregation === EAggregationType.AGGREGATED);
+    return aggrInners;
+  }
+
   private updatePropertyRow(treeColumnCount: number) {
     const $tr = this.$table.select('thead .properties');
     const $th = $tr.selectAll('th').data(new Array(treeColumnCount));
-    $th.enter().append('th').html((_, index: number) =>
+
+    $th.enter().append('th');
+
+    $th.html((_, index: number) =>
       `<div class="popup">
         <i class="fa fa-cog" aria-hidden="true"></i>
         <div class="popupcontent">
           <form action="" class="property_form">
             <div>
               <label for="hi${index}1">Height (unaggr.):</label>
-              <input type="number" id="hi${index}1" class='heightInput'>
+              <input type="number" id="hi${index}1" class='heightInput' ${this.unaggrItemsOnLevel(index).length === 0 ? 'disabled' : ''}>
             </div>
             <div>
               <label for="hi${index}2">Height (aggr): </label>
-              <input type="number" id="hi${index}2" class='aggrheightInput'>
+              <input type="number" id="hi${index}2" class='aggrheightInput' ${this.aggrItemsOnLevel(index).length === 0 ? 'disabled' : ''}>
             </div>
             <div>
               <button class="submit_button" type="submit">Apply</button>
@@ -110,19 +128,12 @@ export default class CollapsibleList {
         const strVal1 = d3.select(this).select('.aggrheightInput').property('value');
         const aggrVal = parseInt(strVal1, 10);
 
-        const arr: INode[] = [];
-        CollapsibleList.flat(that.tree, arr);
-
-        const arrLeaves = arr.filter((n) => n.level === index && n.type === 'leaf');
-        const arrInners = arr.filter((n) => n.level === index && n.type === 'inner');
-
         if(!isNaN(unaggrVal)) {
-          arrLeaves.forEach((n) => n.height = unaggrVal);
-          arrInners.forEach((n: InnerNode) => n.height = n.aggregation !== EAggregationType.AGGREGATED ? unaggrVal : n.aggregatedHeight);
+          that.unaggrItemsOnLevel(index).forEach((n: INode) => n.height = unaggrVal);
         }
 
         if(!isNaN(aggrVal)) {
-          arrInners.forEach((n: InnerNode) => n.height = n.aggregation === EAggregationType.AGGREGATED ? aggrVal : n.height);
+          that.aggrItemsOnLevel(index).forEach((n: InnerNode) => n.height = aggrVal);
         }
         that.rebuild();
         return false;
