@@ -90,6 +90,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   private defaultRowHeight: number = 20;
   private flat: (InnerNode|LeafNode<T>)[] = [];
   private leaves: LeafNode<T>[] = [];
+  private readonly panel: SidePanel;
 
   constructor(parent: Element, columns: IColumn[], private readonly callbacks: ICallbacks, options: Partial<ILineUpRendererOptions> = {}) {
     super();
@@ -166,8 +167,8 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     }));
 
 
-    const panel = new SidePanel(this, parent.ownerDocument);
-    parent.parentElement!.appendChild(panel.node);
+    this.panel = new SidePanel(this.ctx, parent.ownerDocument);
+    parent.parentElement!.appendChild(this.panel.node);
   }
 
   protected createEventList() {
@@ -275,6 +276,8 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       const stats = computeHist(arr, indices, col.getCategories.bind(col), col.categories);
       this.histCache.set(col.id, stats);
     });
+
+    this.panel.update(this.ctx);
   }
 
   rebuild(tree: InnerNode, ruleSet: IRuleSet) {
