@@ -3,14 +3,14 @@
  */
 import {columns, data, IColumn} from './data/index';
 import DebugInterface from './DebugInterface';
-import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet, createRuleSets, updateRuleSets} from './rule/index';
+import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet} from './rule/index';
 import InnerNode from './tree/InnerNode';
 import {fromArray} from './tree/utils';
-import * as d3 from 'd3';
 
 export interface ITaggleRenderer {
   initTree(tree: InnerNode, ruleSet: IRuleSet): void;
   rebuild(tree: InnerNode, ruleSet: IRuleSet): void;
+  readonly availableHeight: number;
 }
 
 export interface ITaggleRendererClass {
@@ -42,14 +42,13 @@ export default class App {
 
     const defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
     this.tree = fromArray(data, defaultRowHeight);
-    createRuleSets(this.tree);
     this.renderer.initTree(this.tree, this.ruleSet);
-    applyStaticRuleSet(this.ruleSet, this.tree);
+    applyStaticRuleSet(this.ruleSet, this.tree, this.renderer.availableHeight);
 
     this.debug = new DebugInterface(parent, () => this.update(), (rule) => {
       this.ruleSet = rule;
       this.renderer.initTree(this.tree, this.ruleSet);
-      applyStaticRuleSet(rule, this.tree);
+      applyStaticRuleSet(rule, this.tree, this.renderer.availableHeight);
       this.update();
     });
 
@@ -57,8 +56,7 @@ export default class App {
   }
 
   update() {
-    updateRuleSets(this.tree, [(<HTMLElement>d3.select('main').node()).clientHeight]);
-    applyDynamicRuleSet(this.ruleSet, this.tree);
+    applyDynamicRuleSet(this.ruleSet, this.tree, this.renderer.availableHeight);
     this.renderer.rebuild(this.tree, this.ruleSet);
     this.debug.update(this.tree);
   }

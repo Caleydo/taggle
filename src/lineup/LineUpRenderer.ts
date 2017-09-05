@@ -150,6 +150,10 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
     }));
   }
 
+  get availableHeight() {
+    return this.node.querySelector('main')!.clientHeight;
+  }
+
   protected reorder() {
     this.sortAndGroup(this.ranking, this.tree);
     this.callbacks.update();

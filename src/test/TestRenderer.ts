@@ -30,6 +30,10 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
     this.columns = this.createColumns(columns);
   }
 
+  get availableHeight() {
+    return this.bodyScroller.clientHeight;
+  }
+
   private getRow(index: number): INode {
     return this.flat[index];
   }

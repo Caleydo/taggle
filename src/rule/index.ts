@@ -4,11 +4,15 @@
 import LeafNode from '../tree/LeafNode';
 import InnerNode from '../tree/InnerNode';
 import {visit} from '../tree/utils';
+import {
+  NotSpacefillingNotProportional,
+  NotSpacefillingProportional,
+  SpacefillingNotProportional,
+  SpacefillingProportional
+} from './TaggleRuleSet';
 
 export {default as createChooser} from './RuleSwitcher';
-import {NotSpacefillingNotProportional, SpacefillingNotProportional, NotSpacefillingProportional, SpacefillingProportional, IUpdate} from './TaggleRuleSet';
 
-export const ruleSets:{name: string, ruleSet: IRuleSet}[] = [];
 
 export interface IRuleSet {
   name: string;
@@ -33,6 +37,13 @@ export interface IRuleSet {
     aggregatedHeight: number|((node: InnerNode)=>number);
     visType: 'default'|'mean'|((node: InnerNode) => 'default'|'mean');
   };
+
+  /**
+   * optional update before the rule is applied
+   * @param {InnerNode} root
+   * @param {number} availableHeight
+   */
+  update?(root: InnerNode, availableHeight: number): void;
 }
 
 const tableRuleSet: IRuleSet = {
@@ -49,9 +60,8 @@ const tableRuleSet: IRuleSet = {
   }
 };
 
-export const defaultRuleSet = tableRuleSet;
 
-const compactRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
+const compactRuleSet: IRuleSet = Object.assign({}, tableRuleSet, {
   name: 'compact',
   stratificationLevels: 0,
   sortLevels: 1,
@@ -68,7 +78,7 @@ function tableLensHeight(distance: number) {
   return Math.max(2, 40 * Math.sin(Math.PI / 2 * ((7 - Math.min(distance, 7)) / 7)));
 }
 
-const tableLensRuleSet: IRuleSet = Object.assign({}, defaultRuleSet, {
+const tableLensRuleSet: IRuleSet = Object.assign({}, tableRuleSet, {
   name: 'tablelens',
   stratificationLevels: 0,
   sortLevels: 1,
@@ -91,12 +101,17 @@ function functor<P, T>(r: T | ((p: P) => T), p: P) {
   return r;
 }
 
-export function applyStaticRuleSet(ruleSet: IRuleSet, tree: InnerNode) {
+export function applyStaticRuleSet(ruleSet: IRuleSet, tree: InnerNode, availableHeight: number) {
   if (ruleSet.stratificationLevels === 0) {
     //flat tree
     tree.children = tree.flatLeaves();
     tree.children.forEach((d) => d.parent = tree);
   }
+
+  if (ruleSet.update) {
+    ruleSet.update(tree, availableHeight);
+  }
+
   visit<any>(tree, (inner) => {
     inner.aggregatedHeight = functor(ruleSet.inner.aggregatedHeight, inner);
     inner.visType = functor(ruleSet.inner.visType, inner);
@@ -108,7 +123,10 @@ export function applyStaticRuleSet(ruleSet: IRuleSet, tree: InnerNode) {
 }
 
 
-export function applyDynamicRuleSet(ruleSet: IRuleSet, tree: InnerNode) {
+export function applyDynamicRuleSet(ruleSet: IRuleSet, tree: InnerNode, availableHeight: number) {
+  if (ruleSet.update) {
+    ruleSet.update(tree, availableHeight);
+  }
   //just apply it if they are functions, i.e. dynamically computed
   visit<any>(tree, (inner) => {
     if (typeof ruleSet.inner.aggregatedHeight === 'function') {
@@ -128,24 +146,15 @@ export function applyDynamicRuleSet(ruleSet: IRuleSet, tree: InnerNode) {
   });
 }
 
-export function updateRuleSets(root: InnerNode, params: any[]) {
-  ruleSets.forEach((r) => {
-    if(isUpdate(r.ruleSet)) {
-      (<IUpdate>r.ruleSet).update(root, params);
-    }
-  });
-}
 
-function isUpdate(arg: any): arg is IUpdate {
-    return arg.update !== undefined;
-}
+export const defaultRuleSet = tableRuleSet;
 
-export function createRuleSets(tree: InnerNode) {
-  ruleSets.push({ name: 'table', ruleSet: tableRuleSet});
-  ruleSets.push({ name: 'compact', ruleSet: compactRuleSet});
-  ruleSets.push({ name: 'tablelens', ruleSet: tableLensRuleSet});
-  ruleSets.push({name: 'not_spacefilling not_proportional', ruleSet: new NotSpacefillingNotProportional()});
-  ruleSets.push({name: 'not_spacefilling proportional', ruleSet: new NotSpacefillingProportional()});
-  ruleSets.push({name: 'spacefilling not_proportional', ruleSet: new SpacefillingNotProportional(tree)});
-  ruleSets.push({name: 'spacefilling proportional', ruleSet: new SpacefillingProportional(tree)});
-}
+export const ruleSets = [
+  tableRuleSet,
+  compactRuleSet,
+  tableLensRuleSet,
+  new NotSpacefillingNotProportional(),
+  new NotSpacefillingProportional(),
+  new SpacefillingNotProportional(),
+  new SpacefillingProportional(),
+];

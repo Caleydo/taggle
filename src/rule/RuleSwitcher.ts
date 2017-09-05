@@ -9,7 +9,7 @@ export default function createRuleSetChooser(callback: (ruleSet: IRuleSet)=>void
   node.innerHTML=`Switch Ruleset: <select>${ruleSets.map((d) => `<option>${d.name}</option>`)}</select>`;
   node.lastElementChild!.addEventListener('change', function (this: HTMLSelectElement) {
     const index = Math.max(this.selectedIndex, 0);
-    const rule = ruleSets[index]!.ruleSet;
+    const rule = ruleSets[index]!;
     callback(rule);
   });
   return node;
