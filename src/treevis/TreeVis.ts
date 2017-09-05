@@ -5,23 +5,23 @@ import * as d3 from 'd3';
 import {InnerNode, INode, LeafNode, visit} from '../tree';
 import {EAggregationType} from '../tree';
 
-export default class CollapsibleList {
+export default class TreeVis {
   private readonly $parentDiv: d3.Selection<any>;
   private $table: d3.Selection<any>;
   private tree: InnerNode;
 
   constructor($root: d3.Selection<any>, private readonly rebuild: ()=>void) {
     this.$parentDiv = $root.classed('treevis', true);
-    this.createTable();
+    this.$table = TreeVis.createTable(this.$parentDiv);
   }
 
   get node() {
     return this.$parentDiv;
   }
 
-  protected createTable() {
-    this.$table = this.$parentDiv.append('table');
-    this.$table.html(`<thead>
+  private static createTable($parent: d3.Selection<any>) {
+    const $table = $parent.append('table');
+    $table.html(`<thead>
                 <tr>
                   <th colspan="0">Visual Tree</th>
                   <th>Aggr.</th>
@@ -33,6 +33,7 @@ export default class CollapsibleList {
                 </tr>
                 </thead>
                 <tbody></tbody>`);
+    return $table;
   }
 
   render(root: InnerNode) {
@@ -65,7 +66,7 @@ export default class CollapsibleList {
     console.assert(root.parent === null);
 
     const arr: INode[] = [];
-    const treeDepth = CollapsibleList.flat(root, arr); // convert tree to list
+    const treeDepth = TreeVis.flat(root, arr); // convert tree to list
     const treeColumnCount = treeDepth + 1;
     this.updatePropertyRow(treeColumnCount);
     buildTableBody(this.$table, arr, treeColumnCount);
@@ -73,7 +74,7 @@ export default class CollapsibleList {
 
   private unaggrItemsOnLevel(level: number) {
     const arr: INode[] = [];
-    CollapsibleList.flat(this.tree, arr);
+    TreeVis.flat(this.tree, arr);
     const arrLeaves = arr.filter((n) => n.level === level && n.type === 'leaf');
     const unaggrInners = arr.filter((n) => n.level === level && n.type === 'inner' && n.aggregation !== EAggregationType.AGGREGATED);
     return arrLeaves.concat(unaggrInners);
@@ -81,7 +82,7 @@ export default class CollapsibleList {
 
   private aggrItemsOnLevel(level: number) {
     const arr: INode[] = [];
-    CollapsibleList.flat(this.tree, arr);
+    TreeVis.flat(this.tree, arr);
     return arr.filter((n) => n.level === level && n.type === 'inner' && n.aggregation === EAggregationType.AGGREGATED);
   }
 
@@ -223,13 +224,13 @@ export default class CollapsibleList {
     $tr.select('.visType').html((d) =>
       (d.type === 'inner' ? InnerNode : LeafNode)
         .visTypes
-        .map((r) => `<option ${r === d.visType ? 'selected' : ''}>${CollapsibleList.mapVisTypeName(r, d.type)}</option>`)
+        .map((r) => `<option ${r === d.visType ? 'selected' : ''}>${TreeVis.mapVisTypeName(r, d.type)}</option>`)
         .join('')
     );
     const that = this;
     $tr.select('.visType')
     .on('change', function(this: HTMLSelectElement, d: INode) {
-      d.visType = CollapsibleList.mapVisTypeName(this.value, d.type);
+      d.visType = TreeVis.mapVisTypeName(this.value, d.type);
       that.rebuild();
     });
   }
