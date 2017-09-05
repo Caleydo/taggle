@@ -1,13 +1,13 @@
 /**
  * Created by Samuel Gratzl on 10.08.2017.
  */
-import CollapsibleList from './treevis/CollapsibleList';
+import TreeVis from './treevis/TreeVis';
 import FlyoutBar from './controls/FlyoutBar';
 import InnerNode from './tree/InnerNode';
 import {IRuleSet, createChooser} from './rule/index';
 
 export default class DebugInterface {
-  private readonly treeVis: CollapsibleList;
+  private readonly treeVis: TreeVis;
   private readonly fl: FlyoutBar;
 
   constructor(parent: HTMLElement, rebuilder: () => void, ruleChanged: (rule: IRuleSet)=>void) {
@@ -16,7 +16,7 @@ export default class DebugInterface {
       const node = createChooser(ruleChanged);
       this.fl.node.insertBefore(node, this.fl.node.lastChild);
     }
-    this.treeVis = new CollapsibleList(this.fl.body, rebuilder);
+    this.treeVis = new TreeVis(this.fl.body, rebuilder);
   }
 
   update(root: InnerNode) {

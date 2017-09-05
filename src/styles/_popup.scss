@@ -1,0 +1,28 @@
+/* The actual popup */
+.popup {
+  position: relative;
+  display: inline-block;
+  user-select: none;
+
+  i {
+    cursor: pointer;
+  }
+
+  .popupcontent {
+    display: none;
+    width: 160px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 0;
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    margin-left: -10px;
+  }
+
+  &:hover .popupcontent {
+    display: block;
+  }
+}

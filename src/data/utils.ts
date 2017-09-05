@@ -37,9 +37,6 @@ export function computeCategoricalHist(leaves: LeafNode<IRow>[], column: IColumn
   return bins;
 }
 
-
-
-
 export function createTree<T extends IRow>(data: any[], columns: IColumn[], leafHeight: number, ruleSet: IRuleSet): InnerNode {
   const root = fromArray(data, leafHeight);
   // initial grouping and sorting
@@ -100,6 +97,10 @@ export function restratifyTree<T extends IRow>(columns: IColumn[], root: InnerNo
     groupBy<T>(root, root.flatLeaves(), (a) => by.map((bi) => <string>a[bi]));
   }
 
+  updateAggregationHelper(root, columns);
+}
+
+export function updateAggregationHelper<T extends IRow>(root: InnerNode, columns: IColumn[]) {
   visit(root, (inner: InnerNode) => {
     inner.aggregate = {};
     columns.forEach((col) => {

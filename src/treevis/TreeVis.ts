@@ -5,22 +5,23 @@ import * as d3 from 'd3';
 import {InnerNode, INode, LeafNode, visit} from '../tree';
 import {EAggregationType} from '../tree';
 
-export default class CollapsibleList {
+export default class TreeVis {
   private readonly $parentDiv: d3.Selection<any>;
-  private $table: d3.Selection<any>;
+  private readonly $table: d3.Selection<any>;
+  private tree: InnerNode;
 
   constructor($root: d3.Selection<any>, private readonly rebuild: ()=>void) {
     this.$parentDiv = $root.classed('treevis', true);
-    this.createTable();
+    this.$table = TreeVis.createTable(this.$parentDiv);
   }
 
   get node() {
     return this.$parentDiv;
   }
 
-  protected createTable() {
-    this.$table = this.$parentDiv.append('table');
-    this.$table.html(`<thead>
+  private static createTable($parent: d3.Selection<any>) {
+    const $table = $parent.append('table');
+    $table.html(`<thead>
                 <tr>
                   <th colspan="0">Visual Tree</th>
                   <th>Aggr.</th>
@@ -28,12 +29,16 @@ export default class CollapsibleList {
                   <th>Height (px)</th>
                   <th>DOI (0...1)</th>
                 </tr>
+                <tr class="properties">
+                </tr>
                 </thead>
                 <tbody></tbody>`);
+    return $table;
   }
 
   render(root: InnerNode) {
-    const buildTable = ($table: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
+	  this.tree = root;
+    const buildTableBody = ($table: d3.Selection<INode>, arr: INode[], treeColumnCount: number) => {
       console.assert($table && arr && treeColumnCount > -1);
       $table.select('thead tr th').attr('colspan', treeColumnCount);
       const $tr = $table.select('tbody').selectAll('tr')
@@ -46,11 +51,11 @@ export default class CollapsibleList {
       // update phase
       $tr.attr('data-level', (d) => d.level);
       $tr.attr('data-type', (d) => d.type);
-      const $trComplete = $tr.html((d) => this.buildRow(d, treeColumnCount));
-      this.addTreeClickhandler($trComplete);
-      this.updateAggregatedColumn($trComplete);
-      this.updateRendererColumn($trComplete);
-      this.updateInputColumn($trComplete);
+      $tr.html((d) => this.buildRow(d, treeColumnCount));
+      this.addTreeClickhandler($tr);
+      this.updateAggregatedColumn($tr);
+      this.updateRendererColumn($tr);
+      this.updateInputColumn($tr);
       this.setReadonly($tr);
       this.setCollapsedState($tr);
 
@@ -61,26 +66,88 @@ export default class CollapsibleList {
     console.assert(root.parent === null);
 
     const arr: INode[] = [];
-    const treeDepth = CollapsibleList.flat(root, arr); // convert tree to list
-    buildTable(this.$table, arr, treeDepth+1);
+    const treeDepth = TreeVis.flat(root, arr); // convert tree to list
+    const treeColumnCount = treeDepth + 1;
+    this.updatePropertyRow(treeColumnCount);
+    buildTableBody(this.$table, arr, treeColumnCount);
+  }
+
+  private unaggrItemsOnLevel(level: number) {
+    const arr: INode[] = [];
+    TreeVis.flat(this.tree, arr);
+    const arrLeaves = arr.filter((n) => n.level === level && n.type === 'leaf');
+    const unaggrInners = arr.filter((n) => n.level === level && n.type === 'inner' && n.aggregation !== EAggregationType.AGGREGATED);
+    return arrLeaves.concat(unaggrInners);
+  }
+
+  private aggrItemsOnLevel(level: number) {
+    const arr: INode[] = [];
+    TreeVis.flat(this.tree, arr);
+    return arr.filter((n) => n.level === level && n.type === 'inner' && n.aggregation === EAggregationType.AGGREGATED);
+  }
+
+  private updatePropertyRow(treeColumnCount: number) {
+    const $tr = this.$table.select('thead .properties');
+    const $th = $tr.selectAll('th').data(d3.range(treeColumnCount));
+
+    $th.enter().append('th');
+
+    $th.html((_, index: number) =>
+      `<div class="popup">
+        <i class="fa fa-cog" aria-hidden="true"></i>
+        <div class="popupcontent">
+          <form action="" class="property_form">
+            <div>
+              <label for="hi${index}1">Height (unaggr.):</label>
+              <input type="number" id="hi${index}1" class='heightInput' ${this.unaggrItemsOnLevel(index).length === 0 ? 'disabled' : ''}>
+            </div>
+            <div>
+              <label for="hi${index}2">Height (aggr): </label>
+              <input type="number" id="hi${index}2" class='aggrheightInput' ${this.aggrItemsOnLevel(index).length === 0 ? 'disabled' : ''}>
+            </div>
+            <div>
+              <button class="submit_button" type="submit">Apply</button>
+            </div>
+          </form>
+        </div>
+      </div>`
+    );
+    $th.exit().remove();
+    this.addFormhandler($th);
+  }
+
+  private addFormhandler($th: d3.Selection<any>) {
+    const that = this;
+    $th.select('.property_form')
+      .on('submit', function(this: HTMLFormElement, _, index: number) {
+        (<any>d3.event).stopPropagation();
+        (<any>d3.event).preventDefault();
+        const $this = d3.select(this);
+
+        const unaggrVal = parseInt($this.select('.heightInput').property('value'), 10);
+        const aggrVal = parseInt($this.select('.aggrheightInput').property('value'), 10);
+
+        if(!isNaN(unaggrVal)) {
+          that.unaggrItemsOnLevel(index).forEach((n: INode) => n.height = unaggrVal);
+        }
+
+        if(!isNaN(aggrVal)) {
+          that.aggrItemsOnLevel(index).forEach((n: InnerNode) => n.height = aggrVal);
+        }
+        that.rebuild();
+        return false;
+      });
   }
 
   private buildRow(d: INode, treeColumnCount: number) {
-    let resultRow = `${'<td class="hierarchy"></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
-
-    // aggregated row
-    resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''}></td>` : '<td/>';
-
-    // used renderer row
-    resultRow += `<td><select class="visType" ${d.type === 'inner' && d.aggregation !== EAggregationType.AGGREGATED ? 'disabled="disabled"' : ''}></select></td>`;
-
-    // height row
-    resultRow += `<td><input class="height" type="number" value="${d.height}"></td>`;
-
-    // DOI row
-    resultRow += `<td><input class="doi" type="number" step="0.01" value="${d.doi}"></td>`;
-
-    return resultRow;
+    return `
+        ${'<td class="hierarchy"></td>'.repeat(d.level)}
+        <td class="clickable">
+          ${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}
+        ${d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''}></td>` : '<td/>'}
+        <td><select class="visType" ${d.type === 'inner' && d.aggregation !== EAggregationType.AGGREGATED ? 'disabled="disabled"' : ''}></select></td>
+        <td><input class="height" type="number" value="${Math.round(d.height)}"></td>
+        <td><input class="doi" type="number" step="0.01" value="${d.doi}"></td>`;
   }
 
   private static flat(root: INode, result: INode[]) {
@@ -149,13 +216,13 @@ export default class CollapsibleList {
     $tr.select('.visType').html((d) =>
       (d.type === 'inner' ? InnerNode : LeafNode)
         .visTypes
-        .map((r) => `<option ${r === d.visType ? 'selected' : ''}>${CollapsibleList.mapVisTypeName(r, d.type)}</option>`)
+        .map((r) => `<option ${r === d.visType ? 'selected' : ''}>${TreeVis.mapVisTypeName(r, d.type)}</option>`)
         .join('')
     );
     const that = this;
     $tr.select('.visType')
     .on('change', function(this: HTMLSelectElement, d: INode) {
-      d.visType = CollapsibleList.mapVisTypeName(this.value, d.type);
+      d.visType = TreeVis.mapVisTypeName(this.value, d.type);
       that.rebuild();
     });
   }

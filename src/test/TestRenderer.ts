@@ -10,7 +10,7 @@ import HierarchyColumn from './column/HierarchyColumn';
 import CategoricalColumn from './column/CategoricalColumn';
 import NumberColumn from './column/NumberColumn';
 import {StringColumn, ITaggleColumn} from './column';
-import {reorderTree, restratifyTree} from '../data/utils';
+import {reorderTree, restratifyTree, updateAggregationHelper} from '../data/utils';
 import {IRuleSet} from '../rule/index';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> implements ITaggleRenderer {
@@ -61,20 +61,12 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
     // initial grouping and sorting
     if (ruleSet.stratificationLevels > 0) {
       restratifyTree(columns, tree, ['Continent']);
+    } else {
+      updateAggregationHelper(tree, columns);
     }
     if (ruleSet.sortLevels > 0) {
       reorderTree(columns, tree, 'Population (2017)');
     }
-    // random aggregation
-    //visit<IRow>(root, (inner: InnerNode) => {
-    //  if (Math.random() < 0.3) {
-    //    inner.aggregation = EAggregationType.AGGREGATED;
-    //  }
-    //  const group = groupHeights[Math.floor(Math.random() * groupHeights.length)];
-    //   inner.visType = group.renderer;
-    //  inner.aggregatedHeight = group.height;
-    //  return true;
-    //}, () => undefined);
   }
 
   rebuild(tree: InnerNode, ruleSet: IRuleSet) {
