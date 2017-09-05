@@ -1,51 +1,4 @@
-.flyout {
-  &:not(.in) {
-    width: 2vw;
-    max-width: 2vw;
-    background-color: #ddd;
 
-    > :nth-child(n+2) {
-      display: none;
-    }
-  }
-
-  &.in {
-    width: auto;
-    max-width: 50vw;
-
-    h1 {
-      display: none;
-    }
-  }
-
-  h1 {
-    transform: rotate(90deg);
-    position: relative;
-    bottom: 0;
-    white-space: nowrap;
-    cursor: pointer;
-
-    &:active,
-    &:focus,
-    &:hover {
-      color: darkgray;
-    }
-  }
-
-  > .header {
-    text-align: right;
-
-    > i {
-      cursor: pointer;
-
-      &:active,
-      &:focus,
-      &:hover {
-        color: darkgray;
-      }
-    }
-  }
-}
 
 .treevis {
   .hidden {
@@ -79,6 +32,14 @@
     thead {
       font-weight: bold;
       border-bottom: thin solid black;
+
+      .properties {
+        text-align: left;
+
+        .fa.fa-cog {
+          cursor: pointer;
+        }
+      }
     }
 
     td.hierarchy {
