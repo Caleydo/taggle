@@ -20,19 +20,19 @@
     z-index: 2;
     left: 50%;
     margin-left: -10px;
+
+    &::after {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      top: 0;
+      right: -200px;
+      bottom: -200px;
+      left: -200px;
+    }
   }
-}
 
-.popupcontent::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  right: -200px;
-  bottom: -200px;
-  left: -200px;
-}
-
-.popup:hover .popupcontent {
-  display: block;
+  &:hover .popupcontent {
+    display: block;
+  }
 }
