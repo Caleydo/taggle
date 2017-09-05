@@ -7,7 +7,7 @@ import {EAggregationType} from '../tree';
 
 export default class TreeVis {
   private readonly $parentDiv: d3.Selection<any>;
-  private $table: d3.Selection<any>;
+  private readonly $table: d3.Selection<any>;
   private tree: InnerNode;
 
   constructor($root: d3.Selection<any>, private readonly rebuild: ()=>void) {
@@ -51,11 +51,11 @@ export default class TreeVis {
       // update phase
       $tr.attr('data-level', (d) => d.level);
       $tr.attr('data-type', (d) => d.type);
-      const $trComplete = $tr.html((d) => this.buildRow(d, treeColumnCount));
-      this.addTreeClickhandler($trComplete);
-      this.updateAggregatedColumn($trComplete);
-      this.updateRendererColumn($trComplete);
-      this.updateInputColumn($trComplete);
+      $tr.html((d) => this.buildRow(d, treeColumnCount));
+      this.addTreeClickhandler($tr);
+      this.updateAggregatedColumn($tr);
+      this.updateRendererColumn($tr);
+      this.updateInputColumn($tr);
       this.setReadonly($tr);
       this.setCollapsedState($tr);
 
@@ -88,7 +88,7 @@ export default class TreeVis {
 
   private updatePropertyRow(treeColumnCount: number) {
     const $tr = this.$table.select('thead .properties');
-    const $th = $tr.selectAll('th').data(new Array(treeColumnCount));
+    const $th = $tr.selectAll('th').data(d3.range(treeColumnCount));
 
     $th.enter().append('th');
 
@@ -118,15 +118,14 @@ export default class TreeVis {
 
   private addFormhandler($th: d3.Selection<any>) {
     const that = this;
-    $th.selectAll('.property_form')
-      .on('submit', function(this: HTMLFormElement, _, __, index: number) {
+    $th.select('.property_form')
+      .on('submit', function(this: HTMLFormElement, _, index: number) {
         (<any>d3.event).stopPropagation();
         (<any>d3.event).preventDefault();
-        const strVal0 = d3.select(this).select('.heightInput').property('value');
-        const unaggrVal = parseInt(strVal0, 10);
+        const $this = d3.select(this);
 
-        const strVal1 = d3.select(this).select('.aggrheightInput').property('value');
-        const aggrVal = parseInt(strVal1, 10);
+        const unaggrVal = parseInt($this.select('.heightInput').property('value'), 10);
+        const aggrVal = parseInt($this.select('.aggrheightInput').property('value'), 10);
 
         if(!isNaN(unaggrVal)) {
           that.unaggrItemsOnLevel(index).forEach((n: INode) => n.height = unaggrVal);
@@ -141,21 +140,14 @@ export default class TreeVis {
   }
 
   private buildRow(d: INode, treeColumnCount: number) {
-    let resultRow = `${'<td class="hierarchy"></td>'.repeat(d.level)}<td class="clickable">${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}`;
-
-    // aggregated row
-    resultRow += d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''}></td>` : '<td/>';
-
-    // used renderer row
-    resultRow += `<td><select class="visType" ${d.type === 'inner' && d.aggregation !== EAggregationType.AGGREGATED ? 'disabled="disabled"' : ''}></select></td>`;
-
-    // height row
-    resultRow += `<td><input class="height" type="number" value="${Math.round(d.height)}"></td>`;
-
-    // DOI row
-    resultRow += `<td><input class="doi" type="number" step="0.01" value="${d.doi}"></td>`;
-
-    return resultRow;
+    return `
+        ${'<td class="hierarchy"></td>'.repeat(d.level)}
+        <td class="clickable">
+          ${d.level === 0 ? 'root' : d}</td>${'<td></td>'.repeat(treeColumnCount - d.level - 1)}
+        ${d.type === 'inner' ? `<td><input type="checkbox" class="aggregated" ${(<InnerNode>d).aggregation === EAggregationType.AGGREGATED ? 'checked' : ''}></td>` : '<td/>'}
+        <td><select class="visType" ${d.type === 'inner' && d.aggregation !== EAggregationType.AGGREGATED ? 'disabled="disabled"' : ''}></select></td>
+        <td><input class="height" type="number" value="${Math.round(d.height)}"></td>
+        <td><input class="doi" type="number" step="0.01" value="${d.doi}"></td>`;
   }
 
   private static flat(root: INode, result: INode[]) {
