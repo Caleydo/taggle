@@ -1,5 +1,5 @@
 import ANode from './ANode';
-import {IGroupItem} from 'lineupjs/src/ui/engine/RenderColumn';
+import {IGroupItem} from 'lineupjs/src/ui/engine/interfaces';
 import {defaultGroup} from 'lineupjs/src/model/Group';
 
 export default class LeafNode<T> extends ANode implements IGroupItem {

@@ -9,12 +9,7 @@ import {
   IFlatColumn,
   IStatistics
 } from 'lineupjs/src/model/Column';
-import {
-  default as RenderColumn,
-  IGroupData,
-  IGroupItem,
-  IRankingBodyContext
-} from 'lineupjs/src/ui/engine/RenderColumn';
+import RenderColumn from 'lineupjs/src/ui/engine/RenderColumn';
 import {createDOM, createDOMGroup} from 'lineupjs/src/renderer/index';
 import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
 import {AEventDispatcher, debounce} from 'lineupjs/src/utils';
@@ -43,6 +38,7 @@ import {IRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
+import {IGroupData, IGroupItem, IRankingBodyContext} from 'lineupjs/src/ui/engine/interfaces';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
