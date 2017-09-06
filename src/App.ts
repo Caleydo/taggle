@@ -3,13 +3,17 @@
  */
 import {columns, data, IColumn} from './data/index';
 import DebugInterface from './DebugInterface';
-import {applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSet} from './rule/index';
+import {
+  applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSetInstance, IRuleSetLike,
+  IStaticRuleSet
+} from './rule/index';
 import InnerNode from './tree/InnerNode';
 import {fromArray} from './tree/utils';
 
 export interface ITaggleRenderer {
-  initTree(tree: InnerNode, ruleSet: IRuleSet): void;
-  rebuild(tree: InnerNode, ruleSet: IRuleSet): void;
+  initTree(tree: InnerNode, ruleSet: IStaticRuleSet): void;
+  rebuild(tree: InnerNode, ruleSet: IStaticRuleSet, ruleSetInstance: IRuleSetInstance): void;
+  readonly availableHeight: number;
 }
 
 export interface ITaggleRendererClass {
@@ -25,7 +29,8 @@ export default class App {
   private readonly renderer: ITaggleRenderer;
   private readonly debug: DebugInterface;
 
-  private ruleSet: IRuleSet = defaultRuleSet;
+  private ruleSet: IRuleSetLike = defaultRuleSet;
+  private isDynamicLeafHeight: boolean;
   private readonly tree: InnerNode;
 
   constructor(parent: HTMLElement, clazz: ITaggleRendererClass) {
@@ -33,27 +38,33 @@ export default class App {
     this.renderer = new clazz(parent, columns, {
       update: () => this.update(),
       selectionChanged: () => {
-        if (typeof this.ruleSet.leaf.height === 'function') {
+        if (this.isDynamicLeafHeight) {
           this.update();
         }
       }
     });
 
-    const defaultRowHeight = typeof this.ruleSet.leaf.height === 'number' ? this.ruleSet.leaf.height : 20;
-    this.tree = fromArray(data, defaultRowHeight);
+    this.tree = fromArray(data, 20);
     this.renderer.initTree(this.tree, this.ruleSet);
-    applyStaticRuleSet(this.ruleSet, this.tree);
+    const instance = applyStaticRuleSet(this.ruleSet, this.tree, this.renderer.availableHeight);
+    this.isDynamicLeafHeight = typeof instance.leaf.height === 'function';
 
     this.debug = new DebugInterface(parent, () => this.update(), (rule) => {
       this.ruleSet = rule;
-      applyStaticRuleSet(rule, this.tree);
+      this.renderer.initTree(this.tree, this.ruleSet);
+      const instance = applyStaticRuleSet(rule, this.tree, this.renderer.availableHeight);
+      this.isDynamicLeafHeight = typeof instance.leaf.height === 'function';
       this.update();
     });
+
+    window.addEventListener('resize', () => this.update());
   }
 
   update() {
-    applyDynamicRuleSet(this.ruleSet, this.tree);
-    this.renderer.rebuild(this.tree, this.ruleSet);
+    const instance = applyDynamicRuleSet(this.ruleSet, this.tree, this.renderer.availableHeight);
+    this.renderer.rebuild(this.tree, this.ruleSet, instance);
     this.debug.update(this.tree);
+
+    //instance.violations
   }
 }

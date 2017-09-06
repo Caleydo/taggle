@@ -34,7 +34,7 @@ import InnerNode, {EAggregationType} from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {IColumn} from '../data/index';
 import {ICallbacks, ITaggleRenderer} from '../App';
-import {IRuleSet} from '../rule/index';
+import {IRuleSetInstance, IStaticRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
@@ -87,6 +87,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   private flat: (InnerNode | LeafNode<T>)[] = [];
   private leaves: LeafNode<T>[] = [];
   private readonly panel: SidePanel;
+  private ruleSet: IStaticRuleSet;
 
   constructor(parent: Element, columns: IColumn[], private readonly callbacks: ICallbacks, options: Partial<ILineUpRendererOptions> = {}) {
     super();
@@ -152,6 +153,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
     this.ranking.on(`${Ranking.EVENT_DIRTY_ORDER}.provider`, debounce(() => this.reorder(), 100, null));
     this.ranking.on(`${Ranking.EVENT_ORDER_CHANGED}.provider`, debounce(() => this.updateHist(), 100, null));
+    this.ranking.on(`${Ranking.EVENT_ADD_COLUMN}.provider`, debounce((col: Column) => this.updateHistOf(col), 100, null));
     const that = this;
     this.ranking.on(`${Ranking.EVENT_DIRTY}.body`, debounce(function (this: { primaryType: string }) {
       if (this.primaryType !== Column.EVENT_WIDTH_CHANGED) {
@@ -183,20 +185,27 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     return this.ranking;
   }
 
+  get availableHeight() {
+    return this.node.querySelector('main')!.clientHeight;
+  }
+
   protected reorder() {
     this.sortAndGroup(this.ranking, this.tree);
     this.callbacks.update();
   }
 
-  initTree(tree: InnerNode) {
+  initTree(tree: InnerNode, ruleSet: IStaticRuleSet) {
+    this.ruleSet = ruleSet;
     this.leaves = tree.flatLeaves();
+    this.ranking.setMaxSortCriteria(ruleSet.sortLevels);
+    this.ranking.setMaxGroupColumns(ruleSet.stratificationLevels);
     this.updateHist();
   }
 
   private sortAndGroup(ranking: Ranking, tree: InnerNode) {
     //create a flat hierarchy out of it
     const group = ranking.getGroupCriteria();
-    if (!group) {
+    if (!group || this.ruleSet.stratificationLevels < 1) {
       // create a flat tree
       // slice since inplace sorting
       LineUpRenderer.sort(ranking, tree, this.leaves.slice());
@@ -276,10 +285,31 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.panel.update(this.ctx);
   }
 
-  rebuild(tree: InnerNode, ruleSet: IRuleSet) {
+  private updateHistOf(column: Column) {
+    if (!this.options.summary || column.isHidden() || !((column instanceof NumberColumn) || isCategoricalColumn(column))) {
+      return;
+    }
+    const arr = this.leaves.map((l) => l.item);
+    const indices = this.leaves.map((l) => l.dataIndex);
+    if (column instanceof NumberColumn) {
+      const stats = computeStats(arr, indices, column.getValue.bind(column), [0, 1]);
+      this.histCache.set(column.id, stats);
+    }
+    if(isCategoricalColumn(column)) {
+      const stats = computeHist(arr, indices, column.getCategories.bind(column), column.categories);
+      this.histCache.set(column.id, stats);
+    }
+
+    this.panel.update(this.ctx);
+  }
+
+  rebuild(tree: InnerNode, ruleSet: IStaticRuleSet, ruleSetInstance: IRuleSetInstance) {
     this.tree = tree;
-    this.defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
+    this.defaultRowHeight = typeof ruleSetInstance.leaf.height === 'number' ? ruleSetInstance.leaf.height : 20;
+    this.ruleSet = ruleSet;
     this.node.dataset.ruleSet = ruleSet.name;
+    this.ranking.setMaxSortCriteria(ruleSet.sortLevels);
+    this.ranking.setMaxGroupColumns(ruleSet.stratificationLevels);
 
     this.flat = this.tree.flatChildren();
     this.updateImpl();

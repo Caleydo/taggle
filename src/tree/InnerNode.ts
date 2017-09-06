@@ -3,6 +3,7 @@ import {flat, flatLeaves} from './utils';
 import LeafNode from './LeafNode';
 import ANode from './ANode';
 import {IGroupData} from 'lineupjs/src/ui/engine/interfaces';
+import {IGroupParent} from 'lineupjs/src/model/Group';
 
 export enum EAggregationType {
   AGGREGATED,
@@ -10,11 +11,11 @@ export enum EAggregationType {
   UNIFORM
 }
 
-export default class InnerNode extends ANode implements IGroupData {
+export default class InnerNode extends ANode implements IGroupData, IGroupParent {
   readonly type: 'inner' = 'inner';
   children: INode[] = [];
   aggregation: EAggregationType = EAggregationType.UNIFORM;
-  aggregatedHeight = 100;
+  aggregatedHeight = 40;
   aggregatedDoi = 0.5;
   static readonly visTypes = ['default', 'mean'];
 
@@ -30,6 +31,10 @@ export default class InnerNode extends ANode implements IGroupData {
 
   get filtered(): boolean {
     return this.children.every((c) => c.filtered);
+  }
+
+  get subGroups() {
+    return <InnerNode[]>this.children.filter((g) => g.type === 'inner');
   }
 
   toString() {

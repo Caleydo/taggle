@@ -1,8 +1,7 @@
 /**
  * Created by Samuel Gratzl on 10.08.2017.
  */
-import {applyStaticRuleSet, IRuleSet} from '../rule/index';
-import {fromArray, groupBy, sort, visit} from '../tree';
+import {groupBy, sort, visit} from '../tree';
 import InnerNode from '../tree/InnerNode';
 import {IColumn, IRow} from './index';
 import LeafNode from '../tree/LeafNode';
@@ -36,33 +35,6 @@ export function computeCategoricalHist(leaves: LeafNode<IRow>[], column: IColumn
 
   return bins;
 }
-
-export function createTree<T extends IRow>(data: any[], columns: IColumn[], leafHeight: number, ruleSet: IRuleSet): InnerNode {
-  const root = fromArray(data, leafHeight);
-  // initial grouping and sorting
-  if (ruleSet.stratificationLevels > 0) {
-    restratifyTree<T>(columns, root, ['Continent']);
-  }
-  if (ruleSet.sortLevels > 0) {
-    reorderTree<T>(columns, root, 'Population (2017)');
-  }
-  // random aggregation
-  //visit<IRow>(root, (inner: InnerNode) => {
-  //  if (Math.random() < 0.3) {
-  //    inner.aggregation = EAggregationType.AGGREGATED;
-  //  }
-  //  const group = groupHeights[Math.floor(Math.random() * groupHeights.length)];
-  //   inner.visType = group.renderer;
-  //  inner.aggregatedHeight = group.height;
-  //  return true;
-  //}, () => undefined);
-  applyStaticRuleSet(ruleSet, root);
-
-  dump(root);
-
-  return root;
-}
-
 
 export function reorderTree<T extends IRow>(columns: IColumn[], root: InnerNode, by: string) {
   const column = columns.find((c) => c.name === by);
@@ -115,10 +87,8 @@ export function updateAggregationHelper<T extends IRow>(root: InnerNode, columns
 }
 
 export function dump(root: InnerNode) {
-  // random aggregation
   visit<any>(root, (inner: InnerNode) => {
     console.log(`${' '.repeat(inner.level)}-${inner.name}`);
-
     return true;
   }, (n) => console.log(`${' '.repeat(n.level)}-${n.toString()}`));
 }

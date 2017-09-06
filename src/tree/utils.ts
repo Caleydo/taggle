@@ -96,3 +96,14 @@ export function fromArray<T>(rows: T[], rowHeight: number, grouper?: (row: T) =>
   root.children = leaves;
   return root;
 }
+
+export function toArray(root: InnerNode): INode[] {
+  const nodes: INode[] = [];
+  visit<any>(root, (inner: InnerNode) => {
+      nodes.push(inner);
+      return true;
+    }, (leaf) => {
+      nodes.push(leaf);
+  });
+  return nodes;
+}
