@@ -9,22 +9,25 @@ import {
   IFlatColumn,
   IStatistics
 } from 'lineupjs/src/model/Column';
-import {
-  default as RenderColumn, IGroupData, IGroupItem,
-  IRankingBodyContext
-} from 'lineupjs/src/ui/engine/RenderColumn';
+import RenderColumn from 'lineupjs/src/ui/engine/RenderColumn';
 import {createDOM, createDOMGroup} from 'lineupjs/src/renderer/index';
 import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
-import {debounce} from 'lineupjs/src/utils';
+import {AEventDispatcher, debounce} from 'lineupjs/src/utils';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import StringColumn from 'lineupjs/src/model/StringColumn';
 import {filters as defaultFilters} from 'lineupjs/src/dialogs';
 import {renderers as defaultRenderers} from 'lineupjs/src/renderer';
-import {IDataProvider} from 'lineupjs/src/provider/ADataProvider';
+import {default as ADataProvider, IDataProvider} from 'lineupjs/src/provider/ADataProvider';
 import Ranking from 'lineupjs/src/model/Ranking';
 import {ISelectionColumnDesc} from 'lineupjs/src/model/SelectionColumn';
 import {IValueColumnDesc} from 'lineupjs/src/model/ValueColumn';
-import {createRankDesc, createSelectionDesc, createAggregateDesc, isCategoricalColumn, models} from 'lineupjs/src/model';
+import {
+  createAggregateDesc,
+  createRankDesc,
+  createSelectionDesc,
+  isCategoricalColumn,
+  models
+} from 'lineupjs/src/model';
 import {computeHist, computeStats} from 'lineupjs/src/provider/math';
 import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
 import InnerNode, {EAggregationType} from '../tree/InnerNode';
@@ -34,6 +37,8 @@ import {ICallbacks, ITaggleRenderer} from '../App';
 import {IRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
+import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
+import {IGroupData, IGroupItem, IRankingBodyContext} from 'lineupjs/src/ui/engine/interfaces';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -44,27 +49,28 @@ export interface ILineUpRendererOptions {
 export function toDesc(col: IColumn): any {
   const base: any = {type: 'string', column: col.name, label: col.name};
   switch (col.value.type) {
-  case 'categorical':
-    base.type = 'categorical';
-    base.categories = col.value.categories;
-    break;
-  case 'int':
-  case 'real':
-    base.type = 'number';
-    base.domain = col.value.range;
-    break;
+    case 'categorical':
+      base.type = 'categorical';
+      base.categories = col.value.categories;
+      break;
+    case 'int':
+    case 'real':
+      base.type = 'number';
+      base.domain = col.value.range;
+      break;
   }
   return base;
 }
 
 
-export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer {
+export default class LineUpRenderer<T> extends AEventDispatcher implements IDataProvider, ITaggleRenderer {
   private readonly histCache = new Map<string, IStatistics | ICategoricalStatistics>();
 
   readonly node: HTMLElement;
   readonly ctx: IRankingBodyContext;
   private readonly renderer: EngineRankingRenderer;
 
+  private readonly columns: IColumnDesc[];
   readonly ranking: Ranking;
   private selection = new Set<number>();
   private readonly columnTypes: { [columnType: string]: typeof Column } = models();
@@ -78,14 +84,17 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
 
   private tree: InnerNode;
   private defaultRowHeight: number = 20;
-  private flat: (InnerNode|LeafNode<T>)[] = [];
+  private flat: (InnerNode | LeafNode<T>)[] = [];
   private leaves: LeafNode<T>[] = [];
+  private readonly panel: SidePanel;
 
   constructor(parent: Element, columns: IColumn[], private readonly callbacks: ICallbacks, options: Partial<ILineUpRendererOptions> = {}) {
+    super();
     Object.assign(this.options, options);
     this.node = parent.ownerDocument.createElement('main');
     this.node.classList.add('lu');
     parent.appendChild(this.node);
+
 
     const bodyOptions: any = this.options.renderer;
 
@@ -133,7 +142,8 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
     this.ranking.push(this.create(createRankDesc())!);
     this.ranking.push(this.create(createSelectionDesc())!);
 
-    columns.map(toDesc).forEach((desc: any) => {
+    this.columns = columns.map(toDesc);
+    this.columns.forEach((desc: any) => {
       const col = this.create(desc);
       if (col) {
         this.ranking.push(col);
@@ -148,6 +158,29 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
         that.updateImpl();
       }
     }));
+    this.ranking.on(`${Ranking.EVENT_ADD_COLUMN}.body,${Ranking.EVENT_REMOVE_COLUMN}.body`, debounce(() => {
+      this.updateImpl();
+    }));
+
+
+    this.panel = new SidePanel(this.ctx, parent.ownerDocument);
+    parent.parentElement!.appendChild(this.panel.node);
+  }
+
+  protected createEventList() {
+    return super.createEventList().concat([ADataProvider.EVENT_ADD_RANKING, ADataProvider.EVENT_REMOVE_RANKING, ADataProvider.EVENT_ADD_DESC]);
+  }
+
+  getColumns() {
+    return this.columns;
+  }
+
+  getRankings() {
+    return [this.ranking];
+  }
+
+  getLastRanking() {
+    return this.ranking;
   }
 
   protected reorder() {
@@ -235,10 +268,12 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
       const stats = computeStats(arr, indices, col.getValue.bind(col), [0, 1]);
       this.histCache.set(col.id, stats);
     });
-    cols.filter((d) => isCategoricalColumn(d) && !d.isHidden()).forEach((col: ICategoricalColumn&Column) => {
+    cols.filter((d) => isCategoricalColumn(d) && !d.isHidden()).forEach((col: ICategoricalColumn & Column) => {
       const stats = computeHist(arr, indices, col.getCategories.bind(col), col.categories);
       this.histCache.set(col.id, stats);
     });
+
+    this.panel.update(this.ctx);
   }
 
   rebuild(tree: InnerNode, ruleSet: IRuleSet) {
@@ -259,7 +294,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
     const columns = cols.map((c, i) => {
       const single = createDOM(c, defaultRenderers, this.ctx);
       const group = createDOMGroup(c, defaultRenderers, this.ctx);
-      const renderers = { single, group, singleId: c.getRendererType(), groupId: c.getGroupRenderer()};
+      const renderers = {single, group, singleId: c.getRendererType(), groupId: c.getGroupRenderer()};
       return new RenderColumn(c, renderers, i);
     });
 
@@ -305,6 +340,11 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
     this.callbacks.selectionChanged();
   }
 
+  selectAllOf(ranking: Ranking) {
+    console.assert(ranking === this.ranking);
+    this.setSelection(this.leaves.map((d) => d.dataIndex));
+  }
+
   setSelection(dataIndices: number[]) {
     this.selection.clear();
     dataIndices.forEach((d) => this.selection.add(d));
@@ -318,6 +358,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
   removeRanking() {
     // can't remove ranking
   }
+
   ensureOneRanking() {
     // nothing to do
   }
@@ -399,7 +440,7 @@ export default class LineUpRenderer<T> implements IDataProvider, ITaggleRenderer
     return this.leaves.map((d) => col.getValue(d.v, d.dataIndex));
   }
 
-  searchAndJump(_search: string|RegExp, _col: Column) {
+  searchAndJump(_search: string | RegExp, _col: Column) {
     // TODO
   }
 }

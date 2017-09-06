@@ -2,7 +2,7 @@ import {INode} from './';
 import {flat, flatLeaves} from './utils';
 import LeafNode from './LeafNode';
 import ANode from './ANode';
-import {IGroupData} from 'lineupjs/src/ui/engine/RenderColumn';
+import {IGroupData} from 'lineupjs/src/ui/engine/interfaces';
 
 export enum EAggregationType {
   AGGREGATED,
