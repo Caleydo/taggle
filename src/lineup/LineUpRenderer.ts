@@ -49,15 +49,15 @@ export interface ILineUpRendererOptions {
 export function toDesc(col: IColumn): any {
   const base: any = {type: 'string', column: col.name, label: col.name};
   switch (col.value.type) {
-  case 'categorical':
-    base.type = 'categorical';
-    base.categories = col.value.categories;
-    break;
-  case 'int':
-  case 'real':
-    base.type = 'number';
-    base.domain = col.value.range;
-    break;
+    case 'categorical':
+      base.type = 'categorical';
+      base.categories = col.value.categories;
+      break;
+    case 'int':
+    case 'real':
+      base.type = 'number';
+      base.domain = col.value.range;
+      break;
   }
   return base;
 }
@@ -84,7 +84,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
   private tree: InnerNode;
   private defaultRowHeight: number = 20;
-  private flat: (InnerNode|LeafNode<T>)[] = [];
+  private flat: (InnerNode | LeafNode<T>)[] = [];
   private leaves: LeafNode<T>[] = [];
   private readonly panel: SidePanel;
 
@@ -268,7 +268,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       const stats = computeStats(arr, indices, col.getValue.bind(col), [0, 1]);
       this.histCache.set(col.id, stats);
     });
-    cols.filter((d) => isCategoricalColumn(d) && !d.isHidden()).forEach((col: ICategoricalColumn&Column) => {
+    cols.filter((d) => isCategoricalColumn(d) && !d.isHidden()).forEach((col: ICategoricalColumn & Column) => {
       const stats = computeHist(arr, indices, col.getCategories.bind(col), col.categories);
       this.histCache.set(col.id, stats);
     });
@@ -294,7 +294,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     const columns = cols.map((c, i) => {
       const single = createDOM(c, defaultRenderers, this.ctx);
       const group = createDOMGroup(c, defaultRenderers, this.ctx);
-      const renderers = { single, group, singleId: c.getRendererType(), groupId: c.getGroupRenderer()};
+      const renderers = {single, group, singleId: c.getRendererType(), groupId: c.getGroupRenderer()};
       return new RenderColumn(c, renderers, i);
     });
 
@@ -358,6 +358,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   removeRanking() {
     // can't remove ranking
   }
+
   ensureOneRanking() {
     // nothing to do
   }
@@ -439,7 +440,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     return this.leaves.map((d) => col.getValue(d.v, d.dataIndex));
   }
 
-  searchAndJump(_search: string|RegExp, _col: Column) {
+  searchAndJump(_search: string | RegExp, _col: Column) {
     // TODO
   }
 }
