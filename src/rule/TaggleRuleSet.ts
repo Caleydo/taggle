@@ -10,25 +10,23 @@ const maxLeafHeight = 20;
 const defaultAggrHeight = 40;
 
 function printTooSmall(height: number, minHeight: number, item: string) {
-  const msg = `Height of item ${item} (${height} pixels) is smaller than minimum height (${minHeight} pixels) => set it to minimum height`;
-  console.error(msg);
-  return msg;
+  console.log(`Height of item ${item} (${height} pixels) is smaller than minimum height (${minHeight} pixels) => set it to minimum height`);
 }
 
 function printTooBig(height: number, maxHeight: number, item: string) {
-  const msg = `Height of item ${item} (${height} pixels) is bigger than minimum height (${maxHeight} pixels) => set it to minimum height`;
-  console.error(msg);
-  return msg;
+  console.log(`Height of item ${item} (${height} pixels) is bigger than maximal height (${maxHeight} pixels) => set it to maximal height`);
 }
 
 function checkHeightBoundaries(height: number, minHeight: number, maxHeight: number, item: string) {
   let error: string|null = null;
   if(height < minHeight) {
-    error = printTooSmall(height, minHeight, item);
+    printTooSmall(height, minHeight, item);
+    error = `Height of some items were smaller than their minimal allowed size, limiting to minimal size`;
     height = minHeight;
   }
   if(height > maxHeight) {
-    error = printTooBig(height, maxHeight, item);
+    printTooBig(height, maxHeight, item);
+    error = `Height of some items were bigger than their maximal allowed size, limiting to maximal size`;
     height = maxHeight;
   }
   return {height, error};
@@ -82,7 +80,7 @@ class SpacefillingNotProportional implements IRuleSetInstance {
   private readonly unaggrItemCount: number;
   private readonly selectedItemCount: number;
 
-  private readonly spaceFillingErrors: string[] = [];
+  private readonly spaceFillingErrors= new Set<string>();
 
   constructor(root: InnerNode, availableHeight: number) {
     this.visibleHeight = availableHeight;
@@ -102,7 +100,7 @@ class SpacefillingNotProportional implements IRuleSetInstance {
       }
       const {height, error} = checkHeightBoundaries(baseHeight, minLeafHeight, maxLeafHeight, n.toString());
       if (error) {
-        this.spaceFillingErrors.push(error);
+        this.spaceFillingErrors.add(error);
       }
       return height;
     },
@@ -116,7 +114,7 @@ class SpacefillingNotProportional implements IRuleSetInstance {
 
   get violations() {
     return {
-      spaceFilling: this.spaceFillingErrors.length > 0 ? this.spaceFillingErrors.join('\n') : undefined,
+      spaceFilling: this.spaceFillingErrors.size > 0 ? Array.from(this.spaceFillingErrors).join('\n') : undefined,
     };
   }
 }
@@ -133,7 +131,7 @@ export class SpacefillingProportional implements IRuleSetInstance {
   private readonly itemCount: number;
   private readonly selectedItemCount: number;
 
-  private readonly spaceFillingErrors: string[] = [];
+  private readonly spaceFillingErrors= new Set<string>();
 
   constructor(root: InnerNode, availableHeight: number) {
     this.visibleHeight = availableHeight;
@@ -153,7 +151,7 @@ export class SpacefillingProportional implements IRuleSetInstance {
       }
       const {height, error} = checkHeightBoundaries(baseHeight, minLeafHeight, maxLeafHeight, n.toString());
       if (error) {
-        this.spaceFillingErrors.push(error);
+        this.spaceFillingErrors.add(error);
       }
       return height;
     },
@@ -173,7 +171,7 @@ export class SpacefillingProportional implements IRuleSetInstance {
 
   get violations() {
     return {
-      spaceFilling: this.spaceFillingErrors.length > 0 ? this.spaceFillingErrors.join('\n') : undefined,
+      spaceFilling: this.spaceFillingErrors.size > 0 ? Array.from(this.spaceFillingErrors).join('\n') : undefined,
     };
   }
 }

@@ -36,10 +36,10 @@ export default class RuleButtonSwitcher {
 
   setViolations(violations: IRuleViolations) {
     this.proportional.classList.toggle('violated', Boolean(violations.proportionalRatios));
-    this.proportional.lastElementChild!.textContent = violations.proportionalRatios || '';
+    this.proportional.lastElementChild!.textContent = (violations.proportionalRatios || '').replace(/\n/g,'<br>');
 
     this.spaceFilling.classList.toggle('violated', Boolean(violations.spaceFilling));
-    this.spaceFilling.lastElementChild!.textContent = violations.spaceFilling || '';
+    this.spaceFilling.lastElementChild!.textContent = (violations.spaceFilling || '').replace(/\n/g,'<br>');
   }
 
   private choose() {
