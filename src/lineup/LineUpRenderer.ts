@@ -87,6 +87,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   private flat: (InnerNode | LeafNode<T>)[] = [];
   private leaves: LeafNode<T>[] = [];
   private readonly panel: SidePanel;
+  private ruleSet: IStaticRuleSet;
 
   constructor(parent: Element, columns: IColumn[], private readonly callbacks: ICallbacks, options: Partial<ILineUpRendererOptions> = {}) {
     super();
@@ -192,15 +193,17 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.callbacks.update();
   }
 
-  initTree(tree: InnerNode) {
+  initTree(tree: InnerNode, ruleSet: IStaticRuleSet) {
+    this.ruleSet = ruleSet;
     this.leaves = tree.flatLeaves();
+    this.ranking.setMaxSortCriteria(ruleSet.sortLevels);
     this.updateHist();
   }
 
   private sortAndGroup(ranking: Ranking, tree: InnerNode) {
     //create a flat hierarchy out of it
     const group = ranking.getGroupCriteria();
-    if (!group) {
+    if (!group || this.ruleSet.stratificationLevels < 1) {
       // create a flat tree
       // slice since inplace sorting
       LineUpRenderer.sort(ranking, tree, this.leaves.slice());
@@ -283,7 +286,9 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   rebuild(tree: InnerNode, ruleSet: IStaticRuleSet, ruleSetInstance: IRuleSetInstance) {
     this.tree = tree;
     this.defaultRowHeight = typeof ruleSetInstance.leaf.height === 'number' ? ruleSetInstance.leaf.height : 20;
+    this.ruleSet = ruleSet;
     this.node.dataset.ruleSet = ruleSet.name;
+    this.ranking.setMaxSortCriteria(ruleSet.sortLevels);
 
     this.flat = this.tree.flatChildren();
     this.updateImpl();
