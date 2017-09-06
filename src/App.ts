@@ -65,6 +65,6 @@ export default class App {
     this.renderer.rebuild(this.tree, this.ruleSet, instance);
     this.debug.update(this.tree);
 
-    instance.validations
+    //instance.violations
   }
 }

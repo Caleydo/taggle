@@ -197,6 +197,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.ruleSet = ruleSet;
     this.leaves = tree.flatLeaves();
     this.ranking.setMaxSortCriteria(ruleSet.sortLevels);
+    this.ranking.setMaxGroupColumns(ruleSet.stratificationLevels);
     this.updateHist();
   }
 
@@ -289,6 +290,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.ruleSet = ruleSet;
     this.node.dataset.ruleSet = ruleSet.name;
     this.ranking.setMaxSortCriteria(ruleSet.sortLevels);
+    this.ranking.setMaxGroupColumns(ruleSet.stratificationLevels);
 
     this.flat = this.tree.flatChildren();
     this.updateImpl();
