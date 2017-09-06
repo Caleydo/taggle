@@ -5,16 +5,20 @@ import LeafNode from '../tree/LeafNode';
 import InnerNode from '../tree/InnerNode';
 import {visit} from '../tree/utils';
 import {
-  NotSpacefillingNotProportional,
-  NotSpacefillingProportional,
-  SpacefillingNotProportional,
-  SpacefillingProportional
+  notSpacefillingNotProportional,
+  notSpacefillingProportional,
+  spacefillingNotProportional,
+  spacefillingProportional
 } from './TaggleRuleSet';
 
 export {default as createChooser} from './RuleSwitcher';
 
+export interface IRuleViolations {
+  spaceFilling?: string;
+  proportionalRatios?: string;
+}
 
-export interface IRuleSet {
+export interface IStaticRuleSet {
   name: string;
   /**
    * number of possible stratification levels = inner node levels
@@ -27,7 +31,9 @@ export interface IRuleSet {
    * @default +Infinity
    */
   sortLevels: number;
+}
 
+export interface IRuleSetInstance {
   leaf: {
     height: number|((node: LeafNode<any>)=>number);
     visType: 'default'|'compact'|((node: LeafNode<any>) => 'default'|'compact');
@@ -38,13 +44,16 @@ export interface IRuleSet {
     visType: 'default'|'mean'|((node: InnerNode) => 'default'|'mean');
   };
 
-  /**
-   * optional update before the rule is applied
-   * @param {InnerNode} root
-   * @param {number} availableHeight
-   */
-  update?(root: InnerNode, availableHeight: number): void;
+  violations?: IRuleViolations;
 }
+
+export declare type IRuleSet = IStaticRuleSet&IRuleSetInstance;
+
+export interface IRuleSetFactory extends IStaticRuleSet {
+  apply(root: InnerNode, availableHeight: number): IRuleSetInstance;
+}
+
+export declare type IRuleSetLike = IRuleSet|IRuleSetFactory;
 
 const tableRuleSet: IRuleSet = {
   name: 'table',
@@ -101,60 +110,65 @@ function functor<P, T>(r: T | ((p: P) => T), p: P) {
   return r;
 }
 
-export function applyStaticRuleSet(ruleSet: IRuleSet, tree: InnerNode, availableHeight: number) {
+function toInstance(ruleSet: IRuleSetLike, tree: InnerNode, availableHeight: number) {
+  if (typeof (<IRuleSetFactory>ruleSet).apply === 'function') {
+    return (<IRuleSetFactory>ruleSet).apply(tree, availableHeight);
+  }
+  return <IRuleSetInstance>ruleSet;
+}
+
+export function applyStaticRuleSet(ruleSet: IRuleSetLike, tree: InnerNode, availableHeight: number) {
+  const instance = toInstance(ruleSet, tree, availableHeight);
   if (ruleSet.stratificationLevels === 0) {
     //flat tree
     tree.children = tree.flatLeaves();
     tree.children.forEach((d) => d.parent = tree);
   }
 
-  if (ruleSet.update) {
-    ruleSet.update(tree, availableHeight);
-  }
-
   visit<any>(tree, (inner) => {
-    inner.aggregatedHeight = functor(ruleSet.inner.aggregatedHeight, inner);
-    inner.visType = functor(ruleSet.inner.visType, inner);
+    inner.aggregatedHeight = functor(instance.inner.aggregatedHeight, inner);
+    inner.visType = functor(instance.inner.visType, inner);
     return true;
   }, (leaf) => {
-    leaf.height = functor(ruleSet.leaf.height, leaf);
-    leaf.visType = functor(ruleSet.leaf.visType, leaf);
+    leaf.height = functor(instance.leaf.height, leaf);
+    leaf.visType = functor(instance.leaf.visType, leaf);
   });
+
+  return instance;
 }
 
 
-export function applyDynamicRuleSet(ruleSet: IRuleSet, tree: InnerNode, availableHeight: number) {
-  if (ruleSet.update) {
-    ruleSet.update(tree, availableHeight);
-  }
+export function applyDynamicRuleSet(ruleSet: IRuleSetLike, tree: InnerNode, availableHeight: number) {
+  const instance = toInstance(ruleSet, tree, availableHeight);
   //just apply it if they are functions, i.e. dynamically computed
   visit<any>(tree, (inner) => {
-    if (typeof ruleSet.inner.aggregatedHeight === 'function') {
-      inner.aggregatedHeight = ruleSet.inner.aggregatedHeight(inner);
+    if (typeof instance.inner.aggregatedHeight === 'function') {
+      inner.aggregatedHeight = instance.inner.aggregatedHeight(inner);
     }
-    if (typeof ruleSet.inner.visType === 'function') {
-      inner.visType = ruleSet.inner.visType(inner);
+    if (typeof instance.inner.visType === 'function') {
+      inner.visType = instance.inner.visType(inner);
     }
     return true;
   }, (leaf) => {
-    if (typeof ruleSet.leaf.height === 'function') {
-      leaf.height = ruleSet.leaf.height(leaf);
+    if (typeof instance.leaf.height === 'function') {
+      leaf.height = instance.leaf.height(leaf);
     }
-    if (typeof ruleSet.leaf.visType === 'function') {
-      leaf.visType = ruleSet.leaf.visType(leaf);
+    if (typeof instance.leaf.visType === 'function') {
+      leaf.visType = instance.leaf.visType(leaf);
     }
   });
+  return instance;
 }
 
 
 export const defaultRuleSet = tableRuleSet;
 
-export const ruleSets = [
+export const ruleSets: IRuleSetLike[] = [
   tableRuleSet,
   compactRuleSet,
   tableLensRuleSet,
-  new NotSpacefillingNotProportional(),
-  new NotSpacefillingProportional(),
-  new SpacefillingNotProportional(),
-  new SpacefillingProportional(),
+  notSpacefillingNotProportional,
+  notSpacefillingProportional,
+  spacefillingNotProportional,
+  spacefillingProportional,
 ];

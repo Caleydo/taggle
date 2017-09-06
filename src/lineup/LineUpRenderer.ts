@@ -34,7 +34,7 @@ import InnerNode, {EAggregationType} from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {IColumn} from '../data/index';
 import {ICallbacks, ITaggleRenderer} from '../App';
-import {IRuleSet} from '../rule/index';
+import {IRuleSetInstance, IStaticRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
@@ -280,9 +280,9 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.panel.update(this.ctx);
   }
 
-  rebuild(tree: InnerNode, ruleSet: IRuleSet) {
+  rebuild(tree: InnerNode, ruleSet: IStaticRuleSet, ruleSetInstance: IRuleSetInstance) {
     this.tree = tree;
-    this.defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
+    this.defaultRowHeight = typeof ruleSetInstance.leaf.height === 'number' ? ruleSetInstance.leaf.height : 20;
     this.node.dataset.ruleSet = ruleSet.name;
 
     this.flat = this.tree.flatChildren();

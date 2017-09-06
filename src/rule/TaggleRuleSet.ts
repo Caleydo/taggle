@@ -1,8 +1,8 @@
-import {toArray, flatLeaves} from '../tree/utils';
+import {flatLeaves, toArray} from '../tree/utils';
 import InnerNode from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {EAggregationType} from '../tree';
-import {IRuleSet} from './';
+import {IRuleSet, IRuleSetFactory, IRuleSetInstance} from './';
 
 const defaultLeafHeight = 20;
 const minLeafHeight = 1;
@@ -10,78 +10,81 @@ const maxLeafHeight = 20;
 const defaultAggrHeight = 40;
 
 function printTooSmall(height: number, minHeight: number, item: string) {
-  console.error(`Height of item ${item} (${height} pixels) is smaller than minimum height (${minHeight} pixels) => set it to minimum height`);
+  const msg = `Height of item ${item} (${height} pixels) is smaller than minimum height (${minHeight} pixels) => set it to minimum height`;
+  console.error(msg);
+  return msg;
 }
 
 function printTooBig(height: number, maxHeight: number, item: string) {
-  console.error(`Height of item ${item} (${height} pixels) is bigger than minimum height (${maxHeight} pixels) => set it to minimum height`);
+  const msg = `Height of item ${item} (${height} pixels) is bigger than minimum height (${maxHeight} pixels) => set it to minimum height`;
+  console.error(msg);
+  return msg;
 }
 
 function checkHeightBoundaries(height: number, minHeight: number, maxHeight: number, item: string) {
+  let error: string|null = null;
   if(height < minHeight) {
-    printTooSmall(height, minHeight, item);
+    error = printTooSmall(height, minHeight, item);
     height = minHeight;
   }
   if(height > maxHeight) {
-    printTooBig(height, maxHeight, item);
+    error = printTooBig(height, maxHeight, item);
     height = maxHeight;
   }
-  return height;
+  return {height, error};
 }
 
-export class NotSpacefillingNotProportional implements IRuleSet {
-  readonly name = 'not_spacefilling_not_proportional';
-  readonly stratificationLevels = +Infinity;
-  readonly sortLevels = +Infinity;
+export const notSpacefillingNotProportional: IRuleSet = {
+  name: 'NotSpacefillingNotProportional',
+  stratificationLevels: +Infinity,
+  sortLevels: +Infinity,
 
-  readonly leaf = {
+  leaf: {
     height: defaultLeafHeight,
-    visType: <'default'>'default'
-  };
+    visType: 'default'
+  },
 
-  readonly inner = {
+  inner: {
     aggregatedHeight: defaultAggrHeight,
-    visType: <'default'>'default'
-  };
-}
+    visType: 'default'
+  }
+};
 
-export class NotSpacefillingProportional implements IRuleSet  {
-  readonly name = 'not_spacefilling_proportional';
-  readonly stratificationLevels = +Infinity;
-  readonly sortLevels = +Infinity;
+export const notSpacefillingProportional: IRuleSet = {
+   name: 'NotSpacefillingProportional',
+   stratificationLevels:  +Infinity,
+   sortLevels :  +Infinity,
 
-  readonly leaf = {
+   leaf:  {
     height: (n: LeafNode<any>) => {
       if(n.selected) {
         return defaultLeafHeight;
       }
       return minLeafHeight;
     },
-    visType: <'default'>'default'
-  };
+    visType: 'default'
+  },
 
-  readonly inner = {
+  inner: {
     aggregatedHeight: (node: InnerNode) => {
       if(node.aggregation !== EAggregationType.AGGREGATED) {
         return node.aggregatedHeight;
       }
       return flatLeaves(node).length * minLeafHeight;
     },
-    visType: <'default'>'default'
-  };
-}
+    visType: 'default'
+  }
+};
 
-export class SpacefillingNotProportional implements IRuleSet {
-  readonly name = 'spacefilling_not_proportional';
-  readonly stratificationLevels = +Infinity;
-  readonly sortLevels = +Infinity;
+class SpacefillingNotProportional implements IRuleSetInstance {
+  private readonly visibleHeight: number;
+  private readonly aggrItemCount: number;
+  private readonly unaggrItemCount: number;
+  private readonly selectedItemCount: number;
 
-  private visibleHeight: number;
-  private aggrItemCount: number;
-  private unaggrItemCount: number;
-  private selectedItemCount: number;
+  private readonly spaceFillingErrors: string[] = [];
 
-  update(root: InnerNode, availableHeight: number) {
+  constructor(root: InnerNode, availableHeight: number) {
     this.visibleHeight = availableHeight;
     const items = toArray(root);
     this.aggrItemCount = items.filter((n) => n.type === 'inner' && (<InnerNode>n).aggregation === EAggregationType.AGGREGATED).length;
@@ -93,11 +96,15 @@ export class SpacefillingNotProportional implements IRuleSet {
 
   readonly leaf = {
     height: (n: LeafNode<any>) => {
-      let height = this.unaggrItemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.aggrItemCount * this.inner.aggregatedHeight - this.selectedItemCount * defaultLeafHeight) / (this.unaggrItemCount - this.selectedItemCount) : 1;
+      let baseHeight = this.unaggrItemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.aggrItemCount * this.inner.aggregatedHeight - this.selectedItemCount * defaultLeafHeight) / (this.unaggrItemCount - this.selectedItemCount) : 1;
       if(n.selected) {
-        height = defaultLeafHeight;
+        baseHeight = defaultLeafHeight;
       }
-      return checkHeightBoundaries(height, minLeafHeight, maxLeafHeight, n.toString());
+      const {height, error} = checkHeightBoundaries(baseHeight, minLeafHeight, maxLeafHeight, n.toString());
+      if (error) {
+        this.spaceFillingErrors.push(error);
+      }
+      return height;
     },
     visType: <'default'>'default'
   };
@@ -106,18 +113,29 @@ export class SpacefillingNotProportional implements IRuleSet {
     aggregatedHeight: defaultAggrHeight,
     visType: <'default'>'default'
   };
+
+  get violations() {
+    return {
+      spaceFilling: this.spaceFillingErrors.length > 0 ? this.spaceFillingErrors.join('\n') : undefined,
+    };
+  }
 }
 
-export class SpacefillingProportional implements IRuleSet {
-  readonly name = 'spacefilling_proportional';
-  readonly stratificationLevels = +Infinity;
-  readonly sortLevels = +Infinity;
+export const spacefillingNotProportional: IRuleSetFactory = {
+  name: 'SpacefillingNotProportional',
+  stratificationLevels: +Infinity,
+  sortLevels: +Infinity,
+  apply: (tree: InnerNode, availableHeight) => new SpacefillingNotProportional(tree, availableHeight)
+};
 
-  private visibleHeight: number;
-  private itemCount: number;
-  private selectedItemCount: number;
+export class SpacefillingProportional implements IRuleSetInstance {
+  private readonly visibleHeight: number;
+  private readonly itemCount: number;
+  private readonly selectedItemCount: number;
 
-  update(root: InnerNode, availableHeight: number) {
+  private readonly spaceFillingErrors: string[] = [];
+
+  constructor(root: InnerNode, availableHeight: number) {
     this.visibleHeight = availableHeight;
 
     const items = toArray(root);
@@ -129,11 +147,14 @@ export class SpacefillingProportional implements IRuleSet {
 
   readonly leaf = {
     height: (n: LeafNode<any>) => {
-      let height: number = this.itemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.selectedItemCount * defaultLeafHeight) / (this.itemCount - this.selectedItemCount) : 1;
+      let baseHeight = this.itemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.selectedItemCount * defaultLeafHeight) / (this.itemCount - this.selectedItemCount) : 1;
       if(n.selected) {
-        height = defaultLeafHeight;
+        baseHeight = defaultLeafHeight;
       }
-      height = checkHeightBoundaries(height, minLeafHeight, maxLeafHeight, n.toString());
+      const {height, error} = checkHeightBoundaries(baseHeight, minLeafHeight, maxLeafHeight, n.toString());
+      if (error) {
+        this.spaceFillingErrors.push(error);
+      }
       return height;
     },
     visType: <'default'>'default'
@@ -149,4 +170,17 @@ export class SpacefillingProportional implements IRuleSet {
     },
     visType: <'default'>'default'
   };
+
+  get violations() {
+    return {
+      spaceFilling: this.spaceFillingErrors.length > 0 ? this.spaceFillingErrors.join('\n') : undefined,
+    };
+  }
 }
+
+export const spacefillingProportional: IRuleSetFactory = {
+  name: 'SpacefillingProportional',
+  stratificationLevels: +Infinity,
+  sortLevels: +Infinity,
+  apply: (tree: InnerNode, availableHeight) => new SpacefillingProportional(tree, availableHeight)
+};

@@ -11,7 +11,7 @@ import CategoricalColumn from './column/CategoricalColumn';
 import NumberColumn from './column/NumberColumn';
 import {StringColumn, ITaggleColumn} from './column';
 import {reorderTree, restratifyTree, updateAggregationHelper} from '../data/utils';
-import {IRuleSet} from '../rule/index';
+import {IRuleSetInstance, IStaticRuleSet} from '../rule/index';
 
 export default class TestRenderer extends ACellRenderer<ITaggleColumn> implements ITaggleRenderer {
   protected _context: ICellRenderContext<ITaggleColumn>;
@@ -22,7 +22,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
   private groupBy: string[] = [];
 
   private tree: InnerNode;
-  private ruleSet: IRuleSet;
+  private ruleSet: IStaticRuleSet;
 
   constructor(root: HTMLElement, columns: IColumn[], private readonly callbacks: ICallbacks) {
     super(root);
@@ -60,7 +60,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
     return cols;
   }
 
-  initTree(tree: InnerNode, ruleSet: IRuleSet) {
+  initTree(tree: InnerNode, ruleSet: IStaticRuleSet) {
     const columns = this.columns.map((d) => d.column);
     // initial grouping and sorting
     if (ruleSet.stratificationLevels > 0) {
@@ -73,12 +73,12 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
     }
   }
 
-  rebuild(tree: InnerNode, ruleSet: IRuleSet) {
+  rebuild(tree: InnerNode, ruleSet: IStaticRuleSet, ruleSetInstance: IRuleSetInstance) {
     this.tree = tree;
     this.ruleSet = ruleSet;
     this.root.dataset.ruleSet = ruleSet.name;
 
-    const defaultRowHeight = typeof ruleSet.leaf.height === 'number' ? ruleSet.leaf.height : 20;
+    const defaultRowHeight = typeof ruleSetInstance.leaf.height === 'number' ? ruleSetInstance.leaf.height : 20;
 
 
     this.flat = tree.aggregation === EAggregationType.AGGREGATED ? [tree] : tree.flatChildren();
