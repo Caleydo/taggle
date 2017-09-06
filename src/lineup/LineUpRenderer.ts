@@ -340,6 +340,11 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.callbacks.selectionChanged();
   }
 
+  selectAllOf(ranking: Ranking) {
+    console.assert(ranking === this.ranking);
+    this.setSelection(this.leaves.map((d) => d.dataIndex));
+  }
+
   setSelection(dataIndices: number[]) {
     this.selection.clear();
     dataIndices.forEach((d) => this.selection.add(d));
