@@ -38,7 +38,7 @@ export default class FlyoutBar {
     if (next) {
       this.onBecomingVisible();
     }
-  }
+  };
 
   protected createHeader() {
     const $closeButton = this.$node.append('div').classed('header', true).append('i').classed('fa fa-window-close', true);

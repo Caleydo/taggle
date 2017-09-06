@@ -9,6 +9,7 @@ import {
 } from './rule/index';
 import InnerNode from './tree/InnerNode';
 import {fromArray} from './tree/utils';
+import RuleButtonSwitcher from './rule/RuleButtonSwitcher';
 
 export interface ITaggleRenderer {
   initTree(tree: InnerNode, ruleSet: IStaticRuleSet): void;
@@ -23,10 +24,12 @@ export interface ITaggleRendererClass {
 export interface ICallbacks {
   update(): void;
   selectionChanged(): void;
+  ruleChanged(rule: IRuleSetLike): void;
 }
 
 export default class App {
   private readonly renderer: ITaggleRenderer;
+  private readonly switcher: RuleButtonSwitcher;
   private readonly debug: DebugInterface;
 
   private ruleSet: IRuleSetLike = defaultRuleSet;
@@ -35,27 +38,38 @@ export default class App {
 
   constructor(parent: HTMLElement, clazz: ITaggleRendererClass) {
 
-    this.renderer = new clazz(parent, columns, {
+    const callbacks = {
       update: () => this.update(),
       selectionChanged: () => {
         if (this.isDynamicLeafHeight) {
           this.update();
         }
+      },
+      ruleChanged: (rule: IRuleSetLike) => {
+        this.ruleSet = rule;
+        this.renderer.initTree(this.tree, this.ruleSet);
+        const instance = applyStaticRuleSet(rule, this.tree, this.renderer.availableHeight);
+        this.isDynamicLeafHeight = typeof instance.leaf.height === 'function';
+        this.update();
       }
-    });
+    };
+
+    {
+      const aside = parent.ownerDocument.createElement('aside');
+      aside.classList.add('panel');
+      this.switcher = new RuleButtonSwitcher((rule) => callbacks.ruleChanged(rule));
+      aside.appendChild(this.switcher.node);
+      parent.parentElement!.appendChild(aside);
+    }
+
+    this.renderer = new clazz(parent, columns, callbacks);
 
     this.tree = fromArray(data, 20);
     this.renderer.initTree(this.tree, this.ruleSet);
     const instance = applyStaticRuleSet(this.ruleSet, this.tree, this.renderer.availableHeight);
     this.isDynamicLeafHeight = typeof instance.leaf.height === 'function';
 
-    this.debug = new DebugInterface(parent, () => this.update(), (rule) => {
-      this.ruleSet = rule;
-      this.renderer.initTree(this.tree, this.ruleSet);
-      const instance = applyStaticRuleSet(rule, this.tree, this.renderer.availableHeight);
-      this.isDynamicLeafHeight = typeof instance.leaf.height === 'function';
-      this.update();
-    });
+    this.debug = new DebugInterface(parent, callbacks);
 
     window.addEventListener('resize', () => this.update());
   }
@@ -65,6 +79,6 @@ export default class App {
     this.renderer.rebuild(this.tree, this.ruleSet, instance);
     this.debug.update(this.tree);
 
-    //instance.violations
+    this.switcher.setViolations(instance.violations || {});
   }
 }

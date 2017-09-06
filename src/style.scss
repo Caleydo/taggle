@@ -25,9 +25,11 @@ body {
   @import "./styles/table";
 }
 
-aside.lu-side-panel {
+aside.panel {
   flex: 0 0 auto;
   margin-right: 37px;
+  display: flex;
+  flex-direction: column;
 }
 
 @import "./styles/lineup";
@@ -52,3 +54,4 @@ aside.lu-side-panel {
 @import "styles/flyout";
 @import "styles/treevis";
 @import "styles/popup";
+@import "styles/switcher";

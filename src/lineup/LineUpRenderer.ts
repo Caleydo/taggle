@@ -166,7 +166,13 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
 
     this.panel = new SidePanel(this.ctx, parent.ownerDocument);
-    parent.parentElement!.appendChild(this.panel.node);
+    const next = parent.parentElement!.querySelector('aside');
+    if (next) {
+      next.appendChild(this.panel.node);
+    } else {
+      this.panel.node.classList.add('panel');
+      parent.parentElement!.appendChild(this.panel.node);
+    }
   }
 
   protected createEventList() {

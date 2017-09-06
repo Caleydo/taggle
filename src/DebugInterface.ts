@@ -4,19 +4,20 @@
 import TreeVis from './treevis/TreeVis';
 import FlyoutBar from './controls/FlyoutBar';
 import InnerNode from './tree/InnerNode';
-import {IRuleSet, createChooser} from './rule/index';
+import {createChooser} from './rule/index';
+import {ICallbacks} from './App';
 
 export default class DebugInterface {
   private readonly treeVis: TreeVis;
   private readonly fl: FlyoutBar;
 
-  constructor(parent: HTMLElement, rebuilder: () => void, ruleChanged: (rule: IRuleSet)=>void) {
-    this.fl = new FlyoutBar(parent.parentElement!, rebuilder);
+  constructor(parent: HTMLElement, callbacks: ICallbacks) {
+    this.fl = new FlyoutBar(parent.parentElement!, () => callbacks.update());
     {
-      const node = createChooser(ruleChanged);
+      const node = createChooser((rule) => callbacks.ruleChanged(rule));
       this.fl.node.insertBefore(node, this.fl.node.lastChild);
     }
-    this.treeVis = new TreeVis(this.fl.body, rebuilder);
+    this.treeVis = new TreeVis(this.fl.body, () => callbacks.update());
   }
 
   update(root: InnerNode) {
