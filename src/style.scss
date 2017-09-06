@@ -27,6 +27,7 @@ body {
 
 aside.lu-side-panel {
   flex: 0 0 auto;
+  margin-right: 37px;
 }
 
 @import "./styles/lineup";
@@ -36,7 +37,7 @@ aside.lu-side-panel {
   position: fixed;
   right: 0;
   top: 0;
-  height: 98vh;
+  height: 100vh;
   background: white;
   border-left: 2px solid black;
   transition: max-width 0.5s linear;
