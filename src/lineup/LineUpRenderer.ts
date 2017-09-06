@@ -153,6 +153,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
     this.ranking.on(`${Ranking.EVENT_DIRTY_ORDER}.provider`, debounce(() => this.reorder(), 100, null));
     this.ranking.on(`${Ranking.EVENT_ORDER_CHANGED}.provider`, debounce(() => this.updateHist(), 100, null));
+    this.ranking.on(`${Ranking.EVENT_ADD_COLUMN}.provider`, debounce((col: Column) => this.updateHistOf(col), 100, null));
     const that = this;
     this.ranking.on(`${Ranking.EVENT_DIRTY}.body`, debounce(function (this: { primaryType: string }) {
       if (this.primaryType !== Column.EVENT_WIDTH_CHANGED) {
@@ -280,6 +281,24 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       const stats = computeHist(arr, indices, col.getCategories.bind(col), col.categories);
       this.histCache.set(col.id, stats);
     });
+
+    this.panel.update(this.ctx);
+  }
+
+  private updateHistOf(column: Column) {
+    if (!this.options.summary || column.isHidden() || !((column instanceof NumberColumn) || isCategoricalColumn(column))) {
+      return;
+    }
+    const arr = this.leaves.map((l) => l.item);
+    const indices = this.leaves.map((l) => l.dataIndex);
+    if (column instanceof NumberColumn) {
+      const stats = computeStats(arr, indices, column.getValue.bind(column), [0, 1]);
+      this.histCache.set(column.id, stats);
+    }
+    if(isCategoricalColumn(column)) {
+      const stats = computeHist(arr, indices, column.getCategories.bind(column), column.categories);
+      this.histCache.set(column.id, stats);
+    }
 
     this.panel.update(this.ctx);
   }
