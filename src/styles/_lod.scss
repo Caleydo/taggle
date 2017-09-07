@@ -1,0 +1,39 @@
+
+
+.lu.lineup-engine {
+  [data-lod=low][data-agg=detail],
+  [data-lod=medium][data-agg=detail] {
+    background: none !important;
+
+    .lu-missing {
+      background: none !important;
+    }
+
+    .lu-missing,
+    [data-renderer=aggregate],
+    [data-renderer=rank],
+    [data-renderer=string] {
+      display: none;
+    }
+
+    [data-renderer=selection]::before {
+      content: '' !important;
+    }
+
+    [data-renderer=number] {
+      top: 0;
+      bottom: 0;
+    }
+
+    [data-renderer=categorical] {
+      > div:first-of-type {
+        margin-right: 0;
+        flex: 1 1 auto;
+      }
+
+      > div:last-of-type {
+        display: none;
+      }
+    }
+  }
+}
