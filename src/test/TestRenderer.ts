@@ -5,7 +5,7 @@ import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {EAggregationType, InnerNode, INode, LeafNode} from '../tree';
 import {IRow, IColumn} from '../data';
-import {ICallbacks, ITaggleRenderer} from '../App';
+import {ICallbacks, ITaggleRenderer} from '../interfaces';
 import HierarchyColumn from './column/HierarchyColumn';
 import CategoricalColumn from './column/CategoricalColumn';
 import NumberColumn from './column/NumberColumn';

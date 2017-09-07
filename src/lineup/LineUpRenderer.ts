@@ -33,7 +33,7 @@ import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
 import InnerNode, {EAggregationType} from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {IColumn} from '../data/index';
-import {ICallbacks, ITaggleRenderer} from '../App';
+import {ICallbacks, ITaggleRenderer} from '../interfaces';
 import {IStaticRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';

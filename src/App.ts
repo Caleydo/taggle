@@ -1,32 +1,16 @@
 /**
  * Created by Samuel Gratzl on 10.08.2017.
  */
-import {columns, data, IColumn} from './data/index';
+import {columns, data} from './data/index';
 import DebugInterface from './DebugInterface';
 import {
-  applyDynamicRuleSet, applyStaticRuleSet, IRuleSetInstance, IRuleSetLike,
-  IStaticRuleSet
+  applyDynamicRuleSet, applyStaticRuleSet, IRuleSetLike,
 } from './rule/index';
 import InnerNode from './tree/InnerNode';
 import {fromArray} from './tree/utils';
 import RuleButtonSwitcher from './rule/RuleButtonSwitcher';
 import {notSpacefillingNotProportional} from './rule/TaggleRuleSet';
-
-export interface ITaggleRenderer {
-  initTree(tree: InnerNode, ruleSet: IStaticRuleSet): void;
-  rebuild(tree: InnerNode, ruleSet: IStaticRuleSet, ruleSetInstance: IRuleSetInstance): void;
-  readonly availableHeight: number;
-}
-
-export interface ITaggleRendererClass {
-  new(parent: HTMLElement, columns: IColumn[], callbacks: ICallbacks): ITaggleRenderer;
-}
-
-export interface ICallbacks {
-  update(): void;
-  selectionChanged(): void;
-  ruleChanged(rule: IRuleSetLike): void;
-}
+import {ITaggleRenderer, ITaggleRendererClass} from './interfaces';
 
 export default class App {
   private readonly renderer: ITaggleRenderer;
