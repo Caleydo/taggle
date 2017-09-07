@@ -12,7 +12,7 @@ import {
 import RenderColumn from 'lineupjs/src/ui/engine/RenderColumn';
 import {createDOM, createDOMGroup} from 'lineupjs/src/renderer/index';
 import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
-import {AEventDispatcher, debounce} from 'lineupjs/src/utils';
+import {AEventDispatcher, debounce, findOption} from 'lineupjs/src/utils';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import StringColumn from 'lineupjs/src/model/StringColumn';
 import {filters as defaultFilters} from 'lineupjs/src/dialogs';
@@ -94,30 +94,13 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.node.classList.add('lu', 'taggle');
     parent.appendChild(this.node);
 
-
-    const bodyOptions: any = this.options.renderer;
-
-    function findOption(key: string, defaultValue: any): any {
-      if (key in bodyOptions) {
-        return bodyOptions[key];
-      }
-      if (key.indexOf('.') > 0) {
-        const p = key.substring(0, key.indexOf('.'));
-        key = key.substring(key.indexOf('.') + 1);
-        if (p in bodyOptions && key in bodyOptions[p]) {
-          return bodyOptions[p][key];
-        }
-      }
-      return defaultValue;
-    }
-
     this.ctx = {
       provider: this,
       filters: Object.assign({}, defaultFilters),
       linkTemplates: <string[]>[],
       autoRotateLabels: false,
       searchAble: (col: Column) => col instanceof StringColumn,
-      option: findOption,
+      option: findOption(Object.assign({useGridLayout: true}, this.options.renderer)),
       statsOf: (col: Column) => {
         const r = this.histCache.get(col.id);
         if (r == null || r instanceof Promise) {
