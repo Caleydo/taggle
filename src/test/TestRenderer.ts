@@ -163,9 +163,9 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
       this.selectRow(rowIndex, evt.shiftKey || evt.altKey || evt.ctrlKey, node);
       evt.stopPropagation();
     };
-    if (this.getRow(rowIndex).selected) {
-      node.classList.add('selected');
-    }
+    const row = this.getRow(rowIndex);
+    node.classList.toggle('selected', row.selected);
+    node.dataset.lod = this.ruleSet.levelOfDetail(row);
     return super.createRow(node, rowIndex, ...extras);
   }
 
@@ -174,10 +174,9 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
       this.selectRow(rowIndex, evt.shiftKey || evt.altKey || evt.ctrlKey, node);
       evt.stopPropagation();
     };
-    node.classList.remove('selected');
-    if (this.getRow(rowIndex).selected) {
-      node.classList.add('selected');
-    }
+    const row = this.getRow(rowIndex);
+    node.classList.toggle('selected', row.selected);
+    node.dataset.lod = this.ruleSet.levelOfDetail(row);
     return super.updateRow(node, rowIndex, ...extras);
   }
 
