@@ -3,7 +3,11 @@
  */
 import InnerNode from './tree/InnerNode';
 import {IRuleSetInstance, IRuleSetLike, IStaticRuleSet} from './rule/index';
-import {IColumn} from './data/index';
+
+export interface IColumn {
+  name: string;
+  value: { type: string, range?: [number, number], categories?: { name: string, color: string }[] };
+}
 
 export interface ITaggleRenderer {
   initTree(tree: InnerNode, ruleSet: IStaticRuleSet): void;

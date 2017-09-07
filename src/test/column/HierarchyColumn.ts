@@ -1,6 +1,7 @@
 import {LeafNode, InnerNode, INode, EAggregationType} from '../../tree';
 import AColumn from './AColumn';
-import {IRow, IColumn} from '../../data';
+import {IRow} from '../../data';
+import {IColumn} from '../../interfaces';
 
 const CARET_NO = '<i>&nbsp;</i>';
 const CARET_DOWN = '<i>&#9660;</i>';

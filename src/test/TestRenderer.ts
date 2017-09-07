@@ -4,8 +4,8 @@
 import {ACellRenderer, ICellRenderContext} from 'lineupengine/src';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import {EAggregationType, InnerNode, INode, LeafNode} from '../tree';
-import {IRow, IColumn} from '../data';
-import {ICallbacks, ITaggleRenderer} from '../interfaces';
+import {IRow} from '../data';
+import {ICallbacks, ITaggleRenderer, IColumn} from '../interfaces';
 import HierarchyColumn from './column/HierarchyColumn';
 import CategoricalColumn from './column/CategoricalColumn';
 import NumberColumn from './column/NumberColumn';
@@ -27,6 +27,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
   constructor(root: HTMLElement, columns: IColumn[], private readonly callbacks: ICallbacks) {
     super(root);
     root.id = 'taggle';
+    root.classList.add('taggle-test');
     this.columns = this.createColumns(columns);
   }
 

@@ -6,6 +6,7 @@
 import {columns as rawColumns} from './AIDS_Countries.json';
 import * as csv from 'raw-loader!./AIDS_Countries.csv';
 import {csvParse} from 'd3-dsv';
+import {IColumn} from '../interfaces';
 
 function parseValue(v: string, col: { value: { type: string } }) {
   switch (col.value.type) {
@@ -16,11 +17,6 @@ function parseValue(v: string, col: { value: { type: string } }) {
     default:
       return v;
   }
-}
-
-export interface IColumn {
-  name: string;
-  value: { type: string, range?: [number, number], categories?: { name: string, color: string }[] };
 }
 
 export interface IRow {

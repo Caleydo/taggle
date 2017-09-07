@@ -3,8 +3,9 @@
  */
 import {groupBy, sort, visit} from '../tree';
 import InnerNode from '../tree/InnerNode';
-import {IColumn, IRow} from './index';
+import {IRow} from './index';
 import LeafNode from '../tree/LeafNode';
+import {IColumn} from '../interfaces';
 
 
 export function computeNumericalHist(leaves: LeafNode<IRow>[], column: IColumn) {

@@ -15,14 +15,17 @@ body {
   }
 }
 
-.lineup-engine {
+.taggleTest.lineup-engine,
+.taggle.lineup-engine {
   position: absolute !important;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
+}
 
-  @import "./styles/table";
+.taggleTest.lineup-engine {
+  @import "./styles/taggleTest";
 }
 
 aside.panel {
@@ -32,7 +35,6 @@ aside.panel {
   flex-direction: column;
 }
 
-@import "./styles/lineup";
 
 .flyout {
   z-index: 1;
@@ -51,6 +53,7 @@ aside.panel {
   }
 }
 
+@import "./styles/taggle";
 @import "styles/flyout";
 @import "styles/treevis";
 @import "styles/popup";

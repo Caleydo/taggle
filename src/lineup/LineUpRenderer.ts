@@ -32,8 +32,7 @@ import {computeHist, computeStats} from 'lineupjs/src/provider/math';
 import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
 import InnerNode, {EAggregationType} from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
-import {IColumn} from '../data/index';
-import {ICallbacks, ITaggleRenderer} from '../interfaces';
+import {ICallbacks, ITaggleRenderer, IColumn} from '../interfaces';
 import {IStaticRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
@@ -92,7 +91,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     super();
     Object.assign(this.options, options);
     this.node = parent.ownerDocument.createElement('main');
-    this.node.classList.add('lu');
+    this.node.classList.add('lu', 'taggle');
     parent.appendChild(this.node);
 
 

@@ -1,6 +1,7 @@
 import {IColumn} from 'lineupengine/src/style';
 import {LeafNode, InnerNode} from '../../tree';
-import {IRow, IColumn as IDataColumn} from '../../data';
+import {IRow} from '../../data';
+import {IColumn as IDataColumn} from '../../interfaces';
 
 export interface ITaggleColumn extends IColumn {
   readonly column: IDataColumn;

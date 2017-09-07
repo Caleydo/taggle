@@ -1,6 +1,7 @@
 import {LeafNode, InnerNode} from '../../tree';
 import AColumn from './AColumn';
-import {IRow, IColumn} from '../../data';
+import {IRow} from '../../data';
+import {IColumn} from '../../interfaces';
 
 export default class NumberColumn extends AColumn {
   private maxValue: number = 1;
