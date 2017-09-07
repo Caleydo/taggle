@@ -5,7 +5,7 @@
     "clientOnly": true,
     "entries": {
       "app": "./src/index.ts",
-      "lineup": "./src/lineup/index.ts"
+      "test": "./src/test/index.ts"
     },
     "libraries": [],
     "modules": [],
