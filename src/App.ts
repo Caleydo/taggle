@@ -4,12 +4,13 @@
 import {columns, data, IColumn} from './data/index';
 import DebugInterface from './DebugInterface';
 import {
-  applyDynamicRuleSet, applyStaticRuleSet, defaultRuleSet, IRuleSetInstance, IRuleSetLike,
+  applyDynamicRuleSet, applyStaticRuleSet, IRuleSetInstance, IRuleSetLike,
   IStaticRuleSet
 } from './rule/index';
 import InnerNode from './tree/InnerNode';
 import {fromArray} from './tree/utils';
 import RuleButtonSwitcher from './rule/RuleButtonSwitcher';
+import {notSpacefillingNotProportional} from './rule/TaggleRuleSet';
 
 export interface ITaggleRenderer {
   initTree(tree: InnerNode, ruleSet: IStaticRuleSet): void;
@@ -32,7 +33,7 @@ export default class App {
   private readonly switcher: RuleButtonSwitcher;
   private readonly debug: DebugInterface;
 
-  private ruleSet: IRuleSetLike = defaultRuleSet;
+  private ruleSet: IRuleSetLike = notSpacefillingNotProportional;
   private isDynamicLeafHeight: boolean;
   private readonly tree: InnerNode;
 
