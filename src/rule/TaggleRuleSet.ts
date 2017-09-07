@@ -2,7 +2,7 @@ import {flatLeaves, toArray} from '../tree/utils';
 import InnerNode from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {EAggregationType} from '../tree';
-import {IRuleSet, IRuleSetFactory, IRuleSetInstance} from './';
+import {IRuleSet, IRuleSetFactory, IRuleSetInstance, levelOfDetail} from './';
 
 const defaultLeafHeight = 20;
 const minLeafHeight = 1;
@@ -45,7 +45,8 @@ export const notSpacefillingNotProportional: IRuleSet = {
   inner: {
     aggregatedHeight: defaultAggrHeight,
     visType: 'default'
-  }
+  },
+  levelOfDetail
 };
 
 export const notSpacefillingProportional: IRuleSet = {
@@ -71,7 +72,8 @@ export const notSpacefillingProportional: IRuleSet = {
       return flatLeaves(node).length * minLeafHeight;
     },
     visType: 'default'
-  }
+  },
+  levelOfDetail
 };
 
 class SpacefillingNotProportional implements IRuleSetInstance {
@@ -123,7 +125,8 @@ export const spacefillingNotProportional: IRuleSetFactory = {
   name: 'SpacefillingNotProportional',
   stratificationLevels: +Infinity,
   sortLevels: +Infinity,
-  apply: (tree: InnerNode, availableHeight) => new SpacefillingNotProportional(tree, availableHeight)
+  apply: (tree: InnerNode, availableHeight) => new SpacefillingNotProportional(tree, availableHeight),
+  levelOfDetail
 };
 
 export class SpacefillingProportional implements IRuleSetInstance {
@@ -180,5 +183,6 @@ export const spacefillingProportional: IRuleSetFactory = {
   name: 'SpacefillingProportional',
   stratificationLevels: +Infinity,
   sortLevels: +Infinity,
-  apply: (tree: InnerNode, availableHeight) => new SpacefillingProportional(tree, availableHeight)
+  apply: (tree: InnerNode, availableHeight) => new SpacefillingProportional(tree, availableHeight),
+  levelOfDetail
 };

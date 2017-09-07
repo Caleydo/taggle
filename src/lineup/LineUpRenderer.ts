@@ -134,7 +134,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       getGroup: (index: number) => this.getGroup(index),
       getRow: (index: number) => this.getRow(index)
     };
-    this.renderer = new EngineRankingRenderer(this.node, this.options.idPrefix, this.ctx);
+    this.renderer = new EngineRankingRenderer(this.node, this.options.idPrefix, this.ctx, (row, rowIndex) => this.updateCustom(row, rowIndex));
 
     this.ranking = new Ranking('taggle', 4);
 
@@ -172,6 +172,11 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       this.panel.node.classList.add('panel');
       parent.parentElement!.appendChild(this.panel.node);
     }
+  }
+
+  private updateCustom(row: HTMLElement, rowIndex: number) {
+    const data = this.flat[rowIndex];
+    row.dataset.lod = this.ruleSet.levelOfDetail(data);
   }
 
   protected createEventList() {

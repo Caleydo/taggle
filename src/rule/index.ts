@@ -31,6 +31,8 @@ export interface IStaticRuleSet {
    * @default +Infinity
    */
   sortLevels: number;
+
+  levelOfDetail(node: InnerNode|LeafNode<any>): 'high'|'medium'|'low';
 }
 
 export interface IRuleSetInstance {
@@ -55,6 +57,25 @@ export interface IRuleSetFactory extends IStaticRuleSet {
 
 export declare type IRuleSetLike = IRuleSet|IRuleSetFactory;
 
+export function levelOfDetail(node: InnerNode|LeafNode<any>): 'high'|'medium'|'low' {
+  if (node.type === 'inner') {
+    if (node.height >= 35) {
+      return 'high';
+    }
+    if (node.height >= 15) {
+      return 'medium';
+    }
+    return 'low';
+  }
+  if (node.height >= 18) {
+    return 'high';
+  }
+  if (node.height >= 10) {
+    return 'medium';
+  }
+  return 'low';
+}
+
 const tableRuleSet: IRuleSet = {
   name: 'table',
   stratificationLevels: 0,
@@ -66,7 +87,8 @@ const tableRuleSet: IRuleSet = {
   inner: {
     aggregatedHeight: 100,
     visType: 'default'
-  }
+  },
+  levelOfDetail: () => 'high'
 };
 
 
@@ -77,7 +99,8 @@ const compactRuleSet: IRuleSet = Object.assign({}, tableRuleSet, {
   leaf: {
     height: 2,
     visType: 'compact'
-  }
+  },
+  levelOfDetail: (node: InnerNode|LeafNode<any>) => node.type === 'inner' ? 'high' : 'low'
 });
 
 function tableLensHeight(distance: number) {
@@ -100,7 +123,8 @@ const tableLensRuleSet: IRuleSet = Object.assign({}, tableRuleSet, {
       const height = tableLensHeight(node.nearestSibling((n) => n.selected));
       return height < 20 ? 'compact': 'default';
     }
-  }
+  },
+  levelOfDetail
 });
 
 function functor<P, T>(r: T | ((p: P) => T), p: P) {
