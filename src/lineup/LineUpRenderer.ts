@@ -34,7 +34,7 @@ import InnerNode, {EAggregationType} from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {IColumn} from '../data/index';
 import {ICallbacks, ITaggleRenderer} from '../App';
-import {IRuleSetInstance, IStaticRuleSet} from '../rule/index';
+import {IStaticRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
@@ -83,7 +83,6 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   };
 
   private tree: InnerNode;
-  private defaultRowHeight: number = 20;
   private flat: (InnerNode | LeafNode<T>)[] = [];
   private leaves: LeafNode<T>[] = [];
   private readonly panel: SidePanel;
@@ -309,9 +308,8 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.panel.update(this.ctx);
   }
 
-  rebuild(tree: InnerNode, ruleSet: IStaticRuleSet, ruleSetInstance: IRuleSetInstance) {
+  rebuild(tree: InnerNode, ruleSet: IStaticRuleSet) {
     this.tree = tree;
-    this.defaultRowHeight = typeof ruleSetInstance.leaf.height === 'number' ? ruleSetInstance.leaf.height : 20;
     this.ruleSet = ruleSet;
     this.node.dataset.ruleSet = ruleSet.name;
     this.ranking.setMaxSortCriteria(ruleSet.sortLevels);
@@ -343,7 +341,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     }));
 
     (<any>this.ctx).totalNumberOfRows = this.flat.length;
-    const rowContext = nonUniformContext(this.flat.map((d) => d.height), this.defaultRowHeight);
+    const rowContext = nonUniformContext(this.flat.map((d) => d.height));
 
     this.renderer.render(columns, rowContext);
   }
