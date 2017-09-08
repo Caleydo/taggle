@@ -20,7 +20,7 @@
       display: none;
     }
 
-    [data-renderer=number] {
+    [data-renderer=number] > * {
       top: 0;
       bottom: 0;
     }
