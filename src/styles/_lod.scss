@@ -10,7 +10,6 @@
     }
 
     .lu-missing,
-    [data-renderer=aggregate],
     [data-renderer=rank],
     [data-renderer=string],
     [data-renderer=circle],
@@ -18,6 +17,10 @@
     [data-renderer=sparkline],
     [data-renderer=threshold] {
       display: none;
+    }
+
+    [data-renderer=aggregate] {
+      overflow: visible !important;
     }
 
     [data-renderer=number] > * {
