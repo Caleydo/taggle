@@ -57,6 +57,11 @@ export function toDesc(col: IColumn): any {
       base.type = 'number';
       base.domain = col.value.range;
       break;
+    case 'matrix':
+      base.type = 'numbers';
+      base.domain = col.value.range;
+      base.dataLength = col.dataLength;
+      base.colorRange = ['white', 'black'];
   }
   return base;
 }
@@ -125,7 +130,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.ranking.push(this.create(createSelectionDesc())!);
 
     this.columns = columns.map(toDesc);
-    this.columns.forEach((desc: any) => {
+    this.columns.filter((d) => d.type !== 'numbers').forEach((desc: any) => {
       const col = this.create(desc);
       if (col) {
         this.ranking.push(col);

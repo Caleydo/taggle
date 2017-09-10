@@ -5,8 +5,20 @@
 
 import {columns as rawColumns} from './AIDS_Countries.json';
 import * as csv from 'raw-loader!./AIDS_Countries.csv';
-import {csvParse} from 'd3-dsv';
+import {csvParse, csvParseRows} from 'd3-dsv';
 import {IColumn} from '../interfaces';
+
+import {columns as matrixColumns} from './AIDS_matrices.json';
+import * as csvLivingHIV from 'raw-loader!./AIDS_living_HIV.csv';
+import * as csvLivingHIVNormalized from 'raw-loader!./AIDS_living_HIV_normalized.csv';
+import * as csvNewHIVInfections from 'raw-loader!./AIDS_new_HIV_infections.csv';
+import * as csvNewHIVInfectionsNormalized from 'raw-loader!./AIDS_new_HIV_infections_normalized.csv';
+import * as csvOnART from 'raw-loader!./AIDS_on_ART.csv';
+import * as csvOnARTNormalized from 'raw-loader!./AIDS_on_ART_normalized.csv';
+import * as csvOrphans from 'raw-loader!./AIDS_orphans.csv';
+import * as csvOrphansNormalized from 'raw-loader!./AIDS_orphans_normalized.csv';
+import * as csvRelatedDeaths from 'raw-loader!./AIDS_related_deaths.csv';
+import * as csvRelatedDeathsNormalized from 'raw-loader!./AIDS_related_deaths_normalized.csv';
 
 function parseValue(v: string, col: { value: { type: string } }) {
   switch (col.value.type) {
@@ -24,9 +36,7 @@ export interface IRow {
 }
 
 export const columns: IColumn[] = rawColumns;
-
-function parse(): any[] {
-  return csvParse(csv, (rawRow) => {
+export const data = csvParse(csv, (rawRow) => {
     const r: any = {};
     columns.forEach((col: any) => {
       const v = rawRow[col.name];
@@ -34,6 +44,24 @@ function parse(): any[] {
     });
     return r;
   });
+
+function integrateMatrix(desc: any, file: string) {
+  const m = csvParseRows(file).map((row) => row.map((v) => parseValue(v, desc)));
+  columns.push({
+    value: Object.assign(desc.value, { type: 'matrix' }),
+    name: desc.name,
+    dataLength: desc.size[1]
+  });
+  data.forEach((row, i) => row[desc.name] = m[i]);
 }
 
-export const data = parse();
+integrateMatrix(matrixColumns[0], csvLivingHIV);
+integrateMatrix(matrixColumns[1], csvLivingHIVNormalized);
+integrateMatrix(matrixColumns[2], csvNewHIVInfections);
+integrateMatrix(matrixColumns[3], csvNewHIVInfectionsNormalized);
+integrateMatrix(matrixColumns[4], csvRelatedDeaths);
+integrateMatrix(matrixColumns[5], csvRelatedDeathsNormalized);
+integrateMatrix(matrixColumns[6], csvOnART);
+integrateMatrix(matrixColumns[7], csvOnARTNormalized);
+integrateMatrix(matrixColumns[8], csvOrphans);
+integrateMatrix(matrixColumns[9], csvOrphansNormalized);

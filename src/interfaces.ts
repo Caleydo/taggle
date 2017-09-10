@@ -6,7 +6,12 @@ import {IRuleSetInstance, IRuleSetLike, IStaticRuleSet} from './rule/index';
 
 export interface IColumn {
   name: string;
-  value: { type: string, range?: [number, number], categories?: { name: string, color: string }[] };
+  value: {
+    type: string,
+    range?: [number, number],
+    categories?: { name: string, color: string }[]
+  };
+  dataLength?: number;
 }
 
 export interface ITaggleRenderer {
