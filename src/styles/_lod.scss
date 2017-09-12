@@ -10,17 +10,23 @@
     }
 
     .lu-missing,
+    .lu-hover-only,
+    .lu-selection-only,
     [data-renderer=rank],
     [data-renderer=string],
     [data-renderer=circle],
     [data-renderer=selection],
     [data-renderer=sparkline],
     [data-renderer=threshold] {
-      display: none;
+      display: none !important;
     }
 
     [data-renderer=aggregate] {
       overflow: visible !important;
+
+      &::before {
+        position: absolute;
+      }
     }
 
     [data-renderer=number] > * {
