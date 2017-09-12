@@ -186,6 +186,10 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     return this.columns;
   }
 
+  pushDesc(column: IColumnDesc) {
+    this.columns.push(column);
+  }
+
   getRankings() {
     return [this.ranking];
   }
@@ -199,6 +203,9 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   }
 
   protected reorder() {
+    if (!this.tree) {
+      return;
+    }
     this.sortAndGroup(this.ranking, this.tree);
     this.callbacks.update();
   }
@@ -272,6 +279,22 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
   private getRow(index: number): IGroupItem {
     return <IGroupItem>this.flat[index];
+  }
+
+  getRows(): T[] {
+    return this.flat.reduce((act, c) => {
+      if (c.type === 'inner') {
+        (<InnerNode>c).flatLeaves<T>().forEach((n) => {
+          if (n.filtered) {
+            return;
+          }
+          act.push(n.item);
+        });
+      } else {
+        act.push((<LeafNode<T>>c).item);
+      }
+      return act;
+    }, <T[]>[]);
   }
 
   private updateHist() {
