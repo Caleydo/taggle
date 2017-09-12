@@ -3,11 +3,14 @@ import {IGroupItem} from 'lineupjs/src/ui/engine/interfaces';
 import {defaultGroup} from 'lineupjs/src/model/Group';
 
 export default class LeafNode<T> extends ANode implements IGroupItem {
+  /**
+   * @deprecated
+   */
+  static readonly visTypes = ['default', 'compact'];
+
   readonly type: 'leaf' = 'leaf';
   height = 20;
-
   doi: number = 0.5;
-  static readonly visTypes = ['default', 'compact'];
 
   constructor(public readonly item: T, public readonly dataIndex: number) {
     super();

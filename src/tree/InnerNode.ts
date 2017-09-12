@@ -12,12 +12,16 @@ export enum EAggregationType {
 }
 
 export default class InnerNode extends ANode implements IGroupData, IGroupParent {
+  /**
+   * @deprecated
+   */
+  static readonly visTypes = ['default', 'mean'];
+
   readonly type: 'inner' = 'inner';
   children: INode[] = [];
   aggregation: EAggregationType = EAggregationType.UNIFORM;
   aggregatedHeight = 40;
   aggregatedDoi = 0.5;
-  static readonly visTypes = ['default', 'mean'];
 
   aggregate: any;
 

@@ -3,7 +3,9 @@ import {INode, InnerNode} from './';
 
 export abstract class ANode {
   parent: InnerNode | null = null;
-
+  /**
+   * @deprecated
+   */
   visType = 'default';
   selected: boolean = false;
 
