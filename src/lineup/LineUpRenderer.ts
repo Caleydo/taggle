@@ -10,7 +10,7 @@ import {
   IStatistics
 } from 'lineupjs/src/model/Column';
 import RenderColumn from 'lineupjs/src/ui/engine/RenderColumn';
-import {createDOM, createDOMGroup} from 'lineupjs/src/renderer/index';
+import {createDOM, createDOMGroup} from 'lineupjs/src/renderer';
 import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
 import {AEventDispatcher, debounce, findOption} from 'lineupjs/src/utils';
 import {nonUniformContext} from 'lineupengine/src/logic';
@@ -32,17 +32,19 @@ import {computeHist, computeStats} from 'lineupjs/src/provider/math';
 import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
 import InnerNode, {EAggregationType} from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
-import {ICallbacks, ITaggleRenderer, IColumn} from '../interfaces';
+import {ICallbacks, IColumn, ITaggleRenderer} from '../interfaces';
 import {IStaticRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
 import {IGroupData, IGroupItem, IRankingBodyContext} from 'lineupjs/src/ui/engine/interfaces';
+import OrderedSet from 'lineupjs/src/provider/OrderedSet';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
   summary: boolean;
   renderer: object;
+  panel: boolean;
 }
 
 export function toDesc(col: IColumn): any {
@@ -76,21 +78,23 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
   private readonly columns: IColumnDesc[];
   readonly ranking: Ranking;
-  private selection = new Set<number>();
+  private readonly selection = new OrderedSet<number>();
   private readonly columnTypes: { [columnType: string]: typeof Column } = models();
   private uid = 0;
 
   private readonly options: ILineUpRendererOptions = {
     idPrefix: `lu${Math.random().toString(36).slice(-8).substr(0, 3)}`, //generate a random string with length3;
     summary: true,
-    renderer: {}
+    renderer: {},
+    panel: false
   };
 
   private tree: InnerNode;
   private flat: (InnerNode | LeafNode<T>)[] = [];
   private leaves: LeafNode<T>[] = [];
-  private readonly panel: SidePanel;
+  private panel: SidePanel|null;
   private ruleSet: IStaticRuleSet;
+  private readonly updateAbles: ((ctx: IRankingBodyContext)=>void)[] = [];
 
   constructor(parent: Element, columns: IColumn[], private readonly callbacks: ICallbacks, options: Partial<ILineUpRendererOptions> = {}) {
     super();
@@ -150,15 +154,23 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       this.updateImpl();
     }));
 
-
-    this.panel = new SidePanel(this.ctx, parent.ownerDocument);
-    const next = parent.parentElement!.querySelector('aside');
-    if (next) {
-      next.appendChild(this.panel.node);
+    if (!this.options.panel) {
+      this.panel = null;
     } else {
-      this.panel.node.classList.add('panel');
-      parent.parentElement!.appendChild(this.panel.node);
+      this.panel = new SidePanel(this.ctx, parent.ownerDocument);
+      this.updateAbles.push((ctx) => this.panel!.update(ctx));
+      const next = parent.parentElement!.querySelector('aside');
+      if (next) {
+        next.appendChild(this.panel.node);
+      } else {
+        this.panel.node.classList.add('panel');
+        parent.parentElement!.appendChild(this.panel.node);
+      }
     }
+  }
+
+  pushUpdateAble(updateAble: (ctx: IRankingBodyContext)=>void) {
+    this.updateAbles.push(updateAble);
   }
 
   private updateCustom(row: HTMLElement, rowIndex: number) {
@@ -193,7 +205,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
   initTree(tree: InnerNode, ruleSet: IStaticRuleSet) {
     this.ruleSet = ruleSet;
-    this.leaves = tree.flatLeaves();
+    this.leaves = tree.flatLeaves<any>();
     this.ranking.setMaxSortCriteria(ruleSet.sortLevels);
     this.ranking.setMaxGroupColumns(ruleSet.stratificationLevels);
     this.updateHist();
@@ -266,7 +278,6 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     if (!this.options.summary) {
       return;
     }
-
     const arr = this.leaves.map((l) => l.item);
     const indices = this.leaves.map((l) => l.dataIndex);
     const cols = this.ranking.flatColumns;
@@ -279,7 +290,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       this.histCache.set(col.id, stats);
     });
 
-    this.panel.update(this.ctx);
+    this.updateAbles.forEach((u) => u(this.ctx));
   }
 
   private updateHistOf(column: Column) {
@@ -297,7 +308,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       this.histCache.set(column.id, stats);
     }
 
-    this.panel.update(this.ctx);
+    this.updateAbles.forEach((u) => u(this.ctx));
   }
 
   rebuild(tree: InnerNode, ruleSet: IStaticRuleSet) {
@@ -375,6 +386,10 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.selection.clear();
     dataIndices.forEach((d) => this.selection.add(d));
     this.updateSelections();
+  }
+
+  getSelection() {
+    return Array.from(this.selection);
   }
 
   isSelected(dataIndex: number) {
