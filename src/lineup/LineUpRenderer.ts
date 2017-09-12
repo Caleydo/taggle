@@ -156,16 +156,17 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
     if (!this.options.panel) {
       this.panel = null;
+      return;
+    }
+
+    this.panel = new SidePanel(this.ctx, parent.ownerDocument);
+    this.updateAbles.push((ctx) => this.panel!.update(ctx));
+    const next = parent.parentElement!.querySelector('aside');
+    if (next) {
+      next.appendChild(this.panel.node);
     } else {
-      this.panel = new SidePanel(this.ctx, parent.ownerDocument);
-      this.updateAbles.push((ctx) => this.panel!.update(ctx));
-      const next = parent.parentElement!.querySelector('aside');
-      if (next) {
-        next.appendChild(this.panel.node);
-      } else {
-        this.panel.node.classList.add('panel');
-        parent.parentElement!.appendChild(this.panel.node);
-      }
+      this.panel.node.classList.add('panel');
+      parent.parentElement!.appendChild(this.panel.node);
     }
   }
 
