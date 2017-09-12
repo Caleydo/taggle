@@ -179,7 +179,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   }
 
   protected createEventList() {
-    return super.createEventList().concat([ADataProvider.EVENT_ADD_RANKING, ADataProvider.EVENT_REMOVE_RANKING, ADataProvider.EVENT_ADD_DESC]);
+    return super.createEventList().concat([ADataProvider.EVENT_ADD_RANKING, ADataProvider.EVENT_REMOVE_RANKING, ADataProvider.EVENT_ADD_DESC, ADataProvider.EVENT_CLEAR_DESC]);
   }
 
   getColumns() {
@@ -188,6 +188,12 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
   pushDesc(column: IColumnDesc) {
     this.columns.push(column);
+    this.fire(ADataProvider.EVENT_ADD_DESC, column);
+  }
+
+  clearColumns() {
+    this.columns.splice(0, this.columns.length);
+    this.fire(ADataProvider.EVENT_CLEAR_DESC);
   }
 
   getRankings() {
