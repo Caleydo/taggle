@@ -138,12 +138,9 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.columns = columns.map(toDesc);
 
     // if nothing is specified show all columns
-    if(this.options.defaultColumns.length === 0) {
-      this.options.defaultColumns = this.columns.map((d:any) => d.column);
-    }
-
-    this.options.defaultColumns.forEach((colName:string) => {
-      const desc = this.columns.find((d) => d.type !== 'numbers' && (<any>d).column === colName);
+    const defaultColumns = (this.options.defaultColumns.length > 0) ? this.options.defaultColumns : this.columns.map((d:any) => d.column);
+    defaultColumns.forEach((colName:string) => {
+      const desc = this.columns.find((d) => (<any>d).column === colName);
       if(!desc) {
         return;
       }

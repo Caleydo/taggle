@@ -21,7 +21,7 @@ export interface ITaggleRenderer {
 }
 
 export interface ITaggleRendererClass {
-  new(parent: HTMLElement, columns: IColumn[], callbacks: ICallbacks, options?:any): ITaggleRenderer;
+  new(parent: HTMLElement, columns: IColumn[], callbacks: ICallbacks, options?:object): ITaggleRenderer;
 }
 
 export interface ICallbacks {
