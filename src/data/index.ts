@@ -45,6 +45,17 @@ export const data = csvParse(csv, (rawRow) => {
     return r;
   });
 
+export const defaultColumns: string[] = [
+  'AIDS_Countries',
+  'Continent',
+  'Human devel. index',
+  'Ppl knowing they have HIV (%, 2015)',
+  'N. new HIV infections per 1000 ppl', // matrix
+  'AIDS related deaths per 1000 ppl', // matrix
+  'Discriminatory attitude scale',
+  'Urban Pop (%)'
+];
+
 function integrateMatrix(desc: any, file: string) {
   const m = csvParseRows(file).map((row) => row.map((v) => parseValue(v, desc)));
   columns.push({

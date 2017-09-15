@@ -45,6 +45,7 @@ export interface ILineUpRendererOptions {
   summary: boolean;
   renderer: object;
   panel: boolean;
+  defaultColumns: string[];
 }
 
 export function toDesc(col: IColumn): any {
@@ -86,7 +87,8 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     idPrefix: `lu${Math.random().toString(36).slice(-8).substr(0, 3)}`, //generate a random string with length3;
     summary: true,
     renderer: {},
-    panel: true
+    panel: true,
+    defaultColumns: []
   };
 
   private tree: InnerNode;
@@ -134,10 +136,19 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.ranking.push(this.create(createSelectionDesc())!);
 
     this.columns = columns.map(toDesc);
-    this.columns.filter((d) => d.type !== 'numbers').forEach((desc: any) => {
-      const col = this.create(desc);
-      if (col) {
-        this.ranking.push(col);
+
+    // if nothing is specified show all columns
+    if(this.options.defaultColumns.length === 0) {
+      this.options.defaultColumns = this.columns.map((d:any) => d.column);
+    }
+
+    this.options.defaultColumns.forEach((colName:string) => {
+      const desc = this.columns.find((d) => d.type !== 'numbers' && (<any>d).column === colName);
+      if(desc) {
+        const col = this.create(desc);
+        if (col) {
+          this.ranking.push(col);
+        }
       }
     });
 
