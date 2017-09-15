@@ -1,20 +1,31 @@
-/*
-$engine_even_color: #f7f7f7;
- */
+/* lighter pattern for missing value encoding */
+$lu_missing_bg: repeating-linear-gradient(-45deg, transparent, transparent 11px, #eee 11px, #eee 14px);
+
+/* use slightly darker pattern when background color is also darker */
+$lu_missing_bg_darker: repeating-linear-gradient(-45deg, transparent, transparent 11px, #eaeaea 11px, #eaeaea 14px);
+
 @import '~lineupjs/src/style';
 @import './lod';
 
 .taggle.lineup-engine {
-  main > article {
-    div > .lu-missing {
-      /* lighter pattern for missing value encoding */
-      background: repeating-linear-gradient(-45deg, transparent, transparent 11px, #eee 11px, #eee 14px);
+  > main > article {
+    [data-renderer=number] > div,
+    [data-renderer=script] > div,
+    [data-renderer=circle] > div {
+      /* revert spacing for numerical bar renderer -- spacing is defined by row margin */
+      top: 0;
+      bottom: 0;
     }
 
     &:not(.odd) > div:nth-child(even) > .lu-missing,
     &.odd > div:nth-child(odd) > .lu-missing {
       /* use slightly darker pattern when background color is also darker */
-      background: repeating-linear-gradient(-45deg, transparent, transparent 11px, #eaeaea 11px, #eaeaea 14px);
+      background: $lu_missing_bg_darker;
     }
+  }
+
+  > main:not(.scrolling) > article > div {
+    /* fix: dirty overlapping of orange outline with neighboring rows */
+    margin: 2px 0; // 2px == outline width of :hover and .lu-selected
   }
 }
