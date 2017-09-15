@@ -144,11 +144,12 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
     this.options.defaultColumns.forEach((colName:string) => {
       const desc = this.columns.find((d) => d.type !== 'numbers' && (<any>d).column === colName);
-      if(desc) {
-        const col = this.create(desc);
-        if (col) {
-          this.ranking.push(col);
-        }
+      if(!desc) {
+        return;
+      }
+      const col = this.create(desc);
+      if (col) {
+        this.ranking.push(col);
       }
     });
 
