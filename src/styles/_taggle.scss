@@ -10,6 +10,8 @@ $lu_engine_grip_gap: 3px;
 $lu_side_panel_font_size: 12pt;
 $lu_side_panel_toolbar_font_size: 8pt;
 
+$taggle_hist_color: #c1c1c1;
+
 @import '~lineupjs/src/style';
 @import './lod';
 
@@ -28,7 +30,7 @@ $lu_side_panel_toolbar_font_size: 8pt;
     }
 
     .lu-summary[data-summary$=hist] > * {
-      background: #c1c1c1;
+      background: $taggle_hist_color;
     }
 
     .lu-handle {
@@ -81,8 +83,15 @@ $lu_side_panel_toolbar_font_size: 8pt;
       font-weight: 500;
     }
 
-    .lu-summary[data-summary=string] {
-      height: auto;
+    > main {
+      &.lu-summary[data-summary=string] {
+        height: auto;
+      }
+
+      &.lu-summary[data-summary=slider-hist] > div,
+      &.lu-summary[data-summary=hist] > div {
+        background: $taggle_hist_color;
+      }
     }
   }
 }
