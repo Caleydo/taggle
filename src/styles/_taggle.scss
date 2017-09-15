@@ -1,8 +1,8 @@
 /* lighter pattern for missing value encoding */
-$lu_missing_bg: repeating-linear-gradient(-45deg, transparent, transparent 11px, #eee 11px, #eee 14px);
+$lu_missing_bg: repeating-linear-gradient(-45deg, transparent, transparent 12px, #eee 12px, #eee 15px);
 
 /* use slightly darker pattern when background color is also darker */
-$lu_missing_bg_darker: repeating-linear-gradient(-45deg, transparent, transparent 11px, #eaeaea 11px, #eaeaea 14px);
+$lu_missing_bg_darker: repeating-linear-gradient(-45deg, transparent, transparent 12px, #eaeaea 12px, #eaeaea 15px);
 
 @import '~lineupjs/src/style';
 @import './lod';
