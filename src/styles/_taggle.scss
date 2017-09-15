@@ -17,6 +17,12 @@ $lu_missing_bg_darker: repeating-linear-gradient(-45deg, transparent, transparen
       bottom: 0;
     }
 
+    [data-agg=detail] [data-renderer=categorical] :first-child,
+    [data-agg=detail] [data-renderer=heatmap] :first-child {
+      /* remove max-height for categorical identifier -- spacing is defined by row margin */
+      max-height: none;
+    }
+
     &:not(.odd) > div:nth-child(even) > .lu-missing,
     &.odd > div:nth-child(odd) > .lu-missing {
       /* use slightly darker pattern when background color is also darker */
