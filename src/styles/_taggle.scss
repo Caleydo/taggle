@@ -48,6 +48,14 @@ $lu_engine_grip_gap: 3px;
       max-height: none;
     }
 
+    [data-agg=group] [data-renderer=catcolor] {
+      /* center the text for the renderer "Most Frequent Category Color" */
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      text-align: center;
+    }
+
     &:not(.odd) > div:nth-child(even) > .lu-missing,
     &.odd > div:nth-child(odd) > .lu-missing {
       /* use slightly darker pattern when background color is also darker */
