@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css?family=Yantramanav:700,500,400");
 
+$taggle_border_color: #6d6c6c !default;
+
 body {
   font-family: "Yantramanav", "Arial", sans-serif;
   font-size: 95%;
@@ -33,6 +35,7 @@ aside.panel {
   margin-right: 37px;
   display: flex;
   flex-direction: column;
+  border-left: 1px solid $taggle_border_color;
 }
 
 .flyout {
@@ -42,7 +45,7 @@ aside.panel {
   top: 0;
   height: 100vh;
   background: white;
-  border-left: 2px solid black;
+  border-left: 1px solid $taggle_border_color;
   transition: max-width 0.5s linear;
   display: flex;
   flex-direction: column;
