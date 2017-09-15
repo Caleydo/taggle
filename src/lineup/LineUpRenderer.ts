@@ -86,7 +86,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     idPrefix: `lu${Math.random().toString(36).slice(-8).substr(0, 3)}`, //generate a random string with length3;
     summary: true,
     renderer: {},
-    panel: false
+    panel: true
   };
 
   private tree: InnerNode;
@@ -154,7 +154,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       this.updateImpl();
     }));
 
-    if (!this.options.panel) {
+    if (!that.options.panel) {
       this.panel = null;
       return;
     }
