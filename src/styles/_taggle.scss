@@ -89,6 +89,14 @@ $taggle_hist_color: #c1c1c1;
     > header {
       padding: 0.2em 0.5em;
       font-weight: 500;
+
+      &::before {
+        padding-right: 0.2em;
+      }
+
+      .lu-label {
+        padding-left: 0.4em;
+      }
     }
 
     > main {
