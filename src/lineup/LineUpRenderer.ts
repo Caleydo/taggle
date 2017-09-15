@@ -312,7 +312,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     const indices = this.leaves.map((l) => l.dataIndex);
     const cols = this.ranking.flatColumns;
     cols.filter((d) => d instanceof NumberColumn && !d.isHidden()).forEach((col: NumberColumn) => {
-      const stats = computeStats(arr, indices, col.getNumber.bind(col), col.isMissing.bind(col), [0, 1]);
+      const stats = computeStats(arr, indices, col.getValue.bind(col), [0, 1]);
       this.histCache.set(col.id, stats);
     });
     cols.filter((d) => isCategoricalColumn(d) && !d.isHidden()).forEach((col: ICategoricalColumn & Column) => {
@@ -330,7 +330,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     const arr = this.leaves.map((l) => l.item);
     const indices = this.leaves.map((l) => l.dataIndex);
     if (column instanceof NumberColumn) {
-      const stats = computeStats(arr, indices, column.getNumber.bind(column), column.isMissing.bind(column), [0, 1]);
+      const stats = computeStats(arr, indices, column.getValue.bind(column), [0, 1]);
       this.histCache.set(column.id, stats);
     }
     if(isCategoricalColumn(column)) {
