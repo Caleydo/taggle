@@ -7,6 +7,7 @@ $lu_missing_bg_darker: repeating-linear-gradient(-45deg, transparent, transparen
 /* make gaps between columns a bit smaller */
 $lu_engine_grip_gap: 3px;
 
+$lu_side_panel_toolbar_bg: #6d6c6c;
 $lu_side_panel_font_size: 12pt;
 $lu_side_panel_toolbar_font_size: 8pt;
 
@@ -77,6 +78,13 @@ $taggle_hist_color: #c1c1c1;
 .lu-side-panel {
   > div > main > article {
     margin-bottom: 0.8em;
+
+    .lu-toolbar {
+      color: white;
+      top: 0;
+      right: 0;
+      font-size: 9pt;
+    }
 
     > header {
       padding: 0.2em 0.5em;
