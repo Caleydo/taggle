@@ -8,6 +8,24 @@ $lu_missing_bg_darker: repeating-linear-gradient(-45deg, transparent, transparen
 @import './lod';
 
 .taggle.lineup-engine {
+  header section {
+    /* make lineup header brighter and adjust label and histogram accordingly */
+    background: #eaeaea;
+    color: black;
+
+    .lu-label {
+      font-weight: 500;
+    }
+
+    .lu-toolbar {
+      color: white;
+    }
+
+    .lu-summary[data-summary$=hist] > * {
+      background: #c1c1c1;
+    }
+  }
+
   > main > article {
     [data-renderer=number] > div,
     [data-renderer=script] > div,
