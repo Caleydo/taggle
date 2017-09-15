@@ -3,3 +3,18 @@ $engine_even_color: #f7f7f7;
  */
 @import '~lineupjs/src/style';
 @import './lod';
+
+.taggle.lineup-engine {
+  main > article {
+    div > .lu-missing {
+      /* lighter pattern for missing value encoding */
+      background: repeating-linear-gradient(-45deg, transparent, transparent 11px, #eee 11px, #eee 14px);
+    }
+
+    &:not(.odd) > div:nth-child(even) > .lu-missing,
+    &.odd > div:nth-child(odd) > .lu-missing {
+      /* use slightly darker pattern when background color is also darker */
+      background: repeating-linear-gradient(-45deg, transparent, transparent 11px, #eaeaea 11px, #eaeaea 14px);
+    }
+  }
+}
