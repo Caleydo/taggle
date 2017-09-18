@@ -1,5 +1,3 @@
-$taggle_hist_color: #c1c1c1;
-
 @import '~lineupjs/src/style';
 @import './lod';
 
@@ -7,42 +5,5 @@ $taggle_hist_color: #c1c1c1;
   > main:not(.scrolling) > article > div {
     /* fix: dirty overlapping of orange outline with neighboring rows */
     margin: 2px 0; // 2px == outline width of :hover and .lu-selected
-  }
-}
-
-.lu-side-panel {
-  > div > main > article {
-    margin-bottom: 0.8em;
-
-    .lu-toolbar {
-      color: white;
-      top: 0;
-      right: 0;
-      font-size: 9pt;
-    }
-
-    > header {
-      padding: 0.2em 0.5em;
-      font-weight: 500;
-
-      &::before {
-        padding-right: 0.2em;
-      }
-
-      .lu-label {
-        padding-left: 0.4em;
-      }
-    }
-
-    > main {
-      &.lu-summary[data-summary=string] {
-        height: auto;
-      }
-
-      &.lu-summary[data-summary=slider-hist] > div,
-      &.lu-summary[data-summary=hist] > div {
-        background: $taggle_hist_color;
-      }
-    }
   }
 }
