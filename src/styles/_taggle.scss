@@ -4,27 +4,6 @@ $taggle_hist_color: #c1c1c1;
 @import './lod';
 
 .taggle.lineup-engine {
-  header section {
-    /* make lineup header brighter and adjust label and histogram accordingly */
-    background: #eaeaea;
-    color: black;
-
-    .lu-label {
-      font-weight: 500;
-    }
-
-    .lu-toolbar {
-      color: white;
-    }
-
-    .lu-summary[data-summary$=hist] > * {
-      background: $taggle_hist_color;
-    }
-
-    .lu-handle {
-      width: $lu_engine_grip_gap;
-    }
-  }
 
   > main > article {
     [data-renderer=number] > div,
