@@ -4,31 +4,6 @@ $taggle_hist_color: #c1c1c1;
 @import './lod';
 
 .taggle.lineup-engine {
-
-  > main > article {
-    [data-renderer=number] > div,
-    [data-renderer=script] > div,
-    [data-renderer=circle] > div {
-      /* revert spacing for numerical bar renderer -- spacing is defined by row margin */
-      top: 0;
-      bottom: 0;
-    }
-
-    [data-agg=detail] [data-renderer=categorical] :first-child,
-    [data-agg=detail] [data-renderer=heatmap] :first-child {
-      /* remove max-height for categorical identifier -- spacing is defined by row margin */
-      max-height: none;
-    }
-
-    [data-agg=group] [data-renderer=catcolor] {
-      /* center the text for the renderer "Most Frequent Category Color" */
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      text-align: center;
-    }
-  }
-
   > main:not(.scrolling) > article > div {
     /* fix: dirty overlapping of orange outline with neighboring rows */
     margin: 2px 0; // 2px == outline width of :hover and .lu-selected
