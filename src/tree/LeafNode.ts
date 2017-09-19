@@ -28,7 +28,7 @@ export default class LeafNode<T> extends ANode implements IGroupItem {
     if (!this.parent) {
       return 0;
     }
-    return this.parent.rows.indexOf(this);
+    return this.parent.children.indexOf(this);
   }
 
   set filtered(value: boolean) {

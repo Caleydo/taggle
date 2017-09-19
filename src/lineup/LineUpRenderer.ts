@@ -12,7 +12,7 @@ import {
 import RenderColumn from 'lineupjs/src/ui/engine/RenderColumn';
 import {createDOM, createDOMGroup} from 'lineupjs/src/renderer';
 import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
-import {AEventDispatcher, debounce, findOption} from 'lineupjs/src/utils';
+import {AEventDispatcher, debounce, findOption, IEventContext} from 'lineupjs/src/utils';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import StringColumn from 'lineupjs/src/model/StringColumn';
 import {filters as defaultFilters} from 'lineupjs/src/dialogs';
@@ -150,11 +150,16 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       }
     });
 
-    this.ranking.on(`${Ranking.EVENT_DIRTY_ORDER}.provider`, debounce(() => this.reorder(), 100, null));
-    this.ranking.on(`${Ranking.EVENT_ORDER_CHANGED}.provider`, debounce(() => this.updateHist(), 100, null));
-    this.ranking.on(`${Ranking.EVENT_ADD_COLUMN}.provider`, debounce((col: Column) => this.updateHistOf(col), 100, null));
     const that = this;
-    this.ranking.on(`${Ranking.EVENT_DIRTY}.body`, debounce(function (this: { primaryType: string }) {
+    this.ranking.on(`${Ranking.EVENT_DIRTY_ORDER}.provider`, debounce(function(this: IEventContext) {
+      if (this.primaryType === Column.EVENT_RENDERER_TYPE_CHANGED) {
+        return; // handled by dirty
+      }
+      that.reorder(this.primaryType);
+    }, 100));
+    this.ranking.on(`${Ranking.EVENT_ORDER_CHANGED}.provider`, debounce(() => this.updateHist(), 100));
+    this.ranking.on(`${Ranking.EVENT_ADD_COLUMN}.provider`, debounce((col: Column) => this.updateHistOf(col), 100));
+    this.ranking.on(`${Ranking.EVENT_DIRTY}.body`, debounce(function (this: IEventContext) {
       if (this.primaryType !== Column.EVENT_WIDTH_CHANGED) {
         that.updateImpl();
       }
@@ -218,11 +223,11 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     return this.node.querySelector('main')!.clientHeight;
   }
 
-  protected reorder() {
+  protected reorder(eventType: string) {
     if (!this.tree) {
       return;
     }
-    this.sortAndGroup(this.ranking, this.tree);
+    this.sortAndGroup(this.ranking, this.tree, eventType === Ranking.EVENT_GROUP_CRITERIA_CHANGED);
     this.callbacks.update();
   }
 
@@ -234,32 +239,34 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.updateHist();
   }
 
-  private sortAndGroup(ranking: Ranking, tree: InnerNode) {
+  private sortAndGroup(ranking: Ranking, tree: InnerNode, doGrouping: boolean) {
     //create a flat hierarchy out of it
     const group = ranking.getGroupCriteria();
-    if (!group || this.ruleSet.stratificationLevels < 1) {
+    if (group.length === 0 || this.ruleSet.stratificationLevels < 1) {
       // create a flat tree
       // slice since inplace sorting
-      LineUpRenderer.sort(ranking, tree, this.leaves.slice());
+      tree.children = this.leaves.slice();
+      LineUpRenderer.sort(ranking, tree, <LeafNode<T>[]>tree.children);
       return;
     }
 
-    const groups = new Map<string, InnerNode>();
-    this.leaves.forEach((node) => {
-      const group = ranking.grouper(node.v, node.dataIndex) || defaultGroup;
-      if (!groups.has(group.name)) {
-        const inner = new InnerNode(group.name, group.color);
-        inner.parent = tree;
-        groups.set(group.name, inner);
-      }
-      const ggroup = groups.get(group.name)!;
-      node.parent = ggroup;
-      ggroup.children.push(node);
-    });
+    if (doGrouping) {
+      const groups = new Map<string, InnerNode>();
+      this.leaves.forEach((node) => {
+        const group = ranking.grouper(node.v, node.dataIndex) || defaultGroup;
+        if (!groups.has(group.name)) {
+          const inner = new InnerNode(group.name, group.color);
+          inner.parent = tree;
+          groups.set(group.name, inner);
+        }
+        const ggroup = groups.get(group.name)!;
+        node.parent = ggroup;
+        ggroup.children.push(node);
+      });
+      tree.children = Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name));
+    }
 
-    const inner = Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name));
-    tree.children = inner;
-    inner.forEach((group) => {
+    tree.children.forEach((group: InnerNode) => {
       // sort within the group
       LineUpRenderer.sort(ranking, group, <LeafNode<T>[]>group.children);
     });
