@@ -39,6 +39,8 @@ import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
 import {IGroupData, IGroupItem, IRankingBodyContext} from 'lineupjs/src/ui/engine/interfaces';
 import OrderedSet from 'lineupjs/src/provider/OrderedSet';
+import MultiLevelRenderColumn from 'lineupjs/src/ui/engine/MultiLevelRenderColumn';
+import {isMultiLevelColumn} from 'lineupjs/src/model/CompositeColumn';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -46,6 +48,7 @@ export interface ILineUpRendererOptions {
   renderer: object;
   panel: boolean;
   defaultColumns: string[];
+  columnPadding: number;
 }
 
 export function toDesc(col: IColumn): any {
@@ -88,7 +91,8 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     summary: true,
     renderer: {},
     panel: true,
-    defaultColumns: []
+    defaultColumns: [],
+    columnPadding: 3
   };
 
   private tree: InnerNode;
@@ -376,10 +380,14 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     const flatCols: IFlatColumn[] = [];
     ranking.flatten(flatCols, 0, 1, 0);
     const cols = flatCols.map((c) => c.col);
+    const columnPadding = this.options.columnPadding === undefined ? 3 : this.options.columnPadding;
     const columns = cols.map((c, i) => {
       const single = createDOM(c, defaultRenderers, this.ctx);
       const group = createDOMGroup(c, defaultRenderers, this.ctx);
       const renderers = {single, group, singleId: c.getRendererType(), groupId: c.getGroupRenderer()};
+      if (isMultiLevelColumn(c)) {
+        return new MultiLevelRenderColumn(c, renderers, i, columnPadding);
+      }
       return new RenderColumn(c, renderers, i);
     });
 
