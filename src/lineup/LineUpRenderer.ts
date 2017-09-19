@@ -234,6 +234,8 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   initTree(tree: InnerNode, ruleSet: IStaticRuleSet) {
     this.ruleSet = ruleSet;
     this.leaves = tree.flatLeaves<any>();
+    // ensure order
+    this.leaves.sort((a, b) => a.dataIndex - b.dataIndex);
     this.ranking.setMaxSortCriteria(ruleSet.sortLevels);
     this.ranking.setMaxGroupColumns(ruleSet.stratificationLevels);
     this.updateHist();
