@@ -1,8 +1,16 @@
 
 
 .taggle.lineup-engine {
-  [data-lod=low][data-agg=detail],
-  [data-lod=medium][data-agg=detail] {
+  [data-lod=low][data-agg=detail]:hover,
+  [data-lod=medium][data-agg=detail]:hover {
+    /* show regular height for hovered rows in low + medium LOD */
+    height: 20px !important;
+  }
+
+  [data-lod=low][data-agg=detail]:not(:hover),
+  [data-lod=medium][data-agg=detail]:not(:hover) {
+    /* shrink rows in low + medium LOD that are not hovered */
+
     background: none !important;
 
     .lu-missing {
