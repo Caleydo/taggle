@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 08.08.2017.
  */
 import {IRuleSetLike, IRuleViolations} from './';
-import {notSpacefillingNotProportional, spacefillingNotProportional, notSpacefillingProportional, spacefillingProportional} from './TaggleRuleSet';
+import {notSpacefillingNotProportional, spacefillingNotProportional} from './TaggleRuleSet';
 
 
 export default class RuleButtonSwitcher {
