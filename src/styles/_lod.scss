@@ -81,4 +81,8 @@
       }
     }
   }
+
+  [data-lod=low][data-agg=detail] {
+    margin: 0; // reset margin between rows
+  }
 }

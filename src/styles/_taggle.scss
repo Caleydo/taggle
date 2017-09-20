@@ -1,9 +1,3 @@
 @import '~lineupjs/src/style';
 @import './lod';
 
-.taggle.lineup-engine[data-rule-set^=Spacefilling],
-.taggle.lineup-engine[data-rule-set=NotSpacefillingProportional] {
-  > main:not(.scrolling) > article > div:not(.#{$lu_css_prefix}-selected) {
-    margin: 0; // reset margin between rows
-  }
-}
