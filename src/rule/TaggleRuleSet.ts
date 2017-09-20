@@ -8,6 +8,7 @@ const defaultLeafHeight = 20;
 const minLeafHeight = 1;
 const maxLeafHeight = 20;
 const defaultAggrHeight = 40;
+const paddingBottom = 25;
 
 function printTooSmall(height: number, minHeight: number, item: string) {
   console.log(`Height of item ${item} (${height} pixels) is smaller than minimum height (${minHeight} pixels) => set it to minimum height`);
@@ -85,7 +86,7 @@ class SpacefillingNotProportional implements IRuleSetInstance {
   private readonly spaceFillingErrors= new Set<string>();
 
   constructor(root: InnerNode, availableHeight: number) {
-    this.visibleHeight = availableHeight;
+    this.visibleHeight = availableHeight - paddingBottom;
     const items = toArray(root);
     this.aggrItemCount = items.filter((n) => n.type === 'inner' && (<InnerNode>n).aggregation === EAggregationType.AGGREGATED).length;
     this.unaggrItemCount = items.filter((n) => n.type === 'leaf' && !n.parents.find((n2) => n2.aggregation === EAggregationType.AGGREGATED) && !(<LeafNode<any>>n).filtered).length;
@@ -137,7 +138,7 @@ export class SpacefillingProportional implements IRuleSetInstance {
   private readonly spaceFillingErrors= new Set<string>();
 
   constructor(root: InnerNode, availableHeight: number) {
-    this.visibleHeight = availableHeight;
+    this.visibleHeight = availableHeight - paddingBottom;
 
     const items = toArray(root);
     this.itemCount = items.filter((n) => n.type === 'leaf' && !(<LeafNode<any>>n).filtered).length;
