@@ -18,7 +18,7 @@ export default class RuleButtonSwitcher {
       <!--<div><span>Proportional</span>
         <code></code>
       </div>-->
-      <div><span>Space Filling</span>
+      <div><span>Overview</span>
         <code></code>
       </div>
     `;
