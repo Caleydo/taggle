@@ -15,9 +15,9 @@ export default class RuleButtonSwitcher {
 
     this.node.classList.add('rule-button-chooser');
     this.node.innerHTML = `
-      <div><span>Proportional</span>
+      <!--<div><span>Proportional</span>
         <code></code>
-      </div>
+      </div>-->
       <div><span>Space Filling</span>
         <code></code>
       </div>
