@@ -53,7 +53,12 @@ export default class LeafNode<T> extends ANode implements IGroupItem {
 
   toString() {
     // try to find a suitable string
-    const val = Object.values(this.item).find((x) => typeof(x) === 'string');
-    return val ? val : this.item.toString();
+    for (const k of Object.keys(this.item)) {
+      const v = (<any>this.item)[k];
+      if (typeof v === 'string') {
+        return v;
+      }
+    }
+    return this.item.toString();
   }
 }
