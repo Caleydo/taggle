@@ -11,7 +11,7 @@
   [data-lod=medium][data-agg=detail]:not(:hover) {
     /* shrink rows in low + medium LOD that are not hovered */
 
-    background: none !important;
+    padding-top: 0;
 
     .lu-hover-only,
     .lu-selection-only,
@@ -83,10 +83,5 @@
         display: none;
       }
     }
-  }
-
-  [data-lod=low][data-agg=detail],
-  [data-lod=medium][data-agg=detail] {
-    margin: 0; // reset margin between rows
   }
 }
