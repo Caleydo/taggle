@@ -3,7 +3,7 @@ import {flat, flatLeaves} from './utils';
 import LeafNode from './LeafNode';
 import ANode from './ANode';
 import {IGroupData} from 'lineupjs/src/ui/engine/interfaces';
-import {IGroupParent} from 'lineupjs/src/model/Group';
+import {IGroupParent, IOrderedGroup} from 'lineupjs/src/model/Group';
 
 export enum EAggregationType {
   AGGREGATED,
@@ -11,7 +11,7 @@ export enum EAggregationType {
   UNIFORM
 }
 
-export default class InnerNode extends ANode implements IGroupData, IGroupParent {
+export default class InnerNode extends ANode implements IGroupData, IGroupParent, IOrderedGroup {
   /**
    * @deprecated
    */
@@ -39,6 +39,10 @@ export default class InnerNode extends ANode implements IGroupData, IGroupParent
 
   get subGroups() {
     return <InnerNode[]>this.children.filter((g) => g.type === 'inner');
+  }
+
+  get order() {
+    return this.flatLeaves().map((d) => d.dataIndex);
   }
 
   toString() {

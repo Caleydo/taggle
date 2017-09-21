@@ -86,7 +86,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   private readonly columnTypes: { [columnType: string]: typeof Column } = models();
   private uid = 0;
 
-  private readonly options: ILineUpRendererOptions = {
+  private readonly options: Readonly<ILineUpRendererOptions> = {
     idPrefix: `lu${Math.random().toString(36).slice(-8).substr(0, 3)}`, //generate a random string with length3;
     summary: true,
     renderer: {},
@@ -101,6 +101,8 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   private panel: SidePanel|null;
   private ruleSet: IStaticRuleSet;
   private readonly updateAbles: ((ctx: IRankingBodyContext)=>void)[] = [];
+
+  private readonly debouncedUpdate = debounce(() => this.callbacks.update(), 50);
 
   constructor(parent: Element, columns: IColumn[], private readonly callbacks: ICallbacks, options: Partial<ILineUpRendererOptions> = {}) {
     super();
@@ -164,7 +166,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.ranking.on(`${Ranking.EVENT_ORDER_CHANGED}.provider`, debounce(() => this.updateHist(), 100));
     this.ranking.on(`${Ranking.EVENT_ADD_COLUMN}.provider`, debounce((col: Column) => this.updateHistOf(col), 100));
     this.ranking.on(`${Ranking.EVENT_DIRTY}.body`, debounce(function (this: IEventContext) {
-      if (this.primaryType !== Column.EVENT_WIDTH_CHANGED) {
+      if (this.primaryType !== Column.EVENT_WIDTH_CHANGED && this.primaryType !== Ranking.EVENT_ORDER_CHANGED) {
         that.updateImpl();
       }
     }));
@@ -369,7 +371,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.node.dataset.ruleSet = ruleSet.name;
     this.ranking.setMaxSortCriteria(ruleSet.sortLevels);
     this.ranking.setMaxGroupColumns(ruleSet.stratificationLevels);
-
+    this.ranking.setGroups(tree.children[0] instanceof InnerNode ? <InnerNode[]>tree.children : [tree]);
     this.flat = this.tree.flatChildren();
     this.updateImpl();
   }
@@ -505,7 +507,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       (<IAggregateGroupColumnDesc>desc).setAggregated = (_ranking: Ranking, group: IGroup, value: boolean) => {
         const node = <InnerNode>group;
         node.aggregation = value ? EAggregationType.AGGREGATED : EAggregationType.UNIFORM;
-        this.callbacks.update();
+        this.debouncedUpdate();
       };
     }
   }
