@@ -59,18 +59,26 @@ export declare type IRuleSetLike = IRuleSet|IRuleSetFactory;
 
 export function levelOfDetail(node: InnerNode|LeafNode<any>): 'high'|'medium'|'low' {
   if (node.type === 'inner') {
-    if (node.height >= 35) {
-      return 'high';
-    }
-    if (node.height >= 15) {
-      return 'medium';
-    }
-    return 'low';
+    return levelOfDetailInner(node.height);
   }
-  if (node.height >= 18) {
+  return levelOfDetailLeaf(node.height);
+}
+
+export function levelOfDetailInner(height: number) {
+  if (height >= 35) {
     return 'high';
   }
-  if (node.height >= 10) {
+  if (height >= 15) {
+    return 'medium';
+  }
+  return 'low';
+}
+
+export function levelOfDetailLeaf(height: number) {
+  if (height >= 18) {
+    return 'high';
+  }
+  if (height >= 10) {
     return 'medium';
   }
   return 'low';
