@@ -1,7 +1,6 @@
 .flyout {
   &:not(.in) {
-    width: 2vw;
-    max-width: 2vw;
+    width: 40px;
     background-color: #ddd;
 
     > :nth-child(n+2) {
