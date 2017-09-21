@@ -90,7 +90,8 @@
     }
   }
 
-  [data-lod=low][data-agg=detail] {
+  [data-lod=low][data-agg=detail],
+  [data-lod=medium][data-agg=detail] {
     margin: 0; // reset margin between rows
   }
 }
