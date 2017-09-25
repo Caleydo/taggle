@@ -90,7 +90,7 @@ class SpacefillingNotProportional implements IRuleSetInstance {
     const visibleHeight = availableHeight - paddingBottom;
     const visible = root.flatChildren();
 
-    const inner = visible.reduce((a, b) => a + b.type === 'inner' ? 1 : 0, 0);
+    const inner = visible.reduce((a, b) => a + (b.type === 'inner' ? 1 : 0), 0);
     const items = visible.length - inner;
 
     const selected = visible.reduce((a, b) => a + (b.type === 'leaf' && b.selected ? 1 : 0), 0);
