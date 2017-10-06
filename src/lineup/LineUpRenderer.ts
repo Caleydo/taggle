@@ -16,7 +16,7 @@ import {AEventDispatcher, debounce, findOption, IEventContext} from 'lineupjs/sr
 import {nonUniformContext} from 'lineupengine/src/logic';
 import StringColumn from 'lineupjs/src/model/StringColumn';
 import {filters as defaultFilters} from 'lineupjs/src/dialogs';
-import {summaries as defaultSummaries} from 'lineupjs/src/ui/engine/summary';
+import {defaultSummaries} from 'lineupjs/src/ui/engine/summary';
 import {renderers as defaultRenderers} from 'lineupjs/src/renderer';
 import {default as ADataProvider, IDataProvider} from 'lineupjs/src/provider/ADataProvider';
 import Ranking from 'lineupjs/src/model/Ranking';
