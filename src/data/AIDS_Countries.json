@@ -81,28 +81,28 @@
       "value": {
         "categories": [
           {
-            "color": "#bdc9e1",
-            "name": "Unknown"
-          },
-          {
-            "color": "#c51b8a",
-            "name": "Predominant"
-          },
-          {
-            "color": "#f768a1",
-            "name": "Medium"
-          },
-          {
-            "color": "#fbb4b9",
-            "name": "Slight"
+            "color": "#7a0177",
+            "name": "High"
           },
           {
             "color": "#feebe2",
             "name": "Low"
           },
           {
-            "color": "#7a0177",
-            "name": "High"
+            "color": "#f768a1",
+            "name": "Medium"
+          },
+          {
+            "color": "#c51b8a",
+            "name": "Predominant"
+          },
+          {
+            "color": "#fbb4b9",
+            "name": "Slight"
+          },
+          {
+            "color": "#bdc9e1",
+            "name": "Unknown"
           }
         ],
         "type": "categorical"
@@ -137,6 +137,10 @@
       "value": {
         "categories": [
           {
+            "color": "#b2df8a",
+            "name": "Africa"
+          },
+          {
             "color": "#a6cee3",
             "name": "Asia"
           },
@@ -145,20 +149,16 @@
             "name": "Europe"
           },
           {
-            "color": "#b2df8a",
-            "name": "Africa"
-          },
-          {
-            "color": "#33a02c",
-            "name": "South America"
+            "color": "#e31a1c",
+            "name": "North America"
           },
           {
             "color": "#fb9a99",
             "name": "Oceania"
           },
           {
-            "color": "#e31a1c",
-            "name": "North America"
+            "color": "#33a02c",
+            "name": "South America"
           }
         ],
         "type": "categorical"
@@ -169,18 +169,6 @@
       "value": {
         "categories": [
           {
-            "color": "#d8daeb",
-            "name": "No information provided"
-          },
-          {
-            "color": "#542788",
-            "name": "No restriction"
-          },
-          {
-            "color": "#998ec3",
-            "name": "Some restriction"
-          },
-          {
             "color": "#f1a340",
             "name": "Complete bar"
           },
@@ -189,8 +177,20 @@
             "name": "Deportation"
           },
           {
+            "color": "#d8daeb",
+            "name": "No information provided"
+          },
+          {
+            "color": "#542788",
+            "name": "No restriction"
+          },
+          {
             "color": "#fee0b6",
             "name": "Require proof"
+          },
+          {
+            "color": "#998ec3",
+            "name": "Some restriction"
           }
         ],
         "type": "categorical"
