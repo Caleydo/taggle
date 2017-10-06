@@ -16,6 +16,7 @@ import {AEventDispatcher, debounce, findOption, IEventContext} from 'lineupjs/sr
 import {nonUniformContext} from 'lineupengine/src/logic';
 import StringColumn from 'lineupjs/src/model/StringColumn';
 import {filters as defaultFilters} from 'lineupjs/src/dialogs';
+import {defaultSummaries} from 'lineupjs/src/ui/engine/summary';
 import {renderers as defaultRenderers} from 'lineupjs/src/renderer';
 import {default as ADataProvider, IDataProvider} from 'lineupjs/src/provider/ADataProvider';
 import Ranking from 'lineupjs/src/model/Ranking';
@@ -114,6 +115,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.ctx = {
       provider: this,
       filters: Object.assign({}, defaultFilters),
+      summaries: Object.assign({}, defaultSummaries),
       linkTemplates: <string[]>[],
       autoRotateLabels: false,
       searchAble: (col: Column) => col instanceof StringColumn,
