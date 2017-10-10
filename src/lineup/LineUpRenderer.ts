@@ -42,6 +42,7 @@ import {IGroupData, IGroupItem, IRankingBodyContext} from 'lineupjs/src/ui/engin
 import OrderedSet from 'lineupjs/src/provider/OrderedSet';
 import MultiLevelRenderColumn from 'lineupjs/src/ui/engine/MultiLevelRenderColumn';
 import {isMultiLevelColumn} from 'lineupjs/src/model/CompositeColumn';
+import {IStratification, matrixSplicer} from './splicer';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -50,6 +51,7 @@ export interface ILineUpRendererOptions {
   panel: boolean;
   defaultColumns: string[];
   columnPadding: number;
+  stratifications: IStratification[];
 }
 
 export function toDesc(col: IColumn): any {
@@ -93,7 +95,8 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     renderer: {},
     panel: true,
     defaultColumns: [],
-    columnPadding: 3
+    columnPadding: 3,
+    stratifications: []
   };
 
   private tree: InnerNode;
@@ -115,7 +118,9 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.ctx = {
       provider: this,
       filters: Object.assign({}, defaultFilters),
-      summaries: Object.assign({}, defaultSummaries),
+      summaries: Object.assign({
+        'numbers': matrixSplicer(this.options.stratifications)
+      }, defaultSummaries),
       linkTemplates: <string[]>[],
       autoRotateLabels: false,
       searchAble: (col: Column) => col instanceof StringColumn,

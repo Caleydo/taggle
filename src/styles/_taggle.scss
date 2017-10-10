@@ -1,3 +1,9 @@
 @import '~lineupjs/src/style';
 @import './lod';
 
+.lu-side-panel .lu-summary[data-summary=stratify] {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 20px;
+}

@@ -20,6 +20,10 @@ import * as csvOrphansNormalized from 'raw-loader!./AIDS_orphans_normalized.csv'
 import * as csvRelatedDeaths from 'raw-loader!./AIDS_related_deaths.csv';
 import * as csvRelatedDeathsNormalized from 'raw-loader!./AIDS_related_deaths_normalized.csv';
 
+
+import * as csvYears from 'raw-loader!./AIDS_Years.csv';
+import {IStratification} from '../lineup/splicer';
+
 function parseValue(v: string, col: { value: { type: string } }) {
   switch (col.value.type) {
     case 'real':
@@ -77,3 +81,58 @@ integrateMatrix(matrixColumns[6], csvOnART);
 integrateMatrix(matrixColumns[7], csvOnARTNormalized);
 integrateMatrix(matrixColumns[8], csvOrphans);
 integrateMatrix(matrixColumns[9], csvOrphansNormalized);
+
+function parseStratifications() {
+  const data = csvParse(csvYears);
+
+  const descs = [
+    {
+        name: 'Decades',
+        value: {
+          categories: [
+            {
+              color: '#d7b5d8',
+              name: '1990s'
+            },
+            {
+              color: '#df65b0',
+              name: '2000s'
+            },
+            {
+              color: '#dd1c77',
+              name: '2010s'
+            }
+          ]
+        }
+      },
+      {
+        name: 'HAART availability',
+        value: {
+          categories: [
+            {
+              color: '#fbb4ae',
+              name: '1 pre HAART period'
+            },
+            {
+              color: '#b3cde3',
+              name: '2 A Decade of HAART'
+            },
+            {
+              color: '#ccebc5',
+              name: '3 multiple medications available'
+            }
+          ]
+        }
+      }
+  ];
+
+  return descs.map((d) => {
+    return {
+      name: d.name,
+      categories: d.value.categories,
+      data: data.map((r) => r[d.name])
+    };
+  });
+}
+
+export const stratifications: IStratification[] = parseStratifications();
