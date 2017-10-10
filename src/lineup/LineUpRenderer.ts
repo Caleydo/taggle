@@ -492,7 +492,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     (<any>desc).accessor = (<any>desc).accessor || ((row: any) => row[(<any>desc).column]);
     if (desc.type === 'rank') {
       (<IValueColumnDesc<number>>desc).accessor = (_row: any, index: number) => {
-        return this.leaves[index].relativeIndex + 1;
+        return this.leaves[index].absoluteIndex + 1;
       };
     } else if (desc.type === 'selection') {
       (<ISelectionColumnDesc>desc).accessor = (_row: any, index: number) => this.isSelected(index);
