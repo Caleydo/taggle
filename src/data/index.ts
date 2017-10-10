@@ -57,7 +57,8 @@ export const defaultColumns: string[] = [
 ];
 
 function integrateMatrix(desc: any, file: string) {
-  const m = csvParseRows(file).map((row) => row.map((v) => parseValue(v, desc)));
+  //skip header and first column
+  const m = csvParseRows(file).map((row, i) => i === 0 ? row.slice(1) : row.slice(1).map((v) => parseValue(v, desc))).slice(1);
   columns.push({
     value: Object.assign(desc.value, { type: 'matrix' }),
     name: desc.name,
