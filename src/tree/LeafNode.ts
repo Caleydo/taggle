@@ -31,6 +31,13 @@ export default class LeafNode<T> extends ANode implements IGroupItem {
     return this.parent.children.indexOf(this);
   }
 
+  get absoluteIndex() {
+    if (!this.parent) {
+      return 0;
+    }
+    return this.parent.absoluteIndex + this.relativeIndex;
+  }
+
   set filtered(value: boolean) {
     this.doi = value ? 0 : 0.5;
   }

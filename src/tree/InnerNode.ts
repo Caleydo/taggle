@@ -33,6 +33,24 @@ export default class InnerNode extends ANode implements IGroupData, IGroupParent
     return this.flatLeaves();
   }
 
+  get absoluteIndex(): number {
+    if (!this.parent) {
+      return 0;
+    }
+    let after = false;
+    // acc all before
+    return this.parent.absoluteIndex + this.parent.children.reduce((a,node) => {
+      if (after) {
+        return a;
+      }
+      if (node === this) {
+        after = true;
+        return a;
+      }
+      return a + node.flatLeavesLength;
+    }, 0);
+  }
+
   get filtered(): boolean {
     return this.children.every((c) => c.filtered);
   }
