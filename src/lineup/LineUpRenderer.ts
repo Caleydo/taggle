@@ -9,14 +9,14 @@ import {
   IStatistics
 } from 'lineupjs/src/model/Column';
 import RenderColumn from 'lineupjs/src/ui/engine/RenderColumn';
-import {createDOM, createDOMGroup} from 'lineupjs/src/renderer';
-import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
+import {createDOM, createDOMGroup, renderers as defaultRenderers} from 'lineupjs/src/renderer';
+import {default as NumberColumn} from 'lineupjs/src/model/NumberColumn';
+import {isNumberColumn} from 'lineupjs/src/model/INumberColumn';
 import {AEventDispatcher, debounce, findOption, IEventContext} from 'lineupjs/src/utils';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import StringColumn from 'lineupjs/src/model/StringColumn';
 import {filters as defaultFilters} from 'lineupjs/src/dialogs';
 import {defaultSummaries} from 'lineupjs/src/ui/engine/summary';
-import {renderers as defaultRenderers} from 'lineupjs/src/renderer';
 import {default as ADataProvider, IDataProvider} from 'lineupjs/src/provider/ADataProvider';
 import Ranking from 'lineupjs/src/model/Ranking';
 import {ISelectionColumnDesc} from 'lineupjs/src/model/SelectionColumn';
@@ -282,13 +282,14 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
         node.parent = ggroup;
         ggroup.children.push(node);
       });
-      tree.children = Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name));
+      tree.children = Array.from(groups.values());
     }
 
     tree.children.forEach((group: InnerNode) => {
       // sort within the group
       LineUpRenderer.sort(ranking, group, <LeafNode<T>[]>group.children);
     });
+    tree.children.sort((a: InnerNode, b: InnerNode) => ranking.groupComparator(a, b));
   }
 
   private static sort(ranking: Ranking, parent: InnerNode, leaves: LeafNode<any>[]) {
