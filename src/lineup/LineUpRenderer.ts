@@ -1,7 +1,6 @@
 /**
  * Created by Samuel Gratzl on 10.08.2017.
  */
-import EngineRankingRenderer from 'lineupjs/src/ui/engine/EngineRankingRenderer';
 import {
   default as Column,
   ICategoricalStatistics,
@@ -43,6 +42,7 @@ import OrderedSet from 'lineupjs/src/provider/OrderedSet';
 import MultiLevelRenderColumn from 'lineupjs/src/ui/engine/MultiLevelRenderColumn';
 import {isMultiLevelColumn} from 'lineupjs/src/model/CompositeColumn';
 import {IStratification, matrixSplicer} from './splicer';
+import Renderer from './Renderer';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -81,7 +81,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
   readonly node: HTMLElement;
   readonly ctx: IRankingBodyContext;
-  private readonly renderer: EngineRankingRenderer;
+  private readonly renderer: Renderer;
 
   private readonly columns: IColumnDesc[];
   readonly ranking: Ranking;
@@ -140,7 +140,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       getGroup: (index: number) => this.getGroup(index),
       getRow: (index: number) => this.getRow(index)
     };
-    this.renderer = new EngineRankingRenderer(this.node, this.options.idPrefix, this.ctx, (row, rowIndex) => this.updateCustom(row, rowIndex));
+    this.renderer = new Renderer(this.node, this.options.idPrefix, this.ctx, (row, rowIndex) => this.updateCustom(row, rowIndex));
 
     this.ranking = new Ranking('taggle', 4);
 
@@ -305,6 +305,10 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     });
 
     parent.children = leaves;
+  }
+
+  isAggregated(_ranking: Ranking, group: IGroup) {
+    return (<InnerNode>group).aggregation === EAggregationType.AGGREGATED;
   }
 
   private isGroup(index: number) {
