@@ -30,7 +30,7 @@ export default class InnerNode extends ANode implements IGroupData, IGroupParent
   }
 
   get rows() {
-    return this.flatLeaves();
+    return this.flatLeaves().filter((d) => !d.filtered);
   }
 
   get absoluteIndex(): number {
