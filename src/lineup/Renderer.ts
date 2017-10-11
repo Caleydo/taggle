@@ -9,15 +9,29 @@ import Column from 'lineupjs/src/model/Column';
 import {IExceptionContext} from 'lineupengine/src/logic';
 import {debounce} from 'lineupjs/src/utils';
 import {IRankingBodyContext} from 'lineupjs/src/ui/engine/interfaces';
+import SelectionManager from 'lineupjs/src/ui/engine/SelectionManager';
+import {IGroupData, IGroupItem} from 'lineupjs/src/ui/engine/interfaces';
 
 export default class Renderer extends ACellRenderer<RenderColumn> {
   protected _context: ICellRenderContext<RenderColumn>;
 
   private initialized: 'ready'|'waiting'|'no' = 'no';
+  private readonly selection: SelectionManager;
 
   constructor(root: HTMLElement, id: string, private readonly ctx: IRankingBodyContext, private readonly extraRowUpdate?: (row: HTMLElement, rowIndex: number) => void) {
     super(root, `#${id}`);
     root.id = id;
+
+    this.selection = new SelectionManager(this.ctx, this.body);
+    this.selection.on(SelectionManager.EVENT_SELECT_RANGE, (from: number, to: number, additional: boolean) => {
+      this.selection.selectRange({
+        forEach: (c: (item: (IGroupItem|IGroupData))=>void) => {
+          for(let i = from; i <= to; ++i) {
+            c(this.ctx.isGroup(i) ? this.ctx.getGroup(i) : this.ctx.getRow(i));
+          }
+        }
+      }, additional);
+    });
   }
 
   protected get context() {
@@ -79,15 +93,8 @@ export default class Renderer extends ACellRenderer<RenderColumn> {
     node.dataset.dataIndex = dataIndex.toString();
     node.dataset.agg = 'detail'; //or 'group'
     node.dataset.meta = meta || '';
-    if (this.ctx.provider.isSelected(dataIndex)) {
-      node.classList.add('lu-selected');
-    } else {
-      node.classList.remove('lu-selected');
-    }
-    node.onclick = (evt) => {
-      const dataIndex = parseInt(node.dataset.dataIndex!, 10);
-      this.ctx.provider.toggleSelection(dataIndex, evt.ctrlKey);
-    };
+    this.selection.add(node);
+    this.selection.updateState(node, dataIndex);
   }
 
   protected updateRow(node: HTMLElement, rowIndex: number, ...extras: any[]): void {
@@ -106,12 +113,9 @@ export default class Renderer extends ACellRenderer<RenderColumn> {
       node.dataset.agg = isGroup ? 'group' : 'detail';
       if (isGroup) {
         node.dataset.dataIndex = '';
-        node.onclick = <any>undefined;
+        this.selection.remove(node);
       } else {
-        node.onclick = (evt) => {
-          const dataIndex = parseInt(node.dataset.dataIndex!, 10);
-          this.ctx.provider.toggleSelection(dataIndex, evt.ctrlKey);
-        };
+        this.selection.add(node);
       }
     }
 
@@ -119,11 +123,7 @@ export default class Renderer extends ACellRenderer<RenderColumn> {
       const {dataIndex, meta} = this.ctx.getRow(rowIndex);
       node.dataset.dataIndex = dataIndex.toString();
       node.dataset.meta = meta || '';
-      if (this.ctx.provider.isSelected(dataIndex)) {
-        node.classList.add('lu-selected');
-      } else {
-        node.classList.remove('lu-selected');
-      }
+      this.selection.updateState(node, dataIndex);
     }
 
     super.updateRow(node, rowIndex, ...extras);
@@ -132,12 +132,7 @@ export default class Renderer extends ACellRenderer<RenderColumn> {
   updateSelection(dataIndices: number[]) {
     const selected = new Set(dataIndices);
     this.forEachRow((node: HTMLElement) => {
-      const dataIndex = parseInt(node.dataset.dataIndex!, 10);
-      if (selected.has(dataIndex)) {
-        node.classList.add('lu-selected');
-      } else {
-        node.classList.remove('lu-selected');
-      }
+      this.selection.update(node, selected);
     }, true);
   }
 
