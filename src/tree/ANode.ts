@@ -1,5 +1,6 @@
 import {INode, InnerNode} from './';
 
+export const GROUP_SPACING = 10;
 
 export abstract class ANode {
   parent: InnerNode | null = null;
@@ -10,7 +11,7 @@ export abstract class ANode {
   selected: boolean = false;
 
   get isFirstChild() {
-    return this.index <= 0;
+    return this.parent ? this.parent.children[0] === <any>this : true;
   }
 
   get index() {
