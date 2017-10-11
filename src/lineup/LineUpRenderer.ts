@@ -10,7 +10,8 @@ import {
 } from 'lineupjs/src/model/Column';
 import RenderColumn from 'lineupjs/src/ui/engine/RenderColumn';
 import {createDOM, createDOMGroup} from 'lineupjs/src/renderer';
-import {default as NumberColumn, isNumberColumn} from 'lineupjs/src/model/NumberColumn';
+import {default as NumberColumn} from 'lineupjs/src/model/NumberColumn';
+import {isNumberColumn} from 'lineupjs/src/model/INumberColumn';
 import {AEventDispatcher, debounce, findOption, IEventContext} from 'lineupjs/src/utils';
 import {nonUniformContext} from 'lineupengine/src/logic';
 import StringColumn from 'lineupjs/src/model/StringColumn';
