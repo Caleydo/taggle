@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 10.08.2017.
  */
-import {columns, data, defaultColumns} from './data/index';
+import {columns, data, defaultColumns, stratifications} from './data/index';
 import DebugInterface from './DebugInterface';
 import {
   applyDynamicRuleSet, applyStaticRuleSet, IRuleSetLike,
@@ -47,7 +47,7 @@ export default class App {
       parent.parentElement!.appendChild(aside);
     }
 
-    this.renderer = new clazz(parent, columns, callbacks, { defaultColumns });
+    this.renderer = new clazz(parent, columns, callbacks, { defaultColumns, stratifications });
 
     this.tree = fromArray(data, 20);
     this.renderer.initTree(this.tree, this.ruleSet);

@@ -2,7 +2,7 @@ import {flatLeaves, toArray} from '../tree/utils';
 import InnerNode from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {EAggregationType} from '../tree';
-import {IRuleSet, IRuleSetFactory, IRuleSetInstance, levelOfDetail, levelOfDetailLeaf} from './';
+import {addGroupSpacing, IRuleSet, IRuleSetFactory, IRuleSetInstance, levelOfDetail, levelOfDetailLeaf} from './';
 
 const defaultLeafHeight = 20;
 const minLeafHeight = 1;
@@ -44,7 +44,7 @@ export const notSpacefillingNotProportional: IRuleSet = {
   sortLevels: +Infinity,
 
   leaf: {
-    height: defaultLeafHeight,
+    height: (n) => defaultLeafHeight + addGroupSpacing(n),
     visType: 'default'
   },
 
@@ -63,9 +63,9 @@ export const notSpacefillingProportional: IRuleSet = {
    leaf:  {
     height: (n: LeafNode<any>) => {
       if(n.selected) {
-        return defaultLeafHeight;
+        return defaultLeafHeight + addGroupSpacing(n);
       }
-      return minLeafHeight;
+      return minLeafHeight + addGroupSpacing(n);
     },
     visType: 'default'
   },
@@ -122,7 +122,7 @@ class SpacefillingNotProportional implements IRuleSetInstance {
       if (error) {
         this.spaceFillingErrors.add(error);
       }
-      return height;
+      return height + addGroupSpacing(n);
     },
     visType: <'default'>'default'
   };
@@ -174,7 +174,7 @@ export class SpacefillingProportional implements IRuleSetInstance {
       if (error) {
         this.spaceFillingErrors.add(error);
       }
-      return height;
+      return height + addGroupSpacing(n);
     },
     visType: <'default'>'default'
   };

@@ -25,7 +25,7 @@ export default class TestRenderer extends ACellRenderer<ITaggleColumn> implement
   private ruleSet: IStaticRuleSet;
 
   constructor(root: HTMLElement, columns: IColumn[], private readonly callbacks: ICallbacks) {
-    super(root);
+    super(root, `#taggle`);
     root.id = 'taggle';
     root.classList.add('taggle-test');
     this.columns = this.createColumns(columns);

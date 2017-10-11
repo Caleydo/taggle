@@ -1,7 +1,6 @@
 /**
  * Created by Samuel Gratzl on 10.08.2017.
  */
-import EngineRankingRenderer from 'lineupjs/src/ui/engine/EngineRankingRenderer';
 import {
   default as Column,
   ICategoricalStatistics,
@@ -38,10 +37,12 @@ import {IStaticRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
-import {IGroupData, IGroupItem, IRankingBodyContext} from 'lineupjs/src/ui/engine/interfaces';
+import {IGroupData, IGroupItem, IRankingBodyContext, isGroup} from 'lineupjs/src/ui/engine/interfaces';
 import OrderedSet from 'lineupjs/src/provider/OrderedSet';
 import MultiLevelRenderColumn from 'lineupjs/src/ui/engine/MultiLevelRenderColumn';
 import {isMultiLevelColumn} from 'lineupjs/src/model/CompositeColumn';
+import {IStratification, matrixSplicer} from './splicer';
+import Renderer from './Renderer';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -50,6 +51,9 @@ export interface ILineUpRendererOptions {
   panel: boolean;
   defaultColumns: string[];
   columnPadding: number;
+  stratifications: IStratification[];
+  rowPadding: number;
+  groupPadding: number;
 }
 
 export function toDesc(col: IColumn): any {
@@ -79,7 +83,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
 
   readonly node: HTMLElement;
   readonly ctx: IRankingBodyContext;
-  private readonly renderer: EngineRankingRenderer;
+  private readonly renderer: Renderer;
 
   private readonly columns: IColumnDesc[];
   readonly ranking: Ranking;
@@ -93,7 +97,10 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     renderer: {},
     panel: true,
     defaultColumns: [],
-    columnPadding: 3
+    columnPadding: 3,
+    stratifications: [],
+    rowPadding: 2,
+    groupPadding: 10
   };
 
   private tree: InnerNode;
@@ -115,7 +122,9 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.ctx = {
       provider: this,
       filters: Object.assign({}, defaultFilters),
-      summaries: Object.assign({}, defaultSummaries),
+      summaries: Object.assign({
+        'numbers': matrixSplicer(this.options.stratifications)
+      }, defaultSummaries),
       linkTemplates: <string[]>[],
       autoRotateLabels: false,
       searchAble: (col: Column) => col instanceof StringColumn,
@@ -135,7 +144,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       getGroup: (index: number) => this.getGroup(index),
       getRow: (index: number) => this.getRow(index)
     };
-    this.renderer = new EngineRankingRenderer(this.node, this.options.idPrefix, this.ctx, (row, rowIndex) => this.updateCustom(row, rowIndex));
+    this.renderer = new Renderer(this.node, this.options.idPrefix, this.ctx, (row, rowIndex) => this.updateCustom(row, rowIndex));
 
     this.ranking = new Ranking('taggle', 4);
 
@@ -302,6 +311,10 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     parent.children = leaves;
   }
 
+  isAggregated(_ranking: Ranking, group: IGroup) {
+    return (<InnerNode>group).aggregation === EAggregationType.AGGREGATED;
+  }
+
   private isGroup(index: number) {
     return this.flat[index].type === 'inner';
   }
@@ -403,8 +416,16 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       this.renderer.updateColumnWidths();
     }));
 
+    const groupPadding = this.options.groupPadding;
+    const rowPadding = this.options.rowPadding;
+
     (<any>this.ctx).totalNumberOfRows = this.flat.length;
-    const rowContext = nonUniformContext(this.flat.map((d) => d.height));
+    const rowContext = nonUniformContext(this.flat.map((d) => d.height), NaN, (index) => {
+      if (index >= 0 && this.flat[index] && (isGroup(this.flat[index]) || (<IGroupItem>this.flat[index]).meta === 'last')) {
+          return groupPadding + rowPadding;
+        }
+        return rowPadding;
+    });
 
     this.renderer.render(columns, rowContext);
   }
