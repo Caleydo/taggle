@@ -20,6 +20,19 @@ export default class LeafNode<T> extends ANode implements IGroupItem {
     return this.item;
   }
 
+  get meta() {
+    if (!this.parent) {
+      return undefined;
+    }
+    if (this.parent.children[0] === this) {
+      return 'first';
+    }
+    if (this.parent.children[this.parent.children.length -1 ] === this) {
+      return 'last';
+    }
+    return undefined;
+  }
+
   get group() {
     return this.parent || defaultGroup;
   }
