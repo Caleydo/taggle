@@ -37,7 +37,7 @@ import {IStaticRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
-import {IGroupData, IGroupItem, IRankingBodyContext} from 'lineupjs/src/ui/engine/interfaces';
+import {IGroupData, IGroupItem, IRankingBodyContext, isGroup} from 'lineupjs/src/ui/engine/interfaces';
 import OrderedSet from 'lineupjs/src/provider/OrderedSet';
 import MultiLevelRenderColumn from 'lineupjs/src/ui/engine/MultiLevelRenderColumn';
 import {isMultiLevelColumn} from 'lineupjs/src/model/CompositeColumn';
@@ -52,6 +52,8 @@ export interface ILineUpRendererOptions {
   defaultColumns: string[];
   columnPadding: number;
   stratifications: IStratification[];
+  rowPadding: number;
+  groupPadding: number;
 }
 
 export function toDesc(col: IColumn): any {
@@ -96,7 +98,9 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     panel: true,
     defaultColumns: [],
     columnPadding: 3,
-    stratifications: []
+    stratifications: [],
+    rowPadding: 2,
+    groupPadding: 10
   };
 
   private tree: InnerNode;
@@ -412,8 +416,16 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       this.renderer.updateColumnWidths();
     }));
 
+    const groupPadding = this.options.groupPadding;
+    const rowPadding = this.options.rowPadding;
+
     (<any>this.ctx).totalNumberOfRows = this.flat.length;
-    const rowContext = nonUniformContext(this.flat.map((d) => d.height));
+    const rowContext = nonUniformContext(this.flat.map((d) => d.height), NaN, (index) => {
+      if (index >= 0 && this.flat[index] && (isGroup(this.flat[index]) || (<IGroupItem>this.flat[index]).meta === 'last')) {
+          return groupPadding + rowPadding;
+        }
+        return rowPadding;
+    });
 
     this.renderer.render(columns, rowContext);
   }
