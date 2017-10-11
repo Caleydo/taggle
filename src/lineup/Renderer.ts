@@ -142,7 +142,7 @@ export default class Renderer extends ACellRenderer<RenderColumn> {
 
   updateColumnWidths() {
     const context = this.context;
-    this.style.update(context.defaultRowHeight, context.columns, context.column.defaultRowHeight);
+    this.style.update(context.defaultRowHeight - context.padding(-1), context.columns, context.column.defaultRowHeight - context.column.padding(-1));
     //no data update needed since just width changed
     context.columns.forEach((column) => {
       if (column instanceof MultiLevelRenderColumn) {
