@@ -1,6 +1,6 @@
 import {INode, InnerNode} from './';
 
-export const GROUP_SPACING = 10;
+export const GROUP_SPACING = 5;
 
 export abstract class ANode {
   parent: InnerNode | null = null;
