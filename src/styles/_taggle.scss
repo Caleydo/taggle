@@ -7,3 +7,8 @@
   flex-direction: column;
   height: 20px;
 }
+
+.lu-summary[data-summary=selection] > i,
+.lu-summary[data-summary=aggregation] > i {
+  font-size: 150%;
+}
