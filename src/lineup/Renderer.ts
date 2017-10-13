@@ -76,8 +76,8 @@ export default class Renderer extends ACellRenderer<RenderColumn> {
     this.updateHeader(node, column);
   }
 
-  protected createRow(node: HTMLElement, rowIndex: number, ...extras: any[]): void {
-    super.createRow(node, rowIndex, ...extras);
+  protected createRow(node: HTMLElement, rowIndex: number): void {
+    super.createRow(node, rowIndex);
     const isGroup = this.ctx.isGroup(rowIndex);
 
     if (this.extraRowUpdate) {
@@ -97,7 +97,7 @@ export default class Renderer extends ACellRenderer<RenderColumn> {
     this.selection.updateState(node, dataIndex);
   }
 
-  protected updateRow(node: HTMLElement, rowIndex: number, ...extras: any[]): void {
+  protected updateRow(node: HTMLElement, rowIndex: number): void {
     const isGroup = this.ctx.isGroup(rowIndex);
     const wasGroup = node.dataset.agg === 'group';
 
@@ -126,7 +126,7 @@ export default class Renderer extends ACellRenderer<RenderColumn> {
       this.selection.updateState(node, dataIndex);
     }
 
-    super.updateRow(node, rowIndex, ...extras);
+    super.updateRow(node, rowIndex);
   }
 
   updateSelection(dataIndices: number[]) {
