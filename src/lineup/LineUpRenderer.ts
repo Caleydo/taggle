@@ -43,6 +43,7 @@ import MultiLevelRenderColumn from 'lineupjs/src/ui/engine/MultiLevelRenderColum
 import {isMultiLevelColumn} from 'lineupjs/src/model/CompositeColumn';
 import {IStratification, matrixSplicer} from './splicer';
 import Renderer from './Renderer';
+import TaggleSidePanel from './TaggleSidePanel';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -190,7 +191,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       return;
     }
 
-    this.panel = new SidePanel(this.ctx, parent.ownerDocument);
+    this.panel = new TaggleSidePanel(this.ctx, parent.ownerDocument);
     this.updateAbles.push((ctx) => this.panel!.update(ctx));
     const next = parent.parentElement!.querySelector('aside');
     if (next) {
