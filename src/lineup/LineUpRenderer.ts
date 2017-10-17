@@ -123,9 +123,9 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     this.ctx = {
       provider: this,
       filters: Object.assign({}, defaultFilters),
-      summaries: Object.assign({
+      summaries: this.options.summary ? Object.assign({
         'numbers': matrixSplicer(this.options.stratifications)
-      }, defaultSummaries),
+      }, defaultSummaries) : {},
       linkTemplates: <string[]>[],
       autoRotateLabels: false,
       searchAble: (col: Column) => col instanceof StringColumn,
