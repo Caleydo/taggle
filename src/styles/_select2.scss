@@ -13,6 +13,7 @@
   /* the icons itself are defined in _taggle.scss */
   &::before {
     @include fa-icon();
+
     display: block;
     align-self: flex-start;
     margin-top: 2px;

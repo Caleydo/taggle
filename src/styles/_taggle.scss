@@ -13,6 +13,7 @@
 .lu-side-panel > div > main > article > header .lu-label {
   &::before {
     @include fa-icon();
+
     color: $lu_toolbar_color_base2;
     display: block;
     float: left;
