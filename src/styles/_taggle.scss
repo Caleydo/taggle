@@ -1,9 +1,42 @@
 @import '~lineupjs/src/style';
 @import './lod';
+@import '~font-awesome/scss/variables';
+@import '~font-awesome/scss/mixins';
 
 .lu-side-panel .lu-summary[data-summary=stratify] {
   display: flex;
   align-items: center;
   flex-direction: column;
   height: 20px;
+}
+
+/*
+  Also change data type icons in TaggleSidePanel -> dataTypeSvgIcon()
+ */
+.lu-side-panel > div > main > article > header .lu-label {
+  &::before {
+    @include fa-icon();
+    color: $lu_toolbar_color_base2;
+    display: block;
+    float: left;
+    margin-top: 2px;
+    margin-right: 8px;
+  }
+}
+
+.lu-side-panel > div > main > article[data-type='categorical'] > header .lu-label::before {
+  content: $fa-var-bars;
+}
+
+.lu-side-panel > div > main > article[data-type='number'] > header .lu-label::before {
+  content: $fa-var-signal;
+  transform: rotate(270deg) scaleY(-1);
+}
+
+.lu-side-panel > div > main > article[data-type='numbers'] > header .lu-label::before {
+  content: $fa-var-th;
+}
+
+.lu-side-panel > div > main > article[data-type='string'] > header .lu-label::before {
+  content: $fa-var-align-center;
 }
