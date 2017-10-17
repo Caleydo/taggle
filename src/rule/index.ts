@@ -10,7 +10,7 @@ import {
   spacefillingNotProportional,
   spacefillingProportional
 } from './TaggleRuleSet';
-import {GROUP_SPACING} from '../tree/ANode';
+import {ROW_SPACING} from '../tree/ANode';
 
 export {default as createChooser} from './RuleSwitcher';
 
@@ -58,15 +58,17 @@ export interface IRuleSetFactory extends IStaticRuleSet {
 
 export declare type IRuleSetLike = IRuleSet|IRuleSetFactory;
 
+export const leafMargins: { [key: string]: number } = {
+  high: ROW_SPACING,
+  medium: 0,
+  low: 0
+};
+
 export function levelOfDetail(node: InnerNode|LeafNode<any>): 'high'|'medium'|'low' {
   if (node.type === 'inner') {
     return levelOfDetailInner(node.height);
   }
   return levelOfDetailLeaf(node.height);
-}
-
-export function addGroupSpacing(node: LeafNode<any>) {
-  return node.meta === 'last' ? GROUP_SPACING : 0;
 }
 
 export function levelOfDetailInner(height: number) {
@@ -94,11 +96,11 @@ const tableRuleSet: IRuleSet = {
   stratificationLevels: 0,
   sortLevels: 1,
   leaf: {
-    height: (node) => 20 + addGroupSpacing(node),
+    height: 20,
     visType: 'default'
   },
   inner: {
-    aggregatedHeight: 100 + GROUP_SPACING,
+    aggregatedHeight: 100,
     visType: 'default'
   },
   levelOfDetail: () => 'high'
@@ -110,7 +112,7 @@ const compactRuleSet: IRuleSet = Object.assign({}, tableRuleSet, {
   stratificationLevels: 0,
   sortLevels: 1,
   leaf: {
-    height: (node: LeafNode<any>) => 2 + addGroupSpacing(node),
+    height: 2,
     visType: 'compact'
   },
   levelOfDetail: (node: InnerNode|LeafNode<any>) => node.type === 'inner' ? 'high' : 'low'
@@ -130,7 +132,7 @@ const tableLensRuleSet: IRuleSet = Object.assign({}, tableRuleSet, {
   leaf: {
     height: (node: LeafNode<any>) => {
       const distance = node.nearestSibling((n) => n.selected);
-      return tableLensHeight(distance) + addGroupSpacing(node);
+      return tableLensHeight(distance);
     },
     visType: (node: LeafNode<any>) => {
       const height = tableLensHeight(node.nearestSibling((n) => n.selected));

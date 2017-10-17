@@ -33,7 +33,7 @@ import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
 import InnerNode, {EAggregationType} from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {ICallbacks, IColumn, ITaggleRenderer} from '../interfaces';
-import {IStaticRuleSet} from '../rule/index';
+import {IStaticRuleSet, leafMargins} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
@@ -44,6 +44,7 @@ import {isMultiLevelColumn} from 'lineupjs/src/model/CompositeColumn';
 import {IStratification, matrixSplicer} from './splicer';
 import Renderer from './Renderer';
 import TaggleSidePanel from './TaggleSidePanel';
+import {GROUP_SPACING} from '../tree/ANode';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -53,8 +54,6 @@ export interface ILineUpRendererOptions {
   defaultColumns: string[];
   columnPadding: number;
   stratifications: IStratification[];
-  rowPadding: number;
-  groupPadding: number;
 }
 
 export function toDesc(col: IColumn): any {
@@ -99,9 +98,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     panel: true,
     defaultColumns: [],
     columnPadding: 3,
-    stratifications: [],
-    rowPadding: 2,
-    groupPadding: 10
+    stratifications: []
   };
 
   private tree: InnerNode;
@@ -418,15 +415,16 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
       this.renderer.updateColumnWidths();
     }));
 
-    const groupPadding = this.options.groupPadding;
-    const rowPadding = this.options.rowPadding;
-
     (<any>this.ctx).totalNumberOfRows = this.flat.length;
     const rowContext = nonUniformContext(this.flat.map((d) => d.height), NaN, (index) => {
-      if (index >= 0 && this.flat[index] && (isGroup(this.flat[index]) || (<IGroupItem>this.flat[index]).meta === 'last')) {
-          return groupPadding + rowPadding;
-        }
-        return rowPadding;
+      if (index < 0 || !this.flat[index]) {
+        return 0;
+      }
+      const item = this.flat[index]!;
+      if (isGroup(item) || (<IGroupItem>item).meta === 'last') {
+        return GROUP_SPACING;
+      }
+      return leafMargins[this.ruleSet.levelOfDetail(item)];
     });
 
     this.renderer.render(columns, rowContext);
