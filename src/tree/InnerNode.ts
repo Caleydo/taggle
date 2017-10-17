@@ -68,6 +68,9 @@ export default class InnerNode extends ANode implements IGroupData, IGroupParent
   }
 
   flatChildren(): INode[] {
+    if (this.aggregation === EAggregationType.AGGREGATED) {
+      return [this];
+    }
     const result: INode[] = [];
     return this.children.reduce((r, child) => flat(child, r), result);
   }
