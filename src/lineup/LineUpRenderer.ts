@@ -416,9 +416,25 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     }));
 
     (<any>this.ctx).totalNumberOfRows = this.flat.length;
+    const mostFrequentLeafLevelOfDetail = (() => {
+      const lods: {[key: string]: number} = {
+        high: 0,
+        medium: 0,
+        low: 0
+      };
+      this.flat.forEach((n) => {
+        if (isGroup(n)) {
+          return;
+        }
+        lods[this.ruleSet.levelOfDetail(n)] ++;
+      });
+      //sort desc take first
+      return Object.keys(lods).sort((a, b) => lods[b] - lods[a])[0];
+    })();
+
     const rowContext = nonUniformContext(this.flat.map((d) => d.height), NaN, (index) => {
       if (index < 0 || !this.flat[index]) {
-        return 0;
+        return leafMargins[mostFrequentLeafLevelOfDetail];
       }
       const item = this.flat[index]!;
       if (isGroup(item) || (<IGroupItem>item).meta === 'last') {
