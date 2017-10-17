@@ -5,3 +5,38 @@
     width: 100%;
   }
 }
+
+
+.select2-results__options .select2-results__option {
+  .select2-results__group > span,
+  > span {
+    display: flex;
+
+    > svg {
+      margin-top: 0.1em;
+      margin-right: 0.4em;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  > .select2-results__group {
+    background: $lu_side_panel_bg_color;
+  }
+}
+
+.select2-results__options .select2-results__option {
+  > span > svg {
+    fill: $lu_toolbar_color_base2;
+  }
+}
+
+.select2-results__options .select2-results__option--highlighted {
+  > span > svg {
+    fill: #fff;
+  }
+}
+
+.select2-container--default .select2-results__option .select2-results__option {
+  padding-left: 0.4em;
+}
