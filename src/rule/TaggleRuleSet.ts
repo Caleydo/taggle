@@ -2,18 +2,15 @@ import {flatLeaves, toArray} from '../tree/utils';
 import InnerNode from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {EAggregationType} from '../tree';
-import {addGroupSpacing, IRuleSet, IRuleSetFactory, IRuleSetInstance, levelOfDetail, levelOfDetailLeaf} from './';
+import {IRuleSet, IRuleSetFactory, IRuleSetInstance, leafMargins, levelOfDetail, levelOfDetailLeaf} from './';
+import {GROUP_SPACING} from '../tree/ANode';
 
 const defaultLeafHeight = 20;
 const minLeafHeight = 1;
 const maxLeafHeight = 20;
 const defaultAggrHeight = 40;
 const paddingBottom = defaultLeafHeight + 5;
-const leafMargins: { [key: string]: number } = {
-  high: 4,
-  medium: 0,
-  low: 0
-};
+
 
 // function printTooSmall(height: number, minHeight: number, item: string) {
 //   console.log(`Height of item ${item} (${height} pixels) is smaller than minimum height (${minHeight} pixels) => set it to minimum height`);
@@ -44,7 +41,7 @@ export const notSpacefillingNotProportional: IRuleSet = {
   sortLevels: +Infinity,
 
   leaf: {
-    height: (n) => defaultLeafHeight + addGroupSpacing(n),
+    height: defaultLeafHeight,
     visType: 'default'
   },
 
@@ -63,9 +60,9 @@ export const notSpacefillingProportional: IRuleSet = {
    leaf:  {
     height: (n: LeafNode<any>) => {
       if(n.selected) {
-        return defaultLeafHeight + addGroupSpacing(n);
+        return defaultLeafHeight;
       }
-      return minLeafHeight + addGroupSpacing(n);
+      return minLeafHeight;
     },
     visType: 'default'
   },
@@ -91,6 +88,7 @@ class SpacefillingNotProportional implements IRuleSetInstance {
     const visible = root.flatChildren();
 
     const inner = visible.reduce((a, b) => a + (b.type === 'inner' ? 1 : 0), 0);
+    const groups = inner + visible.reduce((a, b) => a + (b.type === 'leaf' && b.meta === 'last' ? 1 : 0), 0);
     const items = visible.length - inner;
 
     const selected = visible.reduce((a, b) => a + (b.type === 'leaf' && b.selected ? 1 : 0), 0);
@@ -101,7 +99,8 @@ class SpacefillingNotProportional implements IRuleSetInstance {
       this.leafHeight = defaultLeafHeight;
       return;
     }
-    const available = visibleHeight - inner * this.inner.aggregatedHeight - selected * (defaultLeafHeight + leafMargins.high);
+    const available = visibleHeight - inner * this.inner.aggregatedHeight - groups * GROUP_SPACING - selected * (defaultLeafHeight + leafMargins.high);
+
     const height = available / unselected;
     const guess = levelOfDetailLeaf(height);
     const heightWithMargin = height - leafMargins[guess];
@@ -122,13 +121,13 @@ class SpacefillingNotProportional implements IRuleSetInstance {
       if (error) {
         this.spaceFillingErrors.add(error);
       }
-      return height + addGroupSpacing(n);
+      return height;
     },
     visType: <'default'>'default'
   };
 
   readonly inner = {
-    aggregatedHeight: defaultAggrHeight,
+    aggregatedHeight: defaultAggrHeight + GROUP_SPACING,
     visType: <'default'>'default'
   };
 
@@ -147,6 +146,9 @@ export const spacefillingNotProportional: IRuleSetFactory = {
   levelOfDetail
 };
 
+/**
+ * FIXME buggy: not considering group spacing
+ */
 export class SpacefillingProportional implements IRuleSetInstance {
   private readonly visibleHeight: number;
   private readonly itemCount: number;
@@ -174,7 +176,7 @@ export class SpacefillingProportional implements IRuleSetInstance {
       if (error) {
         this.spaceFillingErrors.add(error);
       }
-      return height + addGroupSpacing(n);
+      return height;
     },
     visType: <'default'>'default'
   };
@@ -182,7 +184,7 @@ export class SpacefillingProportional implements IRuleSetInstance {
   readonly inner = {
     aggregatedHeight: (node: InnerNode) => {
       if(node.aggregation !== EAggregationType.AGGREGATED) {
-        return node.aggregatedHeight;
+        return node.aggregatedHeight + GROUP_SPACING;
       }
       const itemsInGroup = flatLeaves(node);
       return this.itemCount - this.selectedItemCount > 0 ? (this.visibleHeight - this.selectedItemCount * defaultLeafHeight) / (this.itemCount - this.selectedItemCount) * itemsInGroup.length : 1;
