@@ -1,5 +1,5 @@
 {
-  "name": "taggle2",
+  "name": "taggle",
   "description": "",
   "homepage": "https://phovea.caleydo.org",
   "version": "1.0.0-SNAPSHOT",
@@ -10,11 +10,11 @@
   },
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/sgratzl/taggle2/issues"
+    "url": "https://github.com/Caleydo/taggle/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:sgratzl/taggle2.git"
+    "url": "git@github.com:Caleydo/taggle.git"
   },
   "private": true,
   "scripts": {
@@ -37,7 +37,7 @@
     "release:major": "npm version major && npm publish && git push --follow-tags",
     "release:minor": "npm version minor && npm publish && git push --follow-tags",
     "release:patch": "npm version patch && npm publish && git push --follow-tags",
-    "dist": "mkdirp dist && cd build && tar cvzf ../dist/taggle2.tar.gz *"
+    "dist": "mkdirp dist && cd build && tar cvzf ../dist/taggle.tar.gz *"
   },
   "files": [
     "src",

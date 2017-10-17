@@ -1,4 +1,4 @@
-taggle2 [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
+taggle [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
 =====================
 
 
@@ -7,8 +7,8 @@ Installation
 ------------
 
 ```
-git clone https://github.com/sgratzl/taggle2.git
-cd taggle2
+git clone https://github.com/Caleydo/taggle.git
+cd taggle
 npm install
 ```
 
@@ -42,9 +42,9 @@ This repository is part of **[Phovea](http://phovea.caleydo.org/)**, a platform 
 
 [phovea-image]: https://img.shields.io/badge/Phovea-Client%20Plugin-F47D20.svg
 [phovea-url]: https://phovea.caleydo.org
-[npm-image]: https://badge.fury.io/js/taggle2.svg
-[npm-url]: https://npmjs.org/package/taggle2
-[travis-image]: https://travis-ci.org/sgratzl/taggle2.svg?branch=master
-[travis-url]: https://travis-ci.org/sgratzl/taggle2
-[daviddm-image]: https://david-dm.org/sgratzl/taggle2/status.svg
-[daviddm-url]: https://david-dm.org/sgratzl/taggle2
+[npm-image]: https://badge.fury.io/js/taggle.svg
+[npm-url]: https://npmjs.org/package/taggle
+[travis-image]: https://travis-ci.org/Caleydo/taggle.svg?branch=master
+[travis-url]: https://travis-ci.org/Caleydo/taggle
+[daviddm-image]: https://david-dm.org/Caleydo/taggle/status.svg
+[daviddm-url]: https://david-dm.org/Caleydo/taggle
