@@ -95,7 +95,7 @@
     "d3-dsv": "^1.0.5",
     "font-awesome": "^4.7.0",
     "lineupengine": "github:sgratzl/lineupengine",
-    "lineupjs": "github:Caleydo/lineupjs#thinkh/header-redesign",
+    "lineupjs": "github:Caleydo/lineupjs#develop",
     "select2": "4.0.4",
     "@types/select2": "4.0.41",
     "@types/jquery": "2.0.33",
