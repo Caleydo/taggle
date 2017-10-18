@@ -41,10 +41,12 @@ export default class TaggleSidePanel extends SidePanel {
     const data = groups.map(({key, values}: { key: string, values: SidePanelEntry[] }) => {
       return {
         text: `${key[0].toUpperCase()}${key.slice(1)}`,
+        dataType: key,
         children: values.map((v) => {
           return {
             id: v.id,
-            text: v.name
+            text: v.name,
+            dataType: key
           };
         })
       };
@@ -54,7 +56,9 @@ export default class TaggleSidePanel extends SidePanel {
 
     this.$select2.select2({
       placeholder: 'Add Column...',
-      data
+      data,
+      templateResult: (item: any) => $(`<span data-type="${item.dataType}"><span>${item.text}</span></span>`),
+      templateSelection: (item: any) => $(`<span data-type="${item.dataType}"><span>${item.text}</span></span>`),
     })
     .val(<any>null).trigger('change'); // clear selection
   }

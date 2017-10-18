@@ -5,3 +5,42 @@
     width: 100%;
   }
 }
+
+.select2-container .select2-results > .select2-results__options {
+  max-height: 70vh;
+}
+
+.select2-container .select2-results__group > span,
+.select2-container .select2-results__option > span {
+  display: flex;
+
+  /* the icons itself are defined in _taggle.scss */
+  &::before {
+    @include fa-icon();
+
+    display: block;
+    align-self: flex-start;
+    margin-top: 2px;
+    margin-right: 8px;
+  }
+}
+
+.select2-container .select2-results__option > span {
+  &::before {
+    color: $lu_toolbar_color_base2;
+  }
+}
+
+.select2-container .select2-results__option--highlighted > span {
+  &::before {
+    color: #fff;
+  }
+}
+
+.select2-container .select2-results__group {
+  background: $lu_side_panel_bg_color;
+}
+
+.select2-container .select2-results__option .select2-results__option {
+  padding-left: 0.4em;
+}
