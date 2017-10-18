@@ -17,17 +17,12 @@ body {
   }
 }
 
-.taggleTest.lineup-engine,
 .taggle.lineup-engine {
   position: absolute !important;
   left: 10px;
   top: 10px;
   width: calc(100% - 10px);
   height: calc(100% - 10px);
-}
-
-.taggleTest.lineup-engine {
-  @import "./styles/taggleTest";
 }
 
 aside.panel {
