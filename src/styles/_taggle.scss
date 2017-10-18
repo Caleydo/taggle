@@ -1,5 +1,7 @@
-@import '~lineupjs/src/style';
+@import '~lineupjs/src/styles/engine';
 @import './lod';
+@import './switcher';
+@import './select2';
 
 .lu-side-panel .lu-summary[data-summary=stratify] {
   display: flex;

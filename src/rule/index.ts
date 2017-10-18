@@ -10,7 +10,7 @@ import {
   spacefillingNotProportional,
   spacefillingProportional
 } from './TaggleRuleSet';
-import {ROW_SPACING} from '../tree/ANode';
+import {levelOfDetailInner, levelOfDetailLeaf} from 'taggle/src/rule/lod';
 
 export {default as createChooser} from './RuleSwitcher';
 
@@ -58,12 +58,6 @@ export interface IRuleSetFactory extends IStaticRuleSet {
 
 export declare type IRuleSetLike = IRuleSet|IRuleSetFactory;
 
-export const leafMargins: { [key: string]: number } = {
-  high: ROW_SPACING,
-  medium: 0,
-  low: 0
-};
-
 export function levelOfDetail(node: InnerNode|LeafNode<any>): 'high'|'medium'|'low' {
   if (node.type === 'inner') {
     return levelOfDetailInner(node.height);
@@ -71,25 +65,6 @@ export function levelOfDetail(node: InnerNode|LeafNode<any>): 'high'|'medium'|'l
   return levelOfDetailLeaf(node.height);
 }
 
-export function levelOfDetailInner(height: number) {
-  if (height >= 35) {
-    return 'high';
-  }
-  if (height >= 15) {
-    return 'medium';
-  }
-  return 'low';
-}
-
-export function levelOfDetailLeaf(height: number) {
-  if (height >= 18) {
-    return 'high';
-  }
-  if (height >= 10) {
-    return 'medium';
-  }
-  return 'low';
-}
 
 const tableRuleSet: IRuleSet = {
   name: 'table',

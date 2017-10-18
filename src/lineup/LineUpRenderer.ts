@@ -33,7 +33,7 @@ import {ICategoricalColumn} from 'lineupjs/src/model/CategoricalColumn';
 import InnerNode, {EAggregationType} from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {ICallbacks, IColumn, ITaggleRenderer} from '../interfaces';
-import {IStaticRuleSet, leafMargins} from '../rule/index';
+import {IStaticRuleSet} from '../rule/index';
 import {IAggregateGroupColumnDesc} from 'lineupjs/src/model/AggregateGroupColumn';
 import {defaultGroup, IGroup} from 'lineupjs/src/model/Group';
 import SidePanel from 'lineupjs/src/ui/panel/SidePanel';
@@ -44,7 +44,7 @@ import {isMultiLevelColumn} from 'lineupjs/src/model/CompositeColumn';
 import {IStratification, matrixSplicer} from './splicer';
 import Renderer from './Renderer';
 import TaggleSidePanel from './TaggleSidePanel';
-import {GROUP_SPACING} from '../tree/ANode';
+import {GROUP_SPACING, leafMargins} from '../rule/lod';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -565,12 +565,20 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     return null;
   }
 
-  toDescRef(desc: IColumnDesc): any {
-    return desc;
+   /**
+   * identify by the tuple type@columnname
+   * @param desc
+   * @returns {string}
+   */
+  toDescRef(desc: any): any {
+    return typeof desc.column !== 'undefined' ? `${desc.type}@${desc.column}` : desc;
   }
 
-  fromDescRef(ref: any): IColumnDesc {
-    return ref;
+  fromDescRef(descRef: any): any {
+    if (typeof(descRef) === 'string') {
+      return this.columns.find((d: any) => `${d.type}@${d.column}` === descRef);
+    }
+    return descRef;
   }
 
   mappingSample(col: Column): number[] {
