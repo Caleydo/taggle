@@ -9,10 +9,11 @@ import {defaultConfig} from 'lineupjs/src/config';
 import {IGroupData, IGroupItem, isGroup} from 'lineupjs/src/ui/engine/interfaces';
 import {IRule, regular, spacefilling} from './LineUpRuleSet';
 import {GROUP_SPACING} from '../rule/lod';
-import TaggleSidePanel from 'taggle/src/v2/TaggleSidePanel';
+import TaggleSidePanel from './TaggleSidePanel';
+import {IStratification, matrixSplicer} from './splicer';
 
 export interface ITaggleOptions {
-
+  stratifications: IStratification[];
 }
 
 export default class Taggle extends AEventDispatcher {
@@ -37,6 +38,7 @@ export default class Taggle extends AEventDispatcher {
   private readonly panel: TaggleSidePanel;
 
   private readonly options: Readonly<ITaggleOptions> = {
+    stratifications: []
   };
 
   constructor(public readonly node: HTMLElement, public data: DataProvider, options: Partial<ITaggleOptions & IEngineRendererOptions> =  {}) {
@@ -76,7 +78,10 @@ export default class Taggle extends AEventDispatcher {
   private createConfig(options: Partial<IEngineRendererOptions>): IEngineRendererOptions {
     return merge(defaultConfig(), options, {
       header: {
-        summary: true
+        summary: true,
+        summaries: {
+          'numbers': matrixSplicer(this.options.stratifications)
+        }
       },
       body: {
         rowPadding: 0, //since padding is used
