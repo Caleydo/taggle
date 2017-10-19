@@ -41,9 +41,9 @@ import {IGroupData, IGroupItem, IRankingBodyContext, isGroup} from 'lineupjs/src
 import OrderedSet from 'lineupjs/src/provider/OrderedSet';
 import MultiLevelRenderColumn from 'lineupjs/src/ui/engine/MultiLevelRenderColumn';
 import {isMultiLevelColumn} from 'lineupjs/src/model/CompositeColumn';
-import {IStratification, matrixSplicer} from './splicer';
+import {IStratification, matrixSplicer} from '../v2/splicer';
 import Renderer from './Renderer';
-import TaggleSidePanel from './TaggleSidePanel';
+import TaggleSidePanel from '../v2/TaggleSidePanel';
 import {GROUP_SPACING, leafMargins} from '../rule/lod';
 
 export interface ILineUpRendererOptions {

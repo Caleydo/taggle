@@ -2,8 +2,8 @@ import {flatLeaves, toArray} from '../tree/utils';
 import InnerNode from '../tree/InnerNode';
 import LeafNode from '../tree/LeafNode';
 import {EAggregationType} from '../tree';
-import {IRuleSet, IRuleSetFactory, IRuleSetInstance, leafMargins, levelOfDetail, levelOfDetailLeaf} from './';
-import {GROUP_SPACING} from '../tree/ANode';
+import {IRuleSet, IRuleSetFactory, IRuleSetInstance, levelOfDetail} from './';
+import {GROUP_SPACING, leafMargins, levelOfDetailLeaf} from 'taggle/src/rule/lod';
 
 const defaultLeafHeight = 20;
 const minLeafHeight = 1;
