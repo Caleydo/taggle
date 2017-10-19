@@ -101,7 +101,7 @@ export default class Taggle extends AEventDispatcher {
   }
 
   private dynamicHeight(data: (IGroupData|IGroupItem)[]) {
-    const availableHeight = this.node.querySelector('main')!.clientHeight;
+    const availableHeight = this.node.querySelector('main > main')!.clientHeight;
     const instance = this.rule.apply(data, availableHeight, new Set(this.data.getSelection()));
     this.isDynamicLeafHeight = typeof instance.item === 'function';
     this.setViolation(instance.violation);
