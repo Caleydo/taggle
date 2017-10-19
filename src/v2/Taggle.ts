@@ -71,6 +71,11 @@ export default class Taggle extends AEventDispatcher {
     this.node.firstElementChild!.appendChild(this.panel.node);
 
     this.forward(this.data, `${DataProvider.EVENT_SELECTION_CHANGED}.main`);
+    this.data.on(`${DataProvider.EVENT_SELECTION_CHANGED}.rule`, () => {
+      if (this.isDynamicLeafHeight) {
+        this.update();
+      }
+    });
     this.forward(this.renderer, `${RENDERER_EVENT_HOVER_CHANGED}.main`);
 
     window.addEventListener('resize', this.resizeListener);
@@ -156,12 +161,18 @@ export default class Taggle extends AEventDispatcher {
   changeDataStorage(data: DataProvider, dump?: any) {
     if (this.data) {
       this.unforward(this.data, `${DataProvider.EVENT_SELECTION_CHANGED}.main`);
+      this.data.on(`${DataProvider.EVENT_SELECTION_CHANGED}.rule`, null);
     }
     this.data = data;
     if (dump) {
       this.data.restore(dump);
     }
     this.forward(this.data, `${DataProvider.EVENT_SELECTION_CHANGED}.main`);
+    this.data.on(`${DataProvider.EVENT_SELECTION_CHANGED}.rule`, () => {
+      if (this.isDynamicLeafHeight) {
+        this.update();
+      }
+    });
     this.renderer.changeDataStorage(data);
     this.update();
     this.panel.update(this.renderer.ctx);
