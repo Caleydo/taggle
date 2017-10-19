@@ -9,6 +9,7 @@ import {defaultConfig} from 'lineupjs/src/config';
 import {IGroupData, IGroupItem, isGroup} from 'lineupjs/src/ui/engine/interfaces';
 import {IRule, regular, spacefilling} from './LineUpRuleSet';
 import {GROUP_SPACING} from '../rule/lod';
+import TaggleSidePanel from 'taggle/src/v2/TaggleSidePanel';
 
 export interface ITaggleOptions {
 
@@ -33,6 +34,7 @@ export default class Taggle extends AEventDispatcher {
   private readonly spaceFilling: HTMLElement;
   private readonly resizeListener = () => this.update();
   private readonly renderer: EngineRenderer;
+  private readonly panel: TaggleSidePanel;
 
   private readonly options: Readonly<ITaggleOptions> = {
   };
@@ -61,6 +63,9 @@ export default class Taggle extends AEventDispatcher {
     const config = this.createConfig(options);
 
     this.renderer = new EngineRenderer(data, this.node, config);
+    this.panel = new TaggleSidePanel(this.renderer.ctx, this.node.ownerDocument);
+    this.renderer.pushUpdateAble((ctx) => this.panel.update(ctx));
+    this.node.firstElementChild!.appendChild(this.panel.node);
 
     this.forward(this.data, `${DataProvider.EVENT_SELECTION_CHANGED}.main`);
     this.forward(this.renderer, `${RENDERER_EVENT_HOVER_CHANGED}.main`);
