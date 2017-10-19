@@ -32,6 +32,7 @@ export default class Taggle extends AEventDispatcher {
   private isDynamicLeafHeight: boolean = true;
 
   private rule: IRule = regular;
+  private levelOfDetail: (row: HTMLElement, rowIndex: number)=>void;
   private readonly spaceFilling: HTMLElement;
   private readonly resizeListener = () => this.update();
   private readonly renderer: EngineRenderer;
@@ -84,11 +85,19 @@ export default class Taggle extends AEventDispatcher {
         }
       },
       body: {
+        animation: false,
         rowPadding: 0, //since padding is used
         groupPadding: GROUP_SPACING,
-        dynamicHeight: this.dynamicHeight.bind(this)
+        dynamicHeight: this.dynamicHeight.bind(this),
+        customRowUpdate: this.customRowUpdate.bind(this)
       }
     });
+  }
+
+  private customRowUpdate(row: HTMLElement, rowIndex: number) {
+    if (this.levelOfDetail) {
+      this.levelOfDetail(row, rowIndex);
+    }
   }
 
   private dynamicHeight(data: (IGroupData|IGroupItem)[]) {
@@ -97,14 +106,21 @@ export default class Taggle extends AEventDispatcher {
     this.isDynamicLeafHeight = typeof instance.item === 'function';
     this.setViolation(instance.violation);
 
+    const height = (item: IGroupItem|IGroupData) => {
+      if (isGroup(item)) {
+        return typeof instance.group === 'number' ? instance.group : instance.group(item);
+      }
+      return typeof instance.item === 'number' ? instance.item : instance.item(item);
+    };
+
+    this.levelOfDetail = (row: HTMLElement, rowIndex: number) => {
+      const item = data[rowIndex];
+      row.dataset.lod = this.rule.levelOfDetail(item, height(item));
+    };
+
     return {
       defaultHeight: typeof instance.item === 'number' ? instance.item : NaN,
-      height: (item: IGroupItem|IGroupData) => {
-        if (isGroup(item)) {
-          return typeof instance.group === 'number' ? instance.group : instance.group(item);
-        }
-        return typeof instance.item === 'number' ? instance.item : instance.item(item);
-      }
+      height
     }
   }
 
