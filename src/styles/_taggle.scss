@@ -2,6 +2,7 @@
 @import './lod';
 @import './switcher';
 @import './select2';
+@import './vars';
 @import '~font-awesome/scss/variables';
 @import '~font-awesome/scss/mixins';
 
@@ -43,4 +44,21 @@
 .select2-container [data-type='label']::before,
 .lu-side-panel > div > main > article[data-type='string'] > header .lu-label::before {
   content: $fa-var-align-center;
+}
+
+
+.taggle-lib {
+  display: flex;
+  flex-direction: row-reverse;
+
+  > aside.panel {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid $taggle_border_color;
+  }
+
+  > main {
+    flex: 1 1 auto;
+  }
 }

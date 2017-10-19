@@ -1,7 +1,7 @@
 import {INode} from './';
 import {flat, flatLeaves} from './utils';
 import LeafNode from './LeafNode';
-import ANode, {GROUP_SPACING} from './ANode';
+import ANode from './ANode';
 import {IGroupData} from 'lineupjs/src/ui/engine/interfaces';
 import {IGroupParent, IOrderedGroup} from 'lineupjs/src/model/Group';
 
@@ -20,7 +20,7 @@ export default class InnerNode extends ANode implements IGroupData, IGroupParent
   readonly type: 'inner' = 'inner';
   children: INode[] = [];
   aggregation: EAggregationType = EAggregationType.UNIFORM;
-  aggregatedHeight = 40 + GROUP_SPACING;
+  aggregatedHeight = 40;
   aggregatedDoi = 0.5;
 
   aggregate: any;

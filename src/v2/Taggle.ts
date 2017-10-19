@@ -1,15 +1,14 @@
 /**
  * Created by Samuel Gratzl on 18.10.2017.
  */
-import {IRule, regular, spacefilling} from './LineUpRuleSet';
 import {AEventDispatcher, merge} from 'lineupjs/src/utils';
 import {RENDERER_EVENT_HOVER_CHANGED} from 'lineupjs/src/ui/interfaces';
 import DataProvider from 'lineupjs/src/provider/ADataProvider';
 import EngineRenderer, {IEngineRendererOptions} from 'lineupjs/src/ui/engine/EngineRenderer';
 import {defaultConfig} from 'lineupjs/src/config';
 import {IGroupData, IGroupItem, isGroup} from 'lineupjs/src/ui/engine/interfaces';
-import {ILineUpRendererOptions} from 'taggle/src/lineup/LineUpRenderer';
-import {GROUP_SPACING, ROW_SPACING} from 'taggle/src/rule/lod';
+import {IRule, regular, spacefilling} from './LineUpRuleSet';
+import {GROUP_SPACING} from '../rule/lod';
 
 export interface ITaggleOptions {
 
@@ -43,8 +42,7 @@ export default class Taggle extends AEventDispatcher {
     Object.assign(this.options, options);
 
     this.node.classList.add('taggle-lib');
-    this.node.innerHTML= `<main></main>
-    <aside class="panel">
+    this.node.innerHTML= `<aside class="panel">
         <div class="rule-button-chooser">
             <div><span>Overview</span>
               <code></code>
@@ -53,7 +51,7 @@ export default class Taggle extends AEventDispatcher {
     </aside>`;
 
     {
-      this.spaceFilling = <HTMLElement>this.node.querySelector('rule-button-chooser :first-child')!;
+      this.spaceFilling = <HTMLElement>this.node.querySelector('.rule-button-chooser :first-child')!;
       this.spaceFilling.addEventListener('click', () => {
         const selected = this.spaceFilling.classList.toggle('chosen');
         this.switchRule(selected ? spacefilling: regular);
@@ -62,7 +60,7 @@ export default class Taggle extends AEventDispatcher {
 
     const config = this.createConfig(options);
 
-    this.renderer = new EngineRenderer(data, this.node.firstElementChild!, config);
+    this.renderer = new EngineRenderer(data, this.node, config);
 
     this.forward(this.data, `${DataProvider.EVENT_SELECTION_CHANGED}.main`);
     this.forward(this.renderer, `${RENDERER_EVENT_HOVER_CHANGED}.main`);
@@ -70,13 +68,13 @@ export default class Taggle extends AEventDispatcher {
     window.addEventListener('resize', this.resizeListener);
   }
 
-  private createConfig(options: Partial<ILineUpRendererOptions>): IEngineRendererOptions {
+  private createConfig(options: Partial<IEngineRendererOptions>): IEngineRendererOptions {
     return merge(defaultConfig(), options, {
       header: {
         summary: true
       },
       body: {
-        rowPadding: ROW_SPACING,
+        rowPadding: 0, //since padding is used
         groupPadding: GROUP_SPACING,
         dynamicHeight: this.dynamicHeight.bind(this)
       }
@@ -84,7 +82,7 @@ export default class Taggle extends AEventDispatcher {
   }
 
   private dynamicHeight(data: (IGroupData|IGroupItem)[]) {
-    const availableHeight = this.renderer.node.querySelector('main')!.clientHeight;
+    const availableHeight = this.node.querySelector('main')!.clientHeight;
     const instance = this.rule.apply(data, availableHeight, new Set(this.data.getSelection()));
     this.isDynamicLeafHeight = typeof instance.item === 'function';
     this.setViolation(instance.violation);

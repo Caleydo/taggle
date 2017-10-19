@@ -1,5 +1,5 @@
-import {GROUP_SPACING, leafMargins, levelOfDetailInner, levelOfDetailLeaf} from 'taggle/src/rule/lod';
 import {IGroupData, IGroupItem, isGroup} from 'lineupjs/src/ui/engine/interfaces';
+import {GROUP_SPACING, leafMargins, levelOfDetailInner, levelOfDetailLeaf} from '../rule/lod';
 
 const defaultItemHeight = 20;
 const minItemHeight = 1;
