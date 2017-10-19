@@ -148,5 +148,6 @@ export default class Taggle extends AEventDispatcher {
     this.forward(this.data, `${DataProvider.EVENT_SELECTION_CHANGED}.main`);
     this.renderer.changeDataStorage(data);
     this.update();
+    this.panel.update(this.renderer.ctx);
   }
 }
