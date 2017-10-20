@@ -1,7 +1,7 @@
 import {INode, InnerNode} from './';
 
 export const GROUP_SPACING = 10;
-export const ROW_SPACING = 2;
+export const ROW_SPACING = 0; // since padding is used
 
 export abstract class ANode {
   parent: InnerNode | null = null;
