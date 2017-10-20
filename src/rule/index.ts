@@ -4,15 +4,7 @@
 import LeafNode from '../tree/LeafNode';
 import InnerNode from '../tree/InnerNode';
 import {visit} from '../tree/utils';
-import {
-  notSpacefillingNotProportional,
-  notSpacefillingProportional,
-  spacefillingNotProportional,
-  spacefillingProportional
-} from './TaggleRuleSet';
 import {ROW_SPACING} from '../tree/ANode';
-
-export {default as createChooser} from './RuleSwitcher';
 
 export interface IRuleViolations {
   spaceFilling?: string;
@@ -91,7 +83,7 @@ export function levelOfDetailLeaf(height: number) {
   return 'low';
 }
 
-const tableRuleSet: IRuleSet = {
+export const tableRuleSet: IRuleSet = {
   name: 'table',
   stratificationLevels: 0,
   sortLevels: 1,
@@ -107,7 +99,7 @@ const tableRuleSet: IRuleSet = {
 };
 
 
-const compactRuleSet: IRuleSet = Object.assign({}, tableRuleSet, {
+export const compactRuleSet: IRuleSet = Object.assign({}, tableRuleSet, {
   name: 'compact',
   stratificationLevels: 0,
   sortLevels: 1,
@@ -125,7 +117,7 @@ function tableLensHeight(distance: number) {
   return Math.max(2, 40 * Math.sin(Math.PI / 2 * ((7 - Math.min(distance, 7)) / 7)));
 }
 
-const tableLensRuleSet: IRuleSet = Object.assign({}, tableRuleSet, {
+export const tableLensRuleSet: IRuleSet = Object.assign({}, tableRuleSet, {
   name: 'tablelens',
   stratificationLevels: 0,
   sortLevels: 1,
@@ -198,16 +190,3 @@ export function applyDynamicRuleSet(ruleSet: IRuleSetLike, tree: InnerNode, avai
   });
   return instance;
 }
-
-
-export const defaultRuleSet = tableRuleSet;
-
-export const ruleSets: IRuleSetLike[] = [
-  tableRuleSet,
-  compactRuleSet,
-  tableLensRuleSet,
-  notSpacefillingNotProportional,
-  notSpacefillingProportional,
-  spacefillingNotProportional,
-  spacefillingProportional,
-];

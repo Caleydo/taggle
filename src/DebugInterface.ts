@@ -4,7 +4,7 @@
 import TreeVis from './treevis/TreeVis';
 import FlyoutBar from './controls/FlyoutBar';
 import InnerNode from './tree/InnerNode';
-import {createChooser} from './rule/index';
+import createChooser from './rule/RuleSwitcher';
 import {ICallbacks} from './interfaces';
 
 export default class DebugInterface {

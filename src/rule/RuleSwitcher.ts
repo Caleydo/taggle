@@ -1,7 +1,24 @@
 /**
  * Created by Samuel Gratzl on 08.08.2017.
  */
-import {IRuleSetLike, ruleSets} from './';
+import {compactRuleSet, IRuleSetLike, tableLensRuleSet, tableRuleSet} from './';
+import {
+  notSpacefillingNotProportional, notSpacefillingProportional,
+  spacefillingNotProportional, spacefillingProportional
+} from './TaggleRuleSet';
+
+
+export const defaultRuleSet = tableRuleSet;
+
+export const ruleSets: IRuleSetLike[] = [
+  tableRuleSet,
+  compactRuleSet,
+  tableLensRuleSet,
+  notSpacefillingNotProportional,
+  notSpacefillingProportional,
+  spacefillingNotProportional,
+  spacefillingProportional,
+];
 
 
 export default function createRuleSetChooser(callback: (ruleSet: IRuleSetLike)=>void) {
