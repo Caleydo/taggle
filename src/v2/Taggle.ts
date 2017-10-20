@@ -90,7 +90,7 @@ export default class Taggle extends AEventDispatcher {
         }
       },
       body: {
-        animation: false,
+        animation: true,
         rowPadding: 0, //since padding is used
         groupPadding: GROUP_SPACING,
         dynamicHeight: this.dynamicHeight.bind(this),
