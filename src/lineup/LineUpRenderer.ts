@@ -45,6 +45,7 @@ import {IStratification, matrixSplicer} from './splicer';
 import Renderer from './Renderer';
 import TaggleSidePanel from './TaggleSidePanel';
 import {GROUP_SPACING} from '../tree/ANode';
+import {notSpacefillingNotProportional} from '../rule/TaggleRuleSet';
 
 export interface ILineUpRendererOptions {
   idPrefix: string;
@@ -105,7 +106,7 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
   private flat: (InnerNode | LeafNode<T>)[] = [];
   private leaves: LeafNode<T>[] = [];
   private panel: SidePanel|null;
-  private ruleSet: IStaticRuleSet;
+  private ruleSet: IStaticRuleSet = notSpacefillingNotProportional;
   private readonly updateAbles: ((ctx: IRankingBodyContext)=>void)[] = [];
 
   private readonly debouncedUpdate = debounce(() => this.callbacks.update(), 50);
