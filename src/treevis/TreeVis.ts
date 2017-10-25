@@ -151,7 +151,7 @@ export default class TreeVis {
   }
 
   private static flat(root: INode, result: INode[]) {
-    console.assert(root);
+    console.assert(Boolean(root));
     let depth = 0;
     visit<any>(root, (inner: InnerNode) => {
       result.push(inner);

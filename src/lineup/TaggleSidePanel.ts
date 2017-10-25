@@ -45,7 +45,7 @@ export default class TaggleSidePanel extends SidePanel {
         children: values.map((v) => {
           return {
             id: v.id,
-            text: v.name,
+            text: v.text,
             dataType: key
           };
         })

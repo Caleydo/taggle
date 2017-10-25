@@ -12,7 +12,7 @@ export default class RuleButtonSwitcher {
 
   constructor(private readonly callback: (ruleSet: IRuleSetLike)=>void) {
 
-    this.node.classList.add('rule-button-chooser');
+    this.node.classList.add('lu-rule-button-chooser');
     this.node.innerHTML = `
       <div><span>Overview</span>
         <code></code>
