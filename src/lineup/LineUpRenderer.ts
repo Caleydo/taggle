@@ -314,6 +314,12 @@ export default class LineUpRenderer<T> extends AEventDispatcher implements IData
     return (<InnerNode>group).aggregation === EAggregationType.AGGREGATED;
   }
 
+  aggregateAllOf(_ranking: Ranking, aggregateAll: boolean) {
+    const groups = new Set(this.flat.map((f) => isGroup(f) ? f : f.parent!));
+    groups.forEach((g) => g.aggregation = aggregateAll ? EAggregationType.AGGREGATED : EAggregationType.UNIFORM);
+    this.debouncedUpdate();
+  }
+
   private isGroup(index: number) {
     return this.flat[index].type === 'inner';
   }
