@@ -1,5 +1,5 @@
 
-export const GROUP_SPACING = 10;
+export const GROUP_SPACING = 5;
 export const ROW_SPACING = 2;
 
 export const leafMargins: { [key: string]: number } = {
